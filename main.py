@@ -1,5 +1,9 @@
 #!/usr/bin/python
 # simple.py
+
+import __builtin__
+__builtin__.QLIVE_APP_OPENED = True
+
 import wx
 from pyo import *
 
