@@ -2,37 +2,38 @@
 # simple.py
 import wx
 from pyo import *
-
-
+from FxTrack import *
+from FxViewsPanel import *
 
 
 class MainWindow(wx.Frame):
     def __init__(self):
         wx.Frame.__init__(self, None, size = (1200, 700))
         pass
-#        self.fx = FxLibLowpass()
-#        
 
-#        
-#        self.cuesView = wx.Panel(self)
-#        self.chainsView = wx.Panel(self)
-#        self.fxView = FxParametersView(self.fx, self)        
-#        #sizer
-#        self.sizerTop = wx.BoxSizer(wx.HORIZONTAL)
-#        self.sizerTop.Add(self.cuesView,1)        
-#        self.sizerTop.Add(self.chainsView,1)        
-#        self.sizerTop.Add(self.fxView,2, wx.EXPAND)                    
-#        self.SetSizer(self.sizerTop)
-#        self.slider = ControlSlider(self)
-
-        
 
 if __name__ == "__main__":
+    class TestWindow(wx.Frame):
+        def __init__(self):
+            wx.Frame.__init__(self, None )
+            self.s = Server().boot()
+            self.s.start()
+
+            self.mainSizerVer = wx.BoxSizer(wx.HORIZONTAL)
+            self.track = FxTrack(self)
+            self.mainSizerVer.Add(self.track, 1, wx.EXPAND, 5)
+            
+            self.fxsView = FxViewsPanel(self)
+            self.mainSizerVer.Add(self.fxsView, 1, wx.EXPAND, 5)
+            
+            self.track.setViewPanelRef(self.fxsView)
+
+            self.SetSizer(self.mainSizerVer)
+            
+
     app = wx.App()
 
-#    fx = FxLibLowpass
-    frame = MainWindow()
-#    view = FxParametersView(fx)
+    frame = TestWindow()
     frame.Show()
 
     app.MainLoop()

@@ -27,6 +27,7 @@ class FxBoxMenu(wx.Menu):
 class FxBox(wx.Button):
     def __init__(self, parent):
         wx.Button.__init__(self, parent)
+        self.parent = parent
         self.name = "empty"
         self.SetLabel(self.name)
         self.audio = None
@@ -39,7 +40,9 @@ class FxBox(wx.Button):
         self.SetLabel(self.name)
 
     def buttonClicked(self, event):
-        print "hellao"
+        if self.parent.viewPanelRef != None:
+            if self.audio != None:
+                self.parent.viewPanelRef.openViewForAudioProcess(self.audio)
 
         
     def rightClicked(self, event):
@@ -48,6 +51,7 @@ class FxBox(wx.Button):
             print menu.getSelection()
             # load FX
             self.audio = FxCreator().createFx(menu.getSelection())
+            self.SetLabel(self.audio.name)
             self.audio.setInput(Input([0,1]))
             self.audio.getOutput().out()
         menu.Destroy()

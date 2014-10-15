@@ -18,8 +18,11 @@ class FxTrack(wx.Panel):
                 self.sizer.Add(but, (j,i))
                 
         self.SetSizer(self.sizer)
+        
+        self.viewPanelRef = None
 
-
+    def setViewPanelRef(self, ref):
+        self.viewPanelRef = ref
 
 
 

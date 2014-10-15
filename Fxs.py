@@ -20,6 +20,28 @@ class FxLowpass(FxParent):
         self.lp = ButLP(self.getInput(), freq=self.ctrlFreq, mul = self.dbValue)
         self.setOutput(self.lp)
 
+class FxFreeVerb(FxParent):
+    name = "FreeVerb"
+    def __init__(self):
+        FxParent.__init__(self)
+        self.setName("FreeVerb")
+        #ctrls
+        self.size = FxParameter(name = "size", value = 0.5, min = 0, max = 1, unit = "hz", exp = 2)
+        self.addParameter(self.size)
+        self.damp = FxParameter(name = "damp", value = 0.5, min = 0, max = 1, unit = "hz", exp = 2)
+        self.addParameter(self.damp)
+        self.balance = FxParameter(name = "balance", value = 0.5, min = 0, max = 1, unit = "hz", exp = 2)
+        self.addParameter(self.balance)
+        self.ctrlGain= FxParameter(name = "gain", value = 4, min = -90, max = 24, unit = "db", exp = 1)
+        self.addParameter(self.ctrlGain)
+        
+        #audio
+        self.dbValue = DBToA(self.ctrlGain)
+        self.verb = Freeverb(self.getInput(),self.size, self.damp, self.balance, mul = self.dbValue)
+        self.setOutput(self.verb)
+
+
+
 
 
 class FxCreator:
@@ -28,7 +50,8 @@ class FxCreator:
 
         ### ADD FXs HERE
         self.fxs.append(FxLowpass)
-        
+        self.fxs.append(FxFreeVerb)
+
 
 
         self.buildNames()
