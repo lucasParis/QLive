@@ -11,6 +11,9 @@ changing FxViewsPanel from panel to frame manager FxDialogsManager
 
 
 class FxDialogsManager(object):
+    """
+    only allow one frame open per FX
+    """
     def __init__(self, parent):
         self.openViews = []
         pass

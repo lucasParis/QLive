@@ -28,7 +28,7 @@ class FxBox(wx.Button):
     def __init__(self, parent):
         wx.Button.__init__(self, parent)
         self.parent = parent
-        self.name = "empty"
+        self.name = ""
         self.SetLabel(self.name)
         self.audio = None
         self.presets = None
