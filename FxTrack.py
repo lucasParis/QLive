@@ -8,6 +8,7 @@ class FxTrack(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
         self.sizer = wx.GridBagSizer()
+        self.SetBackgroundColour(wx.Colour(100, 100, 100))
         cols = 5
         rows = 1
         self.buttons = []

@@ -7,7 +7,7 @@ __builtin__.QLIVE_APP_OPENED = True
 import wx
 from pyo import *
 from FxTrack import *
-from FxViewsPanel import *
+from FxDialogsManager import *
 
 
 class MainWindow(wx.Frame):
@@ -27,9 +27,8 @@ if __name__ == "__main__":
             self.track = FxTrack(self)
             self.mainSizerVer.Add(self.track, 1, wx.EXPAND, 5)
             
-            self.fxsView = FxViewsPanel(self)
-            self.mainSizerVer.Add(self.fxsView, 1, wx.EXPAND, 5)
-            
+            self.fxsView = FxDialogsManager(self)
+#            self.mainSizerVer.Add(self.fxsView, 1, wx.EXPAND, 5)
             self.track.setViewPanelRef(self.fxsView)
 
             self.SetSizer(self.mainSizerVer)
