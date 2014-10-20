@@ -3,6 +3,7 @@
 import wx
 from pyo import *
 from pyolib._wxwidgets import ControlSlider
+import  wx.lib.scrolledpanel as scrolled
 
 """
 - changed FxSlidersView from panel to Frame
@@ -21,7 +22,7 @@ class FxSlidersView(wx.Frame):
         sliders = []
         for i, param in enumerate(self.parameters):
             slide = ControlSlider(self, param.min, param.max, param.audioValue.get(), outFunction = param.setValue)
-            self.sizer.Add(slide)
+            self.sizer.Add(slide, 0, wx.EXPAND, 10)
             
         self.SetSizer(self.sizer)
 #        self.Show(True)

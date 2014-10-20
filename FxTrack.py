@@ -3,6 +3,8 @@
 import wx
 from pyo import *
 from FxBox import *
+import  wx.lib.scrolledpanel as scrolled
+
 
 class FxTrack(wx.Panel):
     def __init__(self, parent):

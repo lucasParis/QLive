@@ -40,10 +40,6 @@ class MainWindow(wx.Frame):
         self.mainMixerVsRest.Add(self.mixer, 0, wx.EXPAND, 5)
         self.SetSizer(self.mainMixerVsRest)
 
-#            self.mainSizerVer = wx.BoxSizer(wx.VERTICAL)
-
-#            self.mainSizerVer.Add(self.track, 1, wx.EXPAND, 5)
-#            self.SetSizer(self.mainSizerVer)
 
         # FX WINDOW MANAGER
         self.fxsView = FxDialogsManager(self)
