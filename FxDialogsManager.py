@@ -5,19 +5,22 @@ import  wx.lib.scrolledpanel as scrolled
 from pyo import *
 from FxSlidersView import *
 
-class FxViewsPanel(scrolled.ScrolledPanel):
+"""
+changing FxViewsPanel from panel to frame manager FxDialogsManager
+"""
+
+
+class FxDialogsManager(object):
     def __init__(self, parent):
-        scrolled.ScrolledPanel.__init__(self, parent)
-        self.sizer = wx.BoxSizer(wx.VERTICAL)
         self.openViews = []
-        self.SetSizer(self.sizer)
+        pass
 
     def openViewForAudioProcess(self, audioProcess):
         # make sure it's not already opened
         view = FxSlidersView(self, audioProcess)
+        view.Show()
         self.openViews.append(view)
-        self.sizer.Add(view)
-        self.SetSizer(self.sizer)
+
         
 
 if __name__ == "__main__":
@@ -33,7 +36,7 @@ if __name__ == "__main__":
             self.fx.setInput(Input([0,1]))
             self.fx.getOutput().out()
             
-            self.fxs = FxViewsPanel(self)    
+            self.fxs = FxDialogsManager(self)    
             self.fxs.openViewForAudioProcess(self.fx)
 
     app = wx.App()
