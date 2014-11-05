@@ -24,20 +24,24 @@ class FxBoxMenu(wx.Menu):
     def getSelection(self):
         return self.result
 
-class FxBox(wx.Button):
+class FxBox:
     def __init__(self, parent):
-        wx.Button.__init__(self, parent)
+#        wx.Button.__init__(self, parent)
         self.parent = parent
         self.name = ""
-        self.SetLabel(self.name)
+#        self.SetLabel(self.name)
         self.audio = None
         self.presets = None
-        self.Bind(wx.EVT_BUTTON, self.buttonClicked)
-        self.Bind(wx.EVT_RIGHT_DOWN, self.rightClicked)   
+#        self.Bind(wx.EVT_BUTTON, self.buttonClicked)
+#        self.Bind(wx.EVT_RIGHT_DOWN, self.rightClicked)
+        self.position = (0,0)
              
+    def setPosition(self, pos):
+        self.position = pos
+        
     def setName(self, name):
         self.name = name
-        self.SetLabel(self.name)
+#        self.SetLabel(self.name)
 
     def buttonClicked(self, event):
         if self.parent.viewPanelRef != None:
@@ -47,7 +51,7 @@ class FxBox(wx.Button):
         
     def rightClicked(self, event):
         menu = FxBoxMenu(self)
-        if self.PopupMenu(menu, event.GetPosition()):
+        if self.parent.PopupMenu(menu, event.GetPosition()):
             print menu.getSelection()
             # load FX
             self.audio = FxCreator().createFx(menu.getSelection())
