@@ -21,19 +21,19 @@ class MainWindow(wx.Frame):
         
         # PANELS CREATION
         self.track = FxTrack(self)
-        self.soundfilePlayer = SoundFilePanel(self)
+#        self.soundfilePlayer = SoundFilePanel(self)
         self.cues = CuesPanel(self)
         self.mixer = MixerPanel(self)
 
 
         # LAYOUT, SIZERS
-        self.trackSoundfileSizer = wx.BoxSizer(wx.VERTICAL)
-        self.trackSoundfileSizer.Add(self.track, 1, wx.EXPAND, 5)
-        self.trackSoundfileSizer.Add(self.soundfilePlayer, 1, wx.EXPAND, 5)
+#        self.trackSoundfileSizer = wx.BoxSizer(wx.VERTICAL)
+#        self.trackSoundfileSizer.Add(self.track, 1, wx.EXPAND, 5)
+#        self.trackSoundfileSizer.Add(self.soundfilePlayer, 1, wx.EXPAND, 5)
 
         self.topCuesAndRestSizer = wx.BoxSizer(wx.HORIZONTAL)
         self.topCuesAndRestSizer.Add(self.cues, 0, wx.EXPAND, 5)
-        self.topCuesAndRestSizer.AddSizer(self.trackSoundfileSizer, 2, wx.EXPAND, 5)
+        self.topCuesAndRestSizer.Add(self.track, 1, wx.EXPAND, 5)
 
         self.mainMixerVsRest = wx.BoxSizer(wx.VERTICAL)
         self.mainMixerVsRest.AddSizer(self.topCuesAndRestSizer, 2, wx.EXPAND, 5)

@@ -14,3 +14,6 @@ todo list:
 - change FxTrack Panel into fxTracksContainer scrolledPanel that can contain multiple FxTrack
 - add labels to fxParameters in FxSliderView
 - global save and load functionality
+
+- DC modular grid
+- vertical pyo slider 
