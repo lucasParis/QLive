@@ -3,12 +3,12 @@
 import wx
 from pyo import *
 import  wx.lib.scrolledpanel as scrolled
-from pyolib._wxwidgets import ControlSlider
+from pyolib._wxwidgets import ControlSlider, BACKGROUND_COLOUR
 
 class MixerPanel(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent, size = (800,200))
-        self.SetBackgroundColour((180,180,180))
+        self.SetBackgroundColour(BACKGROUND_COLOUR)
         
         self.inputSliders = []
         self.inSizer = wx.BoxSizer(wx.VERTICAL)
