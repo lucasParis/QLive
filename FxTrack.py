@@ -50,15 +50,19 @@ class FxTrack(scrolled.ScrolledPanel):
         for i, button in enumerate(self.buttons):
             if pos[0] > button.position[0] and pos[0] < button.position[0] + self.buttonWidth and pos[1] > button.position[1] and pos[1] < button.position[1] + 30:
                 button.rightClicked(event)
+                self.Refresh()
         
     def onPaint(self, event):
         dc = wx.PaintDC(self)
         self.PrepareDC(dc)
 
         w, h = self.GetSize()
+        dc.SetTextForeground("#000000")
 #        dc.DrawRectangle(10,10,30,30)
         for i, button in enumerate(self.buttons):
-            dc.DrawRectangle(button.position[0], button.position[1], self.buttonWidth, 30)
+            rect = wx.Rect(button.position[0], button.position[1], self.buttonWidth, 30)
+            dc.DrawRoundedRectangleRect(rect, 5)
+            dc.DrawLabel(button.name, rect, wx.ALIGN_CENTER)
 
 
     def onSize(self, event):

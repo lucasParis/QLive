@@ -41,7 +41,6 @@ class FxBox:
         
     def setName(self, name):
         self.name = name
-#        self.SetLabel(self.name)
 
     def buttonClicked(self, event):
         if self.parent.viewPanelRef != None:
@@ -55,7 +54,7 @@ class FxBox:
             print menu.getSelection()
             # load FX
             self.audio = FxCreator().createFx(menu.getSelection())
-            self.SetLabel(self.audio.name)
+            self.name = self.audio.name
             self.audio.setInput(Input([0,1]))
             self.audio.getOutput().out()
         menu.Destroy()
