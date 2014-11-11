@@ -9,28 +9,32 @@ class MixerPanel(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent, size = (800,200))
         self.SetBackgroundColour(BACKGROUND_COLOUR)
-        
+
         self.inputSliders = []
-        self.inSizer = wx.BoxSizer(wx.VERTICAL)
-        self.inSizer.Add(wx.StaticText(self, label = "Input"), 0, wx.EXPAND, 10)
-        for i in range(6):
-            slide = ControlSlider(self, -80, 12, 0)
-            self.inSizer.Add(slide, 0, wx.EXPAND, 10)
-            self.inputSliders.append(slide)
-
         self.outputSliders = []
-        self.outSizer = wx.BoxSizer(wx.VERTICAL)
-        self.outSizer.Add(wx.StaticText(self, label = "Output"), 0, wx.EXPAND, 10)
-
+        
+        inputBox = wx.BoxSizer(wx.VERTICAL)        
+        inputSliderBox = wx.BoxSizer(wx.HORIZONTAL)
+        inputBox.Add(wx.StaticText(self, label = "Input"), 0, wx.EXPAND, 10)
         for i in range(6):
-            slide = ControlSlider(self, -80, 12, 0)
-            self.outSizer.Add(slide, 0, wx.EXPAND, 10)
+            slide = ControlSlider(self, -80, 12, 0, orient=wx.VERTICAL)
+            inputSliderBox.Add(slide, 0, wx.ALL, 2)
+            self.inputSliders.append(slide)
+        inputBox.Add(inputSliderBox, 0, wx.EXPAND)
+
+        outputBox = wx.BoxSizer(wx.VERTICAL)
+        outputSliderBox = wx.BoxSizer(wx.HORIZONTAL)
+        outputBox.Add(wx.StaticText(self, label = "Output"), 0, wx.EXPAND, 10)
+        for i in range(6):
+            slide = ControlSlider(self, -80, 12, 0, orient=wx.VERTICAL)
+            outputSliderBox.Add(slide, 0, wx.ALL, 2)
             self.outputSliders.append(slide)
+        outputBox.Add(outputSliderBox, 0, wx.EXPAND)
             
-        self.mainSizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.mainSizer.Add(self.inSizer, 1, wx.EXPAND)
-        self.mainSizer.Add(self.outSizer, 1, wx.EXPAND)
-        self.SetSizer(self.mainSizer)
+        mainSizer = wx.BoxSizer(wx.HORIZONTAL)
+        mainSizer.Add(inputBox, 1, wx.EXPAND)
+        mainSizer.Add(outputBox, 1, wx.EXPAND)
+        self.SetSizer(mainSizer)
 
 
 
