@@ -34,10 +34,13 @@ class FxBox:
         self.presets = None
 #        self.Bind(wx.EVT_BUTTON, self.buttonClicked)
 #        self.Bind(wx.EVT_RIGHT_DOWN, self.rightClicked)
-        self.position = (0,0)
+        self.id = (0,0)
              
-    def setPosition(self, pos):
-        self.position = pos
+    def setId(self, Id):
+        self.id = Id
+        
+    def getId(self):
+        return self.id
         
     def setName(self, name):
         self.name = name
