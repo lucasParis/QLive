@@ -10,7 +10,6 @@ class FxTrack(scrolled.ScrolledPanel):
     def __init__(self, parent):
         scrolled.ScrolledPanel.__init__(self, parent)
         
-#        self.sizer = wx.GridBagSizer()
         self.buttonWidth = 80
         self.buttonHeight = 25
         self.connectionWidth = self.buttonWidth/10.
@@ -100,6 +99,14 @@ class FxTrack(scrolled.ScrolledPanel):
 
                 dc.DrawLabel(button.name, rect, wx.ALIGN_CENTER)
 
+        
+
+        rect = wx.Rect(0, 0, 100, 20)#(10+i*100,20)
+        dc.DrawLabel("Inputs", rect, wx.ALIGN_CENTER)
+
+        dc.DrawLine(100, 0, 100, h)
+        
+        
     def idToPosition(self, id):
         return (10+id[0]*100, id[1]*50+20)
 

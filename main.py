@@ -11,7 +11,8 @@ from FxDialogsManager import *
 from CuesPanel import *
 from SoundFilePanel import *
 from MixerPanel import *
-
+from FxTracksToolbar import *
+from FxTracks import *
 
 class MainWindow(wx.Frame):
     def __init__(self):
@@ -20,20 +21,21 @@ class MainWindow(wx.Frame):
         self.s.start()
         
         # PANELS CREATION
-        self.track = FxTrack(self)
+#        self.tracksToolBar = FxTracksToolBar(self)
+        self.tracks = FxTracks(self)
 #        self.soundfilePlayer = SoundFilePanel(self)
         self.cues = CuesPanel(self)
         self.mixer = MixerPanel(self)
 
 
         # LAYOUT, SIZERS
-#        self.trackSoundfileSizer = wx.BoxSizer(wx.VERTICAL)
-#        self.trackSoundfileSizer.Add(self.track, 1, wx.EXPAND, 5)
-#        self.trackSoundfileSizer.Add(self.soundfilePlayer, 1, wx.EXPAND, 5)
+#        self.tracksSizer = wx.BoxSizer(wx.VERTICAL)
+#        self.tracksSizer.Add(self.tracksToolBar, 1, wx.EXPAND)
+#        self.tracksSizer.Add(self.track, 1, wx.EXPAND)
 
         self.topCuesAndRestSizer = wx.BoxSizer(wx.HORIZONTAL)
         self.topCuesAndRestSizer.Add(self.cues, 0, wx.EXPAND, 5)
-        self.topCuesAndRestSizer.Add(self.track, 1, wx.EXPAND, 5)
+        self.topCuesAndRestSizer.Add(self.tracks, 1, wx.EXPAND, 5)
 
         self.mainMixerVsRest = wx.BoxSizer(wx.VERTICAL)
         self.mainMixerVsRest.AddSizer(self.topCuesAndRestSizer, 2, wx.EXPAND, 5)
@@ -43,7 +45,7 @@ class MainWindow(wx.Frame):
 
         # FX WINDOW MANAGER
         self.fxsView = FxDialogsManager(self)
-        self.track.setViewPanelRef(self.fxsView)
+#        self.track.setViewPanelRef(self.fxsView)
 
 
 if __name__ == "__main__":
