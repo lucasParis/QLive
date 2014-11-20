@@ -45,6 +45,7 @@ class InputBoxMenu(wx.Menu):
     def getSelection(self):
         return self.result
 
+
 class ParentBox(object):
     def __init__(self, parent):
         self.parent = parent
@@ -81,7 +82,13 @@ class ParentBox(object):
 #            self.audio.setInput(Input([0,1]))
 #            self.audio.getOutput().out()
 #        menu.Destroy()
+
+    def getSaveDict(self):
+        #from self.audio
+        pass
         
+    def setSaveDict(self, saveDict):
+        pass        
         
 
 

@@ -2,17 +2,18 @@
 # encoding: utf-8
 import wx
 from pyo import *
-from InputParent import *
+from ModuleParent import *
 
-class InputIn(InputParent):
+
+class InputIn(ModuleParent):
     name = "input"
     def __init__(self):
-        InputParent.__init__(self)
+        ModuleParent.__init__(self)
         self.setName("input")
         #ctrls
-        self.ctrlFreq = FxParameter(name = "freq", value = 1000, min = 20, max = 20000, unit = "hz", exp = 2)
+        self.ctrlFreq = ModuleParameter(name = "freq", value = 1000, min = 20, max = 20000, unit = "hz", exp = 2)
         self.addParameter(self.ctrlFreq)
-        self.ctrlGain= FxParameter(name = "gain", value = 4, min = -90, max = 24, unit = "db", exp = 1)
+        self.ctrlGain= ModuleParameter(name = "gain", value = 4, min = -90, max = 24, unit = "db", exp = 1)
         self.addParameter(self.ctrlGain)
         
         #audio

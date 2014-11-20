@@ -148,7 +148,13 @@ class FxTrack(scrolled.ScrolledPanel):
                    
     def onSize(self, event):
         pass
-
+        
+    def getSaveDict(self):
+        pass
+        
+    def setSaveDict(self, saveDict):
+        # look into dict to see how many collums/rows, create necessary Boxes
+        pass
 if __name__ == "__main__":
     class TestWindow(wx.Frame):
         def __init__(self):

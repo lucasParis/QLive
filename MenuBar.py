@@ -22,6 +22,7 @@ class MenuBar(wx.MenuBar):
         
     def onSave(self, event):
         print "our savior"
+
         
     def onLoad(self, event):
         print "oo Loard"

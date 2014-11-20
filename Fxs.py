@@ -2,17 +2,17 @@
 # encoding: utf-8
 import wx
 from pyo import *
-from FxParent import *
+from ModuleParent import *
 
-class FxLowpass(FxParent):
+class FxLowpass(ModuleParent):
     name = "lowpass"
     def __init__(self):
-        FxParent.__init__(self)
+        ModuleParent.__init__(self)
         self.setName("lowpass")
         #ctrls
-        self.ctrlFreq = FxParameter(name = "freq", value = 1000, min = 20, max = 20000, unit = "hz", exp = 2)
+        self.ctrlFreq = ModuleParameter(name = "freq", value = 1000, min = 20, max = 20000, unit = "hz", exp = 2)
         self.addParameter(self.ctrlFreq)
-        self.ctrlGain= FxParameter(name = "gain", value = 4, min = -90, max = 24, unit = "db", exp = 1)
+        self.ctrlGain= ModuleParameter(name = "gain", value = 4, min = -90, max = 24, unit = "db", exp = 1)
         self.addParameter(self.ctrlGain)
         
         #audio
@@ -20,19 +20,19 @@ class FxLowpass(FxParent):
         self.lp = ButLP(self.getInput(), freq=self.ctrlFreq, mul = self.dbValue)
         self.setOutput(self.lp)
 
-class FxFreeVerb(FxParent):
+class FxFreeVerb(ModuleParent):
     name = "FreeVerb"
     def __init__(self):
-        FxParent.__init__(self)
+        ModuleParent.__init__(self)
         self.setName("FreeVerb")
         #ctrls
-        self.size = FxParameter(name = "size", value = 0.5, min = 0, max = 1, unit = "hz", exp = 2)
+        self.size = ModuleParameter(name = "size", value = 0.5, min = 0, max = 1, unit = "hz", exp = 2)
         self.addParameter(self.size)
-        self.damp = FxParameter(name = "damp", value = 0.5, min = 0, max = 1, unit = "hz", exp = 2)
+        self.damp = ModuleParameter(name = "damp", value = 0.5, min = 0, max = 1, unit = "hz", exp = 2)
         self.addParameter(self.damp)
-        self.balance = FxParameter(name = "balance", value = 0.5, min = 0, max = 1, unit = "hz", exp = 2)
+        self.balance = ModuleParameter(name = "balance", value = 0.5, min = 0, max = 1, unit = "hz", exp = 2)
         self.addParameter(self.balance)
-        self.ctrlGain= FxParameter(name = "gain", value = 4, min = -90, max = 24, unit = "db", exp = 1)
+        self.ctrlGain= ModuleParameter(name = "gain", value = 4, min = -90, max = 24, unit = "db", exp = 1)
         self.addParameter(self.ctrlGain)
         
         #audio

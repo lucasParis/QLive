@@ -5,34 +5,6 @@ import wx
 from pyo import *
 from FxParent import FxParameter
 
-#class FxParameter(PyoObject):
-#    def __init__(self, name = "empty", value = 0, min = 0, max = 1, unit = "hz", exp = 1):
-#        PyoObject.__init__(self)
-
-#        self.name = name
-#        self.min = min
-#        self.max = max
-#        self.unit = unit
-#        self.exp = exp
-#        self.value = value
-#        
-#        self.audioValue = Sig(value)
-
-#        self._base_objs = self.audioValue.getBaseObjects()
-
-#    def setValue(self, value):
-#        self.audioValue.setValue(value)
-#        print value
-#        
-#    def setFromFloat(self, float):
-#        self.value = float**self.exp*(self.max-self.min)+self.min
-#        self.audioValue = self.value
-
-#    def setModelParameter(self, param):
-#        # save model parameter? 
-#        # register a callback on model parameter?
-#        # 
-#        pass
 
 class InputParent(object):
     name = "empty"
