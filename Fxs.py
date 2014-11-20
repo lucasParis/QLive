@@ -66,6 +66,31 @@ class FxCreator:
     def createFx(self, index):
         if index < len(self.fxs):
             return self.fxs[index]()
+            
+
+class InputCreator:
+    def __init__(self):
+        self.classes = []
+
+        ### ADD FXs HERE
+        self.classes.append(FxLowpass)
+        self.classes.append(FxFreeVerb)
+
+
+
+        self.buildNames()
+        
+    def buildNames(self):
+        self.names = [cla.name for cla in classes.fxs]
+
+        
+    def getNames(self):
+        return self.names
+        
+    def createInput(self, index):
+        if index < len(self.classes):
+            return self.classes[index]()
+
 
 if __name__ == "__main__":
     class TestWindow(wx.Frame):

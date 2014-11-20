@@ -1,6 +1,9 @@
 #!/usr/bin/python
 # simple.py
-
+"""
+- make single parent for input and fx parents
+- cleanup call from fxbox to floating window
+"""
 import __builtin__
 __builtin__.QLIVE_APP_OPENED = True
 
