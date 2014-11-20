@@ -1,7 +1,6 @@
 #!/usr/bin/python
 # simple.py
 """
-- make single parent for input and fx parents
 - cleanup call from fxbox to floating window
 """
 import __builtin__
@@ -16,12 +15,15 @@ from SoundFilePanel import *
 from MixerPanel import *
 from FxTracksToolbar import *
 from FxTracks import *
+from MenuBar import *
 
 class MainWindow(wx.Frame):
     def __init__(self):
         wx.Frame.__init__(self, None, size = (1200, 700) )
         self.s = Server().boot()
         self.s.start()
+        self.menuB = MenuBar()
+        self.SetMenuBar(self.menuB)
         
         # PANELS CREATION
 #        self.tracksToolBar = FxTracksToolBar(self)
