@@ -9,7 +9,6 @@ __builtin__.QLIVE_APP_OPENED = True
 import wx
 from pyo import *
 from FxTrack import *
-from FxDialogsManager import *
 from CuesPanel import *
 from SoundFilePanel import *
 from MixerPanel import *
@@ -48,9 +47,6 @@ class MainWindow(wx.Frame):
         self.SetSizer(self.mainMixerVsRest)
 
 
-        # FX WINDOW MANAGER
-        self.fxsView = FxDialogsManager(self)
-#        self.track.setViewPanelRef(self.fxsView)
 
 
 if __name__ == "__main__":

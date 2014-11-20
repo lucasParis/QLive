@@ -17,7 +17,7 @@ class FxTrack(scrolled.ScrolledPanel):
         
         self.SetBackgroundColour(wx.Colour(100, 100, 100))
         cols = 5
-        rows = 2
+        rows = 1
         self.buttonsFxs = []
         self.buttonsInputs = []
         for i in range(rows):
@@ -55,23 +55,40 @@ class FxTrack(scrolled.ScrolledPanel):
         print pos
 
     def leftClicked(self, event):
-        pos = self.CalcUnscrolledPosition( event.GetPosition())
-        id = self.positionToIdFX(pos)
-        if id[1] < len(self.buttonsFxs): #valid row
-            if id[0] < len(self.buttonsFxs[id[1]]): #valid column
-                buttonPos = self.idToPositionFX(id)
-                if event.LeftDown():
-                    if pos[0] > buttonPos[0] and pos[0] < buttonPos[0] + self.connectionWidth and pos[1] > buttonPos[1] and pos[1] < buttonPos[1] + self.buttonHeight:
-                        pass
-                        #input connection
-                    elif pos[0] > buttonPos[0] + self.connectionWidth - self.buttonWidth and pos[0] < buttonPos[0] + self.buttonWidth and pos[1] > buttonPos[1] and pos[1] < buttonPos[1] + self.buttonHeight:
-                        pass
-                        #output connection
-                    elif pos[0] > buttonPos[0] and pos[0] < buttonPos[0] + self.buttonWidth and pos[1] > buttonPos[1] and pos[1] < buttonPos[1] + self.buttonHeight:
-                        self.buttonsFxs[id[1]][id[0]].buttonClicked(event)
-                        if event.ShiftDown():
-                            pass
-                            #move effect to new position
+        pos = self.CalcUnscrolledPosition( event.GetPosition() )
+        if pos[0] < 100: # inputs
+            id = self.positionToIdInput(pos)
+            if id[1] < len(self.buttonsInputs): #valid Y
+                    buttonPos = self.idToPositionInput(id)
+                    if pos[0] > buttonPos[0] and pos[0] < buttonPos[0] + self.buttonWidth and pos[1] > buttonPos[1] and pos[1] < buttonPos[1] + self.buttonHeight:
+                        self.buttonsInputs[id[1]].openView()
+#                        self.Refresh()
+        else: #normal Fxs
+            id = self.positionToIdFX(pos)
+            if id[1] < len(self.buttonsFxs): #valid Y
+                if id[0] < len(self.buttonsFxs[id[1]]): #valid X
+                    buttonPos = self.idToPositionFX(id)
+                    if pos[0] > buttonPos[0] and pos[0] < buttonPos[0] + self.buttonWidth and pos[1] > buttonPos[1] and pos[1] < buttonPos[1] + self.buttonHeight:
+                        self.buttonsFxs[id[1]][id[0]].openView()
+                        self.Refresh()
+        
+#        if id[1] < len(self.buttonsFxs): #valid row
+#            if id[0] < len(self.buttonsFxs[id[1]]): #valid column
+#                buttonPos = self.idToPositionFX(id)
+#                if event.LeftDown():
+#                    if pos[0] > buttonPos[0] and pos[0] < buttonPos[0] + self.connectionWidth and pos[1] > buttonPos[1] and pos[1] < buttonPos[1] + self.buttonHeight:
+#                        pass
+#                        #input connection
+#                    elif pos[0] > buttonPos[0] + self.connectionWidth - self.buttonWidth and pos[0] < buttonPos[0] + self.buttonWidth and pos[1] > buttonPos[1] and pos[1] < buttonPos[1] + self.buttonHeight:
+#                        pass
+#                        #output connection
+#                    elif pos[0] > buttonPos[0] and pos[0] < buttonPos[0] + self.buttonWidth and pos[1] > buttonPos[1] and pos[1] < buttonPos[1] + self.buttonHeight:
+#                        print "grorof"
+
+#                        self.buttonsFxs[id[1]][id[0]].openView(event)
+#                        if event.ShiftDown():
+#                            pass
+#                            #move effect to new position
                     
         
     def rightClicked(self, event):

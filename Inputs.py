@@ -11,37 +11,15 @@ class InputIn(ModuleParent):
         ModuleParent.__init__(self)
         self.setName("input")
         #ctrls
-        self.ctrlFreq = ModuleParameter(name = "freq", value = 1000, min = 20, max = 20000, unit = "hz", exp = 2)
-        self.addParameter(self.ctrlFreq)
+#        self.ctrlFreq = ModuleParameter(name = "freq", value = 1000, min = 20, max = 20000, unit = "hz", exp = 2)
+#        self.addParameter(self.ctrlFreq)
         self.ctrlGain= ModuleParameter(name = "gain", value = 4, min = -90, max = 24, unit = "db", exp = 1)
         self.addParameter(self.ctrlGain)
         
         #audio
         self.dbValue = DBToA(self.ctrlGain)
-        self.lp = ButLP(self.getInput(), freq=self.ctrlFreq, mul = self.dbValue)
-        self.setOutput(self.lp)
-
-#class FxFreeVerb(InputParent):
-#    name = "FreeVerb"
-#    def __init__(self):
-#        InputParent.__init__(self)
-#        self.setName("FreeVerb")
-#        #ctrls
-#        self.size = FxParameter(name = "size", value = 0.5, min = 0, max = 1, unit = "hz", exp = 2)
-#        self.addParameter(self.size)
-#        self.damp = FxParameter(name = "damp", value = 0.5, min = 0, max = 1, unit = "hz", exp = 2)
-#        self.addParameter(self.damp)
-#        self.balance = FxParameter(name = "balance", value = 0.5, min = 0, max = 1, unit = "hz", exp = 2)
-#        self.addParameter(self.balance)
-#        self.ctrlGain= FxParameter(name = "gain", value = 4, min = -90, max = 24, unit = "db", exp = 1)
-#        self.addParameter(self.ctrlGain)
-#        
-#        #audio
-#        self.dbValue = DBToA(self.ctrlGain)
-#        self.verb = Freeverb(self.getInput(),self.size, self.damp, self.balance, mul = self.dbValue)
-#        self.setOutput(self.verb)
-
-
+        self.amp = Sig(self.getInput(),mul = self.dbValue)
+        self.setOutput(self.amp)
 
 
 

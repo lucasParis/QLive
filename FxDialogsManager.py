@@ -17,6 +17,7 @@ class FxDialogsManager(object):
     def __init__(self, parent):
         self.openViews = []
         pass
+        
 
     def openViewForAudioProcess(self, audioProcess):
         # make sure it's not already opened
