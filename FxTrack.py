@@ -16,13 +16,13 @@ class FxTrack(scrolled.ScrolledPanel):
         self.connectionHeight = self.buttonHeight-8
         
         self.SetBackgroundColour(wx.Colour(100, 100, 100))
-        cols = 5
-        rows = 1
+        self.cols = 5
+        self.rows = 1
         self.buttonsFxs = []
         self.buttonsInputs = []
-        for i in range(rows):
+        for i in range(self.rows):
             col = []
-            for j in range(cols):
+            for j in range(self.cols):
                 but = FxBox(self)
                 but.setId((j,i))
                 col.append(but)
@@ -31,8 +31,8 @@ class FxTrack(scrolled.ScrolledPanel):
             but.setId((0,i))
             self.buttonsInputs.append(but)
             
-        self.SetSize((10+cols*100+10, 20+30+20))
-        self.SetVirtualSize((10+(cols+1)*(self.buttonWidth+20)+10, 20+30+20))
+        self.SetSize((10+self.cols*100+10, 20+30+20))
+        self.SetVirtualSize((10+(self.cols+1)*(self.buttonWidth+20)+10, 20+30+20))
         self.SetScrollRate(1,1)
 
         self.viewPanelRef = None # to open fxSlidersView
@@ -69,26 +69,11 @@ class FxTrack(scrolled.ScrolledPanel):
                 if id[0] < len(self.buttonsFxs[id[1]]): #valid X
                     buttonPos = self.idToPositionFX(id)
                     if pos[0] > buttonPos[0] and pos[0] < buttonPos[0] + self.buttonWidth and pos[1] > buttonPos[1] and pos[1] < buttonPos[1] + self.buttonHeight:
+#                        print "save:", self.buttonsFxs[id[1]][id[0]].getSaveDict()
                         self.buttonsFxs[id[1]][id[0]].openView()
-                        self.Refresh()
-        
-#        if id[1] < len(self.buttonsFxs): #valid row
-#            if id[0] < len(self.buttonsFxs[id[1]]): #valid column
-#                buttonPos = self.idToPositionFX(id)
-#                if event.LeftDown():
-#                    if pos[0] > buttonPos[0] and pos[0] < buttonPos[0] + self.connectionWidth and pos[1] > buttonPos[1] and pos[1] < buttonPos[1] + self.buttonHeight:
-#                        pass
-#                        #input connection
-#                    elif pos[0] > buttonPos[0] + self.connectionWidth - self.buttonWidth and pos[0] < buttonPos[0] + self.buttonWidth and pos[1] > buttonPos[1] and pos[1] < buttonPos[1] + self.buttonHeight:
-#                        pass
-#                        #output connection
-#                    elif pos[0] > buttonPos[0] and pos[0] < buttonPos[0] + self.buttonWidth and pos[1] > buttonPos[1] and pos[1] < buttonPos[1] + self.buttonHeight:
-#                        print "grorof"
 
-#                        self.buttonsFxs[id[1]][id[0]].openView(event)
-#                        if event.ShiftDown():
-#                            pass
-#                            #move effect to new position
+                        self.Refresh()
+
                     
         
     def rightClicked(self, event):
@@ -167,11 +152,35 @@ class FxTrack(scrolled.ScrolledPanel):
         pass
         
     def getSaveDict(self):
-        pass
+        #build dict with values, corresponding effect index, and index in matrix
+        dict = {}
+        matrix = []
+        for i, row in enumerate(self.buttonsFxs):
+            rowList = []
+            for j, button in enumerate(row):
+                rowList.append(button.getSaveDict())
+            matrix.append(rowList)
+            
+        dict["inputValues"] = []
+        for i, inputBut in enumerate(self.buttonsInputs):
+            dict["inputValues"].append(inputBut.getSaveDict())
+
+        dict["fxsValues"] = matrix
+        dict["rows"] = self.rows
+        dict["cols"] = self.cols
+        return dict
         
     def setSaveDict(self, saveDict):
-        # look into dict to see how many collums/rows, create necessary Boxes
-        pass
+        #resize according to dict row col size
+        for i, row in enumerate(self.buttonsFxs):
+            for j, button in enumerate(row):
+                button.setSaveDict(saveDict["fxsValues"][i][j])
+        for i, inputBut in enumerate(self.buttonsInputs):
+            inputBut.setSaveDict(saveDict["inputValues"][i])
+#            dict["inputValues"].append(inputBut.getSaveDict())
+        self.Refresh()
+
+
 if __name__ == "__main__":
     class TestWindow(wx.Frame):
         def __init__(self):

@@ -6,7 +6,7 @@ Allo
 
 todo list:
 ----------
-- save Load basics
+- DONE save Load basics
 - hardwired simple chain
 - cues, needs toolbar and connection to fxBoxes/InputBoxes
 - soundfile player

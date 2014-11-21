@@ -22,11 +22,13 @@ class FxTracks(wx.Panel):
         self.track.setViewPanelRef(self.fxsView)
         
     def getSaveDict(self):
-        pass
+        # for now simple thru, later compile differents tracks into dict
+        return self.track.getSaveDict()
+
         
     def setSaveDict(self, saveDict):
-        # look into dict to see how many collums/rows, create necessary Boxes
-        pass
+        self.track.setSaveDict(saveDict)
+        
         
 if __name__ == "__main__":
     class TestWindow(wx.Frame):

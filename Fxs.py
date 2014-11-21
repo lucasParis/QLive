@@ -63,7 +63,7 @@ class FxCreator:
     def getNames(self):
         return self.names
         
-    def createFx(self, index):
+    def create(self, index):
         if index < len(self.fxs):
             return self.fxs[index]()
             
@@ -87,7 +87,7 @@ class InputCreator:
     def getNames(self):
         return self.names
         
-    def createInput(self, index):
+    def create(self, index):
         if index < len(self.classes):
             return self.classes[index]()
 
@@ -96,7 +96,9 @@ if __name__ == "__main__":
     class TestWindow(wx.Frame):
         def __init__(self):
             wx.Frame.__init__(self, None)
-            print FxCreator().getNames()
+            self.s = Server().boot()
+            self.effect = FxCreator().createFx(0)
+#            print self.effect.getSaveDict()
             pass
 
     app = wx.App()

@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # simple.py
 """
-- cleanup call from fxbox to floating window
+- how will choice boxes and paths behave in dicts? for now only values are taken care of
+- make parent class for both creators input and fxs
 """
 import __builtin__
 __builtin__.QLIVE_APP_OPENED = True
@@ -21,7 +22,7 @@ class MainWindow(wx.Frame):
         wx.Frame.__init__(self, None, size = (1200, 700) )
         self.s = Server().boot()
         self.s.start()
-        self.menuB = MenuBar()
+        self.menuB = MenuBar(self)
         self.SetMenuBar(self.menuB)
         
         # PANELS CREATION

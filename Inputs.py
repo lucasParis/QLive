@@ -42,7 +42,7 @@ class InputCreator:
     def getNames(self):
         return self.names
         
-    def createInput(self, index):
+    def create(self, index):
         if index < len(self.classes):
             return self.classes[index]()
 

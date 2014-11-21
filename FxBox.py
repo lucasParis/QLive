@@ -55,7 +55,13 @@ class ParentBox(object):
         self.presets = None
 
         self.id = (0,0)
-             
+        self.creatorId = None
+        
+        self.menu = None
+        self.creator = None
+        self.audioIn = Sig([0,0])
+        self.audioOut = Sig([0,0])             
+        
     def setId(self, Id):
         self.id = Id
         
@@ -72,60 +78,52 @@ class ParentBox(object):
 
         
     def openMenu(self, event):
-        pass
-#        menu = FxBoxMenu(self)
-#        if self.parent.PopupMenu(menu, event.GetPosition()):
-#            print menu.getSelection()
-#            # load FX
-#            self.audio = FxCreator().createFx(menu.getSelection())
-#            self.name = self.audio.name
-#            self.audio.setInput(Input([0,1]))
-#            self.audio.getOutput().out()
-#        menu.Destroy()
+        menu = self.menu(self)
+        if self.parent.PopupMenu(menu, event.GetPosition()):
+            if not menu.getSelection() == None:
+                self.initModule(menu.getSelection())
+        menu.Destroy()
+        
+    def initModule(self, index):
+        self.creatorId = index
+        self.audio = self.creator().create(self.creatorId)
+        self.name = self.audio.name
+        self.audio.setInput(self.audioIn)
+        self.audioOut.setValue(self.audio.getOutput())
 
     def getSaveDict(self):
-        #from self.audio
-        pass
+        if self.audio != None:
+            dict = self.audio.getSaveDict()
+            dict["creatorId"] = self.creatorId
+            return dict
+        else:
+            return None
+
         
     def setSaveDict(self, saveDict):
-        pass        
+        if saveDict != None:
+            self.initModule(saveDict["creatorId"])
+            self.audio.setSaveDict(saveDict)
+        else:#use case: empty fx/input, load default/empty
+            pass
         
 
 
 class FxBox(ParentBox):
     def __init__(self, parent):
         ParentBox.__init__(self, parent)
-        pass
+        self.menu = FxBoxMenu
+        self.creator = FxCreator
         
-    def openMenu(self, event):
-        menu = FxBoxMenu(self)
-        if self.parent.PopupMenu(menu, event.GetPosition()):
-            # load FX            
-            if not menu.getSelection() == None:
-                self.audio = FxCreator().createFx(menu.getSelection())
-                self.name = self.audio.name
-                self.audio.setInput(Input([0,1]))
-                self.audio.getOutput().out()
-        menu.Destroy()
         
         
 
 class InputBox(ParentBox):
     def __init__(self, parent):
         ParentBox.__init__(self, parent)
-        pass
+        self.menu = InputBoxMenu
+        self.creator = InputCreator
         
-    def openMenu(self, event):
-        menu = InputBoxMenu(self)
-        if self.parent.PopupMenu(menu, event.GetPosition()):
-            print menu.getSelection()
-            # load FX
-            if not menu.getSelection() == None:
-                self.audio = InputCreator().createInput(menu.getSelection())
-                self.name = self.audio.name
-                self.audio.setInput(Input([0,1]))
-                self.audio.getOutput().out()
-        menu.Destroy()
         
 
 
