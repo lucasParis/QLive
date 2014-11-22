@@ -31,6 +31,22 @@ class FxTrack(scrolled.ScrolledPanel):
             but.setId((0,i))
             self.buttonsInputs.append(but)
             
+        ## Connections
+        for i, row in enumerate(self.buttonsFxs):
+            for j, button in enumerate(row):
+                print j
+                if j == len(row)-1:
+                    print "output"
+                    button.setInput(row[j-1].getOutput())
+                    button.getOutput().out()
+                elif j != 0:
+                    print "chain"
+                    button.setInput(row[j-1].getOutput())
+                else:
+                    print "first"
+                    button.setInput(self.buttonsInputs[0].getOutput())
+        self.outputTest = self.buttonsFxs[0][4].getOutput().out()
+
         self.SetSize((10+self.cols*100+10, 20+30+20))
         self.SetVirtualSize((10+(self.cols+1)*(self.buttonWidth+20)+10, 20+30+20))
         self.SetScrollRate(1,1)
@@ -186,6 +202,7 @@ if __name__ == "__main__":
         def __init__(self):
             wx.Frame.__init__(self, None)
             self.s= Server().boot()
+            self.s.start()
             self.fxTrack = FxTrack(self)
 
 

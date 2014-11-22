@@ -24,7 +24,7 @@ class MainWindow(wx.Frame):
         self.s.start()
         self.menuB = MenuBar(self)
         self.SetMenuBar(self.menuB)
-        
+#        self.inaa = Input([0,1]).out()
         # PANELS CREATION
 #        self.tracksToolBar = FxTracksToolBar(self)
         self.tracks = FxTracks(self)
@@ -34,7 +34,7 @@ class MainWindow(wx.Frame):
 
 
         # LAYOUT, SIZERS
-#        self.tracksSizer = wx.BoxSizer(wx.VERTICAL)
+#        self.tracksSizer = wx.BoxSizer(wx.VERTICAL) 
 #        self.tracksSizer.Add(self.tracksToolBar, 1, wx.EXPAND)
 #        self.tracksSizer.Add(self.track, 1, wx.EXPAND)
 

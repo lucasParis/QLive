@@ -18,7 +18,7 @@ class InputIn(ModuleParent):
         
         #audio
         self.dbValue = DBToA(self.ctrlGain)
-        self.amp = Sig(self.getInput(),mul = self.dbValue)
+        self.amp = Sig(Input([0,1]),mul = self.dbValue)
         self.setOutput(self.amp)
 
 
@@ -51,7 +51,11 @@ if __name__ == "__main__":
     class TestWindow(wx.Frame):
         def __init__(self):
             wx.Frame.__init__(self, None)
+            self.s = Server().boot()
+            self.s.start()
             print InputCreator().getNames()
+            self.input = InputCreator().create(0)
+            self.input.getOutput().out()
             pass
 
     app = wx.App()

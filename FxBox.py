@@ -60,7 +60,13 @@ class ParentBox(object):
         self.menu = None
         self.creator = None
         self.audioIn = Sig([0,0])
-        self.audioOut = Sig([0,0])             
+        self.audioOut = Sig(self.audioIn)    
+        
+    def setInput(self, input):
+        self.audioIn.setValue(input)
+        
+    def getOutput(self):
+        return self.audioOut
         
     def setId(self, Id):
         self.id = Id
@@ -139,6 +145,8 @@ if __name__ == "__main__":
             self.s.start()
             
             self.but = InputBox(self)
+            self.but.getOutput().out()
+            self.but.setInput(Input([0,1]))
 #            self.Bind(wx.EVT_LEFT_DOWN, self.leftClicked)
             self.Bind(wx.EVT_RIGHT_DOWN, self.rightClicked)
 
