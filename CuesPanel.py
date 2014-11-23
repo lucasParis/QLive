@@ -4,36 +4,84 @@ import wx
 from pyo import *
 import  wx.lib.scrolledpanel as scrolled
 
+
+class CuesToolBar(wx.ToolBar):
+    def __init__(self, parent, parent2):
+        wx.ToolBar.__init__(self, parent, size = (-1, -1), style = wx.TB_VERTICAL)
+        self.parentForCallBacks = parent2
+#        self.remRowButton = wx.Button(self, size = (30,-1), pos = (-1,-1))
+#        self.remRowButton.SetLabel("-")    
+#        self.AddControl(wx.StaticText(self, label = "New \nCue"))
+        self.remRowButton = wx.Button(self, size = (40,34), pos = (-1,-1))
+        self.remRowButton.Bind(wx.EVT_BUTTON, self.onNewCue)
+        self.remRowButton.SetLabel("New\nCue")
+        self.AddControl(self.remRowButton)
+#        self.addRowButton = wx.Button(self, size = (30,-1), pos = (-1,-1))
+#        self.addRowButton.SetLabel("+")    
+#        self.AddControl(self.addRowButton)
+#        
+#        self.AddControl(wx.StaticText(self, label = "column"))
+#        self.remColButton = wx.Button(self, size = (30,-1), pos = (-1,-1))
+#        self.remColButton.SetLabel("-")    
+#        self.AddControl(self.remColButton)
+#        self.addColButton = wx.Button(self, size = (30,-1), pos = (-1,-1))
+#        self.addColButton.SetLabel("+")    
+#        self.AddControl(self.addColButton)
+
+        self.Realize()
+        
+    def onNewCue(self, event):
+        self.parentForCallBacks.onNewCue(event)
+
+
+
 class CuesPanel(wx.Panel):
     def __init__(self, parent):
-        wx.Panel.__init__(self, parent, size = (100, 500))
+        wx.Panel.__init__(self, parent, size = (150, 500))
         self.SetBackgroundColour((80,80,80))
         
-        self.addCueButton = wx.Button(self)
-        self.addCueButton.SetLabel("New Cue")
-
-        #LAYOUT
-        self.cueOptionsSizer = wx.GridSizer(2,2)
-        self.cueOptionsSizer.Add(self.addCueButton)
+#        self.addCueButton = wx.Button(self)
+#        self.addCueButton.SetLabel("New Cue")        
+        self.panel = wx.Panel(self)
+        self.toolbar = CuesToolBar(self.panel, self)
+        boxSizer = wx.BoxSizer(wx.HORIZONTAL)
+        boxSizer.Add(self.toolbar, 2, wx.EXPAND)
+        self.panel.SetSizer(boxSizer)
+        
+        self.currentCue = 0
         
         #CUESBUTTONS
         self.cuesPanel = scrolled.ScrolledPanel(self)
         self.cuesPanel.SetupScrolling()
         self.cuesPanelSizer = wx.BoxSizer(wx.VERTICAL)
-        for i in range(20):
-            but = wx.Button(self.cuesPanel)
-            but.SetLabel(str(i))
-            self.cuesPanelSizer.Add(but)
+        self.cueButtons = []
+        self.appendCueButton()
+
+        
         self.cuesPanel.SetSizer(self.cuesPanelSizer)
+        self.mainSizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.mainSizer.Add(self.panel, 0, wx.EXPAND)
 
-        self.mainSizer = wx.BoxSizer(wx.VERTICAL)
-        self.mainSizer.Add(self.cueOptionsSizer)
         self.mainSizer.Add(self.cuesPanel, 1, wx.EXPAND)
-
         self.SetSizer(self.mainSizer)
-        pass
+        
+    def appendCueButton(self):
+        number = str(len(self.cueButtons))
+        but = wx.Button(self.cuesPanel, size = (40, -1), label = number, name = number)
+        but.Bind(wx.EVT_BUTTON, self.onCueSelection)
+        but.SetDefault()
+        self.cuesPanelSizer.Add(but, 1, wx.EXPAND|wx.ALL, 2)
+        self.cueButtons.append(but)
+        self.cuesPanelSizer.Layout()
 
-
+    def onCueSelection(self, event):
+        button = event.GetEventObject()
+        button.SetDefault()
+        number = int(button.GetName())
+        self.currentCue = number
+        
+    def onNewCue(self, event):
+        self.appendCueButton()
 
 
 
@@ -41,8 +89,8 @@ if __name__ == "__main__":
     class TestWindow(wx.Frame):
         def __init__(self):
             wx.Frame.__init__(self, None)
-            self.panel = CuesPanel(self)
-            pass
+            
+            self.cuesPanel = CuesPanel(self)
 
     app = wx.App()
 

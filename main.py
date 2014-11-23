@@ -26,7 +26,7 @@ class MainWindow(wx.Frame):
         self.SetMenuBar(self.menuB)
 #        self.inaa = Input([0,1]).out()
         # PANELS CREATION
-#        self.tracksToolBar = FxTracksToolBar(self)
+#        self.tracksToolBar = FxTracksToolBar(self)	
         self.tracks = FxTracks(self)
 #        self.soundfilePlayer = SoundFilePanel(self)
         self.cues = CuesPanel(self)
