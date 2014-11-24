@@ -34,6 +34,9 @@ class FxTracks(wx.Panel):
         
     def copyCue(self, cueToCopy):
         self.track.copyCue(cueToCopy)
+      
+    def cueEvent(self, eventDict):
+        self.track.cueEvent(eventDict)
         
 if __name__ == "__main__":
     class TestWindow(wx.Frame):

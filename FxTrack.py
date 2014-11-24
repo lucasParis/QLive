@@ -210,7 +210,15 @@ class FxTrack(scrolled.ScrolledPanel):
                 pass
         for i, inputBut in enumerate(self.buttonsInputs):
             pass
-        
+            
+    def cueEvent(self, eventDict):
+        for i, row in enumerate(self.buttonsFxs):
+            for j, button in enumerate(row):
+                button.cueEvent(eventDict)
+        for i, inputBut in enumerate(self.buttonsInputs):
+            inputBut.cueEvent(eventDict)
+
+               
 if __name__ == "__main__":
     class TestWindow(wx.Frame):
         def __init__(self):

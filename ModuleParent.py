@@ -76,7 +76,9 @@ class ModuleParent(object):
                 self.parameters[i].setValue(value)
         else:
             print "error in moduleParent in setSaveDict"
-
+    def cueEvent(self, eventDict):
+        pass
+        
     def loadCue(self, cue):
         list = []
         for i, param in enumerate(self.parameters):

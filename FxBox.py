@@ -118,7 +118,14 @@ class ParentBox(object):
         
     def copyCue(self, cueToCopy):
         pass
+    def cueEvent(self, eventDict):
+        if eventDict["type"] == 'newCue':
+            print eventDict["currentCue"], eventDict["totalCues"]
+        elif eventDict["type"] == 'cueSelect':
+            print eventDict["selectedCue"]
+#            dictEvent = {'type': "cueSelect", "selectedCue": self.currentCue}
 
+    
 class FxBox(ParentBox):
     def __init__(self, parent):
         ParentBox.__init__(self, parent)

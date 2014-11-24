@@ -53,7 +53,14 @@ class CuesPanel(wx.Panel):
 
         self.mainSizer.Add(self.cuesPanel, 1, wx.EXPAND)
         self.SetSizer(self.mainSizer)
-        
+            
+        self.templateCueEvent = {'type': "empty"}
+        """
+        types:
+            - addCue: 
+            - setCue:
+        """
+
     def appendCueButton(self):
         number = str(len(self.cueButtons))
         self.currentCue = number
@@ -70,11 +77,15 @@ class CuesPanel(wx.Panel):
         number = int(button.GetName())
         self.currentCue = number
         if self.parent != None:
-            self.parent.tracks.loadCue(self.currentCue)
+#            self.parent.tracks.loadCue(self.currentCue)
+            dictEvent = {'type': "cueSelect", "selectedCue": self.currentCue}
+            self.parent.tracks.cueEvent(dictEvent)
         
     def onNewCue(self, event):
         if self.parent != None:
-            self.parent.tracks.copyCue(self.currentCue)
+#            self.parent.tracks.copyCue(self.currentCue)
+            dictEvent = {'type': "newCue", "currentCue":self.currentCue, "totalCues": len(self.cueButtons)}
+            self.parent.tracks.cueEvent(dictEvent)
         self.appendCueButton()
         
 
