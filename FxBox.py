@@ -113,7 +113,11 @@ class ParentBox(object):
         else:#use case: empty fx/input, load default/empty
             pass
         
-
+    def loadCue(self, cue):
+        pass
+        
+    def copyCue(self, cueToCopy):
+        pass
 
 class FxBox(ParentBox):
     def __init__(self, parent):

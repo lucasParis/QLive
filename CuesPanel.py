@@ -16,17 +16,7 @@ class CuesToolBar(wx.ToolBar):
         self.remRowButton.Bind(wx.EVT_BUTTON, self.onNewCue)
         self.remRowButton.SetLabel("New\nCue")
         self.AddControl(self.remRowButton)
-#        self.addRowButton = wx.Button(self, size = (30,-1), pos = (-1,-1))
-#        self.addRowButton.SetLabel("+")    
-#        self.AddControl(self.addRowButton)
-#        
-#        self.AddControl(wx.StaticText(self, label = "column"))
-#        self.remColButton = wx.Button(self, size = (30,-1), pos = (-1,-1))
-#        self.remColButton.SetLabel("-")    
-#        self.AddControl(self.remColButton)
-#        self.addColButton = wx.Button(self, size = (30,-1), pos = (-1,-1))
-#        self.addColButton.SetLabel("+")    
-#        self.AddControl(self.addColButton)
+
 
         self.Realize()
         
@@ -36,12 +26,11 @@ class CuesToolBar(wx.ToolBar):
 
 
 class CuesPanel(wx.Panel):
-    def __init__(self, parent):
+    def __init__(self, parent = None):
         wx.Panel.__init__(self, parent, size = (150, 500))
         self.SetBackgroundColour((80,80,80))
-        
-#        self.addCueButton = wx.Button(self)
-#        self.addCueButton.SetLabel("New Cue")        
+        self.parent = parent
+   
         self.panel = wx.Panel(self)
         self.toolbar = CuesToolBar(self.panel, self)
         boxSizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -67,6 +56,7 @@ class CuesPanel(wx.Panel):
         
     def appendCueButton(self):
         number = str(len(self.cueButtons))
+        self.currentCue = number
         but = wx.Button(self.cuesPanel, size = (40, -1), label = number, name = number)
         but.Bind(wx.EVT_BUTTON, self.onCueSelection)
         but.SetDefault()
@@ -79,9 +69,14 @@ class CuesPanel(wx.Panel):
         button.SetDefault()
         number = int(button.GetName())
         self.currentCue = number
+        if self.parent != None:
+            self.parent.tracks.loadCue(self.currentCue)
         
     def onNewCue(self, event):
+        if self.parent != None:
+            self.parent.tracks.copyCue(self.currentCue)
         self.appendCueButton()
+        
 
 
 

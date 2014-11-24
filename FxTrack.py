@@ -196,7 +196,21 @@ class FxTrack(scrolled.ScrolledPanel):
 #            dict["inputValues"].append(inputBut.getSaveDict())
         self.Refresh()
 
-
+    def loadCue(self, cue):
+        for i, row in enumerate(self.buttonsFxs):
+            for j, button in enumerate(row):
+                pass
+        for i, inputBut in enumerate(self.buttonsInputs):
+            pass
+#        self.track.loadCue(cue)
+        
+    def copyCue(self, cueToCopy):
+        for i, row in enumerate(self.buttonsFxs):
+            for j, button in enumerate(row):
+                pass
+        for i, inputBut in enumerate(self.buttonsInputs):
+            pass
+        
 if __name__ == "__main__":
     class TestWindow(wx.Frame):
         def __init__(self):

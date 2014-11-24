@@ -26,7 +26,7 @@ class FxSlidersToolBar(wx.ToolBar):
 #        self.remColButton.SetLabel("-")    
 #        self.AddControl(self.remColButton)
         self.addColButton = wx.Button(self, size = (300,-1), pos = (-1,-1))
-        self.addColButton.SetLabel("I am but a Tool")    
+        self.addColButton.SetLabel("Tool")    
         self.AddControl(self.addColButton)
 
         self.Realize()

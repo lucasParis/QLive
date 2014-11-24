@@ -29,6 +29,11 @@ class FxTracks(wx.Panel):
     def setSaveDict(self, saveDict):
         self.track.setSaveDict(saveDict)
         
+    def loadCue(self, cue):
+        self.track.loadCue(cue)
+        
+    def copyCue(self, cueToCopy):
+        self.track.copyCue(cueToCopy)
         
 if __name__ == "__main__":
     class TestWindow(wx.Frame):

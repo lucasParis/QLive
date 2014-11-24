@@ -42,6 +42,8 @@ class ModuleParent(object):
         self.bypass = False
         self.name = "empty"
         self.parameters = [] #append parameters here
+        self.cues = []
+        self.currentCue = 0
         pass
         
     def addParameter(self, param):
@@ -74,7 +76,17 @@ class ModuleParent(object):
                 self.parameters[i].setValue(value)
         else:
             print "error in moduleParent in setSaveDict"
-            
+
+    def loadCue(self, cue):
+        list = []
+        for i, param in enumerate(self.parameters):
+            list.append(param.getValue())
+        self.currentCue = cue
+        
+    def copyCue(self, cueToCopy):
+        # need to know: current cue, max cues...
+        pass
+                  
 if __name__ == "__main__":
     class TestWindow(wx.Frame):
         def __init__(self):
