@@ -37,6 +37,7 @@ class FxTracks(wx.Panel):
       
     def cueEvent(self, eventDict):
         self.track.cueEvent(eventDict)
+        self.fxsView.refresh()
         
 if __name__ == "__main__":
     class TestWindow(wx.Frame):

@@ -63,7 +63,7 @@ class CuesPanel(wx.Panel):
 
     def appendCueButton(self):
         number = str(len(self.cueButtons))
-        self.currentCue = number
+        self.currentCue = int(number)
         but = wx.Button(self.cuesPanel, size = (40, -1), label = number, name = number)
         but.Bind(wx.EVT_BUTTON, self.onCueSelection)
         but.SetDefault()

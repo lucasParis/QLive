@@ -118,11 +118,14 @@ class ParentBox(object):
         
     def copyCue(self, cueToCopy):
         pass
+        
     def cueEvent(self, eventDict):
-        if eventDict["type"] == 'newCue':
-            print eventDict["currentCue"], eventDict["totalCues"]
-        elif eventDict["type"] == 'cueSelect':
-            print eventDict["selectedCue"]
+        if self.audio != None:
+            self.audio.cueEvent(eventDict)
+#        if eventDict["type"] == 'newCue':
+#            print eventDict["currentCue"], eventDict["totalCues"]
+#        elif eventDict["type"] == 'cueSelect':
+#            print eventDict["selectedCue"]
 #            dictEvent = {'type': "cueSelect", "selectedCue": self.currentCue}
 
     

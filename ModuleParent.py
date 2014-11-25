@@ -76,14 +76,45 @@ class ModuleParent(object):
                 self.parameters[i].setValue(value)
         else:
             print "error in moduleParent in setSaveDict"
+            
     def cueEvent(self, eventDict):
-        pass
+        if eventDict["type"] == 'newCue':
+            print eventDict["currentCue"], eventDict["totalCues"]
+            # on first cue save populate first cue
+            if len(self.cues) == 0:
+                list = []
+                for i,  param in enumerate(self.parameters): 
+                    list.append(param.getValue())
+                self.cues.append(list)
+
+            #creating new Cue
+            list = []
+            for i,  param in enumerate(self.parameters):
+                list.append(param.getValue())
+            self.cues.append(list)
+            self.currentCue = eventDict["totalCues"]
+            
+        elif eventDict["type"] == 'cueSelect':
+            #save current values
+            list = []
+            for i,  param in enumerate(self.parameters):
+                list.append(param.getValue())
+            self.cues[self.currentCue] = list
+            
+            # in with the new
+            self.currentCue = eventDict["selectedCue"]
+            for i,  param in enumerate(self.parameters):
+                param.setValue(self.cues[int(self.currentCue)][i])
+            
         
     def loadCue(self, cue):
-        list = []
-        for i, param in enumerate(self.parameters):
-            list.append(param.getValue())
-        self.currentCue = cue
+        pass
+        # only save on cue change (and save) before changing
+        
+#        list = []
+#        for i, param in enumerate(self.parameters):
+#            list.append(param.getValue())
+#        self.currentCue = cue
         
     def copyCue(self, cueToCopy):
         # need to know: current cue, max cues...

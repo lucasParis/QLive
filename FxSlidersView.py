@@ -48,9 +48,10 @@ class FxSlidersView(wx.Frame):
 
         self.sizer.Add(self.toolbar,1, wx.EXPAND)
         ##init CTRLS
-        sliders = []
+        self.sliders = []
         for i, param in enumerate(self.parameters):
             slide = ControlSlider(self.panel, param.min, param.max, param.audioValue.get(), outFunction = param.setValue)
+            self.sliders.append(slide)
             self.sizer.Add(wx.StaticText(self.panel, label = param.name), 0, wx.EXPAND | wx.ALL, 5)
             self.sizer.Add(slide, 0, wx.EXPAND | wx.ALL, 2)
             
@@ -58,6 +59,12 @@ class FxSlidersView(wx.Frame):
         self.SetTitle(self.audio.name)
 #        self.Bind(wx.EVT_LEAVE_WINDOW, self.onLeave)
 #        
+
+    def refresh(self):
+        for i, param in enumerate(self.parameters):
+            self.sliders[i].SetValue(param.getValue())
+
+            
     def onLeave(self, event):
         print "leaver"
         pass

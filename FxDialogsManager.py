@@ -24,8 +24,24 @@ class FxDialogsManager(object):
         view = FxSlidersView(self, audioProcess)
         view.Show()
         self.openViews.append(view)
-
         
+    def refresh(self):
+#        pass
+        self.cleanUp()
+        for view in self.openViews:
+            view.refresh()
+            
+    def cleanUp(self):
+        for i, view in enumerate(self.openViews):
+#            print view
+            try:
+                if view:
+                    print "alive"
+            except wx._core.PyDeadObjectError:
+                self.openViews.pop(i)
+                print "dead"
+#            if isinstance(view, wx._wx.PyDeadObject): 
+#                del self.openViews[i]
 
 if __name__ == "__main__":
     from pyo import *
@@ -36,12 +52,13 @@ if __name__ == "__main__":
             wx.Frame.__init__(self, None)
             self.s = Server().boot()
             self.s.start()
-            self.fx = FxCreator().createFx(0)
+            self.fx = FxCreator().create(0)
             self.fx.setInput(Input([0,1]))
             self.fx.getOutput().out()
             
             self.fxs = FxDialogsManager(self)    
             self.fxs.openViewForAudioProcess(self.fx)
+            self.fxs.cleanUp()
 
     app = wx.App()
 
