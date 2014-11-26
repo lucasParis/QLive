@@ -19,7 +19,7 @@ class FxBoxMenu(wx.Menu):
         self.result = None
             
     def fxSelected(self, event):
-        print self.fxNames[self.idsIndexDict[event.GetId()]]
+#        print self.fxNames[self.idsIndexDict[event.GetId()]]
         self.result = self.idsIndexDict[event.GetId()]
         
     def getSelection(self):
@@ -39,7 +39,7 @@ class InputBoxMenu(wx.Menu):
         self.result = None
             
     def fxSelected(self, event):
-        print self.inputNames[self.idsIndexDict[event.GetId()]]
+#        print self.inputNames[self.idsIndexDict[event.GetId()]]
         self.result = self.idsIndexDict[event.GetId()]
         
     def getSelection(self):
@@ -96,6 +96,11 @@ class ParentBox(object):
         self.name = self.audio.name
         self.audio.setInput(self.audioIn)
         self.audioOut.setValue(self.audio.getOutput())
+        # setup empty cues
+        cuesPanel = self.parent.parent.parent.cues
+        numberOfCues = cuesPanel.getNumberOfCues()
+        currentCue = cuesPanel.getCurrentCue()
+        self.audio.initCues(numberOfCues, currentCue)
 
     def getSaveDict(self):
         if self.audio != None:

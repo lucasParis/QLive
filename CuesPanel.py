@@ -88,8 +88,11 @@ class CuesPanel(wx.Panel):
             self.parent.tracks.cueEvent(dictEvent)
         self.appendCueButton()
         
-
-
+    def getNumberOfCues(self):
+        return len(self.cueButtons)
+        
+    def getCurrentCue(self):
+        return self.currentCue
 
 if __name__ == "__main__":
     class TestWindow(wx.Frame):

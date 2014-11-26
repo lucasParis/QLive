@@ -37,7 +37,7 @@ class FxSlidersView(wx.Frame):
     """
     def __init__(self, parent, audioProcess):
         wx.Frame.__init__(self, None)
-
+        self.parent = parent
         self.menuBar = wx.MenuBar()
 
         menu1 = wx.Menu()
@@ -46,7 +46,6 @@ class FxSlidersView(wx.Frame):
         self.menuBar.Append(menu1, 'File')
         self.SetMenuBar(self.menuBar)
 
-        self.SetFocus()
         self.audio = audioProcess
         self.parameters = audioProcess.parameters
         
@@ -68,10 +67,11 @@ class FxSlidersView(wx.Frame):
         self.SetTitle(self.audio.name)
 #        self.Bind(wx.EVT_LEAVE_WINDOW, self.onLeave)
         self.Bind(wx.EVT_CLOSE, self.onClose)
-#        
 
     def refresh(self):
+#        print "refreshing"
         for i, param in enumerate(self.parameters):
+#            print "setting value:", param.getValue()
             self.sliders[i].SetValue(param.getValue())
 
             
@@ -82,23 +82,30 @@ class FxSlidersView(wx.Frame):
 
     def onClose(self, evt):
         # remove from the list here...
+        index = self.parent.openViews.index(self)
+        print "deleting", index
+        self.parent.openViews.pop(index)
         self.Destroy()
 
 if __name__ == "__main__":
     from Fxs import FxCreator
+    from FxDialogsManager import FxDialogsManager
     class TestWindow(wx.Frame):
         def __init__(self):
             wx.Frame.__init__(self, None)
             self.s = Server().boot()
             self.s.start()
-            self.fx = FxCreator().createFx(0)
+            self.fx = FxCreator().create(0)
             self.fx.setInput(Input([0,1]))
             self.fx.getOutput().out()
-            
-            self.view = FxSlidersView(self, self.fx)
-            self.view.Show(True)
+            self.fxs = FxDialogsManager(self)    
+            self.fxs.openViewForAudioProcess(self.fx)
+            self.fxs.openViewForAudioProcess(self.fx)
+            self.fxs.openViewForAudioProcess(self.fx)
+
+#            self.view = FxSlidersView(self, self.fx)
+#            self.view.Show(True)
             print "delloh"
-            pass
 
     app = wx.App()
 

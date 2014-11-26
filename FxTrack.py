@@ -9,6 +9,7 @@ import  wx.lib.scrolledpanel as scrolled
 class FxTrack(scrolled.ScrolledPanel):
     def __init__(self, parent):
         scrolled.ScrolledPanel.__init__(self, parent)
+        self.parent = parent
         
         self.buttonWidth = 80
         self.buttonHeight = 25
@@ -34,16 +35,16 @@ class FxTrack(scrolled.ScrolledPanel):
         ## Connections
         for i, row in enumerate(self.buttonsFxs):
             for j, button in enumerate(row):
-                print j
+#                print j
                 if j == len(row)-1:
-                    print "output"
+#                    print "output"
                     button.setInput(row[j-1].getOutput())
                     button.getOutput().out()
                 elif j != 0:
-                    print "chain"
+#                    print "chain"
                     button.setInput(row[j-1].getOutput())
                 else:
-                    print "first"
+#                    print "first"
                     button.setInput(self.buttonsInputs[0].getOutput())
         self.outputTest = self.buttonsFxs[0][4].getOutput().out()
 
@@ -68,7 +69,7 @@ class FxTrack(scrolled.ScrolledPanel):
         pos = self.CalcUnscrolledPosition( event.GetPosition())
         id = self.positionToIdFX(pos)
         
-        print pos
+#        print pos
 
     def leftClicked(self, event):
         pos = self.CalcUnscrolledPosition( event.GetPosition() )
@@ -96,7 +97,7 @@ class FxTrack(scrolled.ScrolledPanel):
         pos = self.CalcUnscrolledPosition( event.GetPosition() )
         if pos[0] < 100: # inputs
             id = self.positionToIdInput(pos)
-            print id
+#            print id
             if id[1] < len(self.buttonsInputs): #valid Y
                     buttonPos = self.idToPositionInput(id)
                     if pos[0] > buttonPos[0] and pos[0] < buttonPos[0] + self.buttonWidth and pos[1] > buttonPos[1] and pos[1] < buttonPos[1] + self.buttonHeight:

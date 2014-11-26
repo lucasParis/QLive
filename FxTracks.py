@@ -7,6 +7,7 @@ from FxDialogsManager import *
 class FxTracks(wx.Panel):
     def __init__(self, parent, size = (-1,800)):
         wx.Panel.__init__(self, parent)
+        self.parent = parent
         self.sizer = wx.BoxSizer(wx.VERTICAL)
         
         self.toolbar = FxTracksToolBar(self)

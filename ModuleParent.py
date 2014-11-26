@@ -19,20 +19,17 @@ class ModuleParameter(PyoObject):
         self._base_objs = self.audioValue.getBaseObjects()
 
     def setValue(self, value):
+#        print "seting"
         self.audioValue.setValue(value)
+        self.value = value
 #        print value
         
-    def setFromFloat(self, float):
-        self.value = float**self.exp*(self.max-self.min)+self.min
-        self.audioValue = self.value
+#    def setFromFloat(self, float):
+#        self.value = float**self.exp*(self.max-self.min)+self.min
+#        self.audioValue = self.value
 
-    def setModelParameter(self, param):
-        # save model parameter? 
-        # register a callback on model parameter?
-        # 
-        pass
     def getValue(self):
-        return self.audioValue.get()
+        return self.value
 
 class ModuleParent(object):
     name = "empty"
@@ -79,7 +76,8 @@ class ModuleParent(object):
             
     def cueEvent(self, eventDict):
         if eventDict["type"] == 'newCue':
-            print eventDict["currentCue"], eventDict["totalCues"]
+#            print "audio got new cue"
+#            print eventDict["currentCue"], eventDict["totalCues"]
             # on first cue save populate first cue
             if len(self.cues) == 0:
                 list = []
@@ -96,6 +94,7 @@ class ModuleParent(object):
             
         elif eventDict["type"] == 'cueSelect':
             #save current values
+#            print "audio got cue selected"
             list = []
             for i,  param in enumerate(self.parameters):
                 list.append(param.getValue())
@@ -106,6 +105,14 @@ class ModuleParent(object):
             for i,  param in enumerate(self.parameters):
                 param.setValue(self.cues[int(self.currentCue)][i])
             
+
+    def initCues(self, numberOfCues, currentCue):
+        for i in range(numberOfCues):
+            list = []
+            for j,  param in enumerate(self.parameters):
+                list.append(param.getValue())
+            self.cues.append(list)
+        self.currentCue = currentCue
         
     def loadCue(self, cue):
         pass

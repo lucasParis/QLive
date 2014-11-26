@@ -26,22 +26,10 @@ class FxDialogsManager(object):
         self.openViews.append(view)
         
     def refresh(self):
-#        pass
-        self.cleanUp()
         for view in self.openViews:
             view.refresh()
             
-    def cleanUp(self):
-        for i, view in enumerate(self.openViews):
-#            print view
-            try:
-                if view:
-                    print "alive"
-            except wx._core.PyDeadObjectError:
-                self.openViews.pop(i)
-                print "dead"
-#            if isinstance(view, wx._wx.PyDeadObject): 
-#                del self.openViews[i]
+
 
 if __name__ == "__main__":
     from pyo import *
@@ -58,7 +46,7 @@ if __name__ == "__main__":
             
             self.fxs = FxDialogsManager(self)    
             self.fxs.openViewForAudioProcess(self.fx)
-            self.fxs.cleanUp()
+#            self.fxs.cleanUp()
 
     app = wx.App()
 
