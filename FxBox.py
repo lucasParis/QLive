@@ -99,8 +99,9 @@ class ParentBox(object):
         # setup empty cues
         cuesPanel = self.parent.parent.parent.cues
         numberOfCues = cuesPanel.getNumberOfCues()
-        currentCue = cuesPanel.getCurrentCue()
-        self.audio.initCues(numberOfCues, currentCue)
+        if numberOfCues > 1:
+            currentCue = cuesPanel.getCurrentCue()
+            self.audio.initCues(numberOfCues, currentCue)
 
     def getSaveDict(self):
         if self.audio != None:
