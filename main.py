@@ -15,15 +15,31 @@ from SoundFilePanel import *
 from MixerPanel import *
 from FxTracksToolbar import *
 from FxTracks import *
-from MenuBar import *
 
 class MainWindow(wx.Frame):
     def __init__(self):
         wx.Frame.__init__(self, None, size = (1200, 700) )
+        # There should be a AudioServer class created in 
+        # its own file (all audio stuff manage there)
         self.s = Server().boot()
         self.s.start()
-        self.menuB = MenuBar(self)
-        self.SetMenuBar(self.menuB)
+        
+        # menubar
+        menubar = wx.MenuBar()
+        menu1 = wx.Menu()
+
+        menu1.Append(wx.ID_SAVE, "Save\tCtrl+S")
+        self.Bind(wx.EVT_MENU, self.onSave, id=wx.ID_SAVE)        
+        menu1.Append(wx.ID_OPEN, "Open\tCtrl+O")
+        self.Bind(wx.EVT_MENU, self.onLoad, id=wx.ID_OPEN)
+        menu1.AppendSeparator()
+        quitItem = menu1.Append(wx.ID_EXIT, "Quit\tCtrl+Q")
+        self.Bind(wx.EVT_MENU, self.OnClose, quitItem)
+        menubar.Append(menu1, 'file')
+        
+        self.SetMenuBar(menubar)
+        # end of menubar
+
 #        self.inaa = Input([0,1]).out()
         # PANELS CREATION
 #        self.tracksToolBar = FxTracksToolBar(self)	
@@ -47,6 +63,25 @@ class MainWindow(wx.Frame):
         self.mainMixerVsRest.Add(self.mixer, 0, wx.EXPAND, 5)
         self.SetSizer(self.mainMixerVsRest)
 
+    def onSave(self, event):
+        dlg = wx.FileDialog(self, "choose path to save Qlive projet", '', '', ".", wx.SAVE|wx.FD_OVERWRITE_PROMPT)
+        if dlg.ShowModal() == wx.ID_OK:
+            path = dlg.GetPath()
+            print "saving:", self.tracks.getSaveDict()
+            dictSave = self.tracks.getSaveDict()
+            f = open(path, "w")
+            f.write("dictSave = %s" % str(dictSave))
+            f.close()
+        dlg.Destroy()
+
+    def onLoad(self, event):
+        dlg = wx.FileDialog(self, "choose Qlive projet", '', '', ".", wx.OPEN)
+        if dlg.ShowModal() == wx.ID_OK:
+            path = dlg.GetPath()
+            execfile(path, globals())
+            print "opening: ", dictSave
+            self.tracks.setSaveDict(dictSave)
+        dlg.Destroy()
 
     def OnClose(self, evt):
         self.Destroy()
