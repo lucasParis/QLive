@@ -37,6 +37,15 @@ class FxSlidersView(wx.Frame):
     """
     def __init__(self, parent, audioProcess):
         wx.Frame.__init__(self, None)
+
+        self.menuBar = wx.MenuBar()
+
+        menu1 = wx.Menu()
+        closeitem = menu1.Append(wx.ID_ANY, "Close\tCtrl+W")
+        self.Bind(wx.EVT_MENU, self.onClose, closeitem)
+        self.menuBar.Append(menu1, 'File')
+        self.SetMenuBar(self.menuBar)
+
         self.SetFocus()
         self.audio = audioProcess
         self.parameters = audioProcess.parameters
@@ -58,6 +67,7 @@ class FxSlidersView(wx.Frame):
         self.panel.SetSizer(self.sizer)
         self.SetTitle(self.audio.name)
 #        self.Bind(wx.EVT_LEAVE_WINDOW, self.onLeave)
+        self.Bind(wx.EVT_CLOSE, self.onClose)
 #        
 
     def refresh(self):
@@ -69,6 +79,10 @@ class FxSlidersView(wx.Frame):
         print "leaver"
         pass
 #        self.Show(True)
+
+    def onClose(self, evt):
+        # remove from the list here...
+        self.Destroy()
 
 if __name__ == "__main__":
     from Fxs import FxCreator

@@ -48,6 +48,8 @@ class MainWindow(wx.Frame):
         self.SetSizer(self.mainMixerVsRest)
 
 
+    def OnClose(self, evt):
+        self.Destroy()
 
 
 if __name__ == "__main__":

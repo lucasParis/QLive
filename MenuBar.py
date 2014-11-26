@@ -18,6 +18,9 @@ class MenuBar(wx.MenuBar):
 
 
 #        menu1.Append(wx.ID_EXIT, "Quit", "Quit")
+        menu1.AppendSeparator()
+        quitItem = menu1.Append(wx.ID_EXIT, "Quit\tCtrl+Q")
+        self.Bind(wx.EVT_MENU, self.parent.OnClose, quitItem)
 
         self.Append(menu1, 'file')
         pass
