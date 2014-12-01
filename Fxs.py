@@ -85,7 +85,7 @@ class FxStereoVerb(ModuleParent):
         
         #audio
         self.dbValue = DBToA(self.ctrlGain)
-        self.verb = STRev(self.getInput(), inpos=self.inputPosition, revtime=self.time, cutoff=self.cutoff, bal=self.balance, mul=self.ctrlGain)
+        self.verb = STRev(self.getInput(), inpos=self.inputPosition, revtime=self.time, cutoff=self.cutoff, bal=self.balance, mul=self.dbValue)
         self.setOutput(self.verb)
 
 class FxDisto(ModuleParent):
@@ -204,8 +204,8 @@ if __name__ == "__main__":
         def __init__(self):
             wx.Frame.__init__(self, None)
             self.s = Server().boot()
-            self.effect = FxCreator().createFx(0)
-#            print self.effect.getSaveDict()
+            self.effect = FxCreator().create(3)
+            #            print self.effect.getSaveDict()
             pass
 
     app = wx.App()
