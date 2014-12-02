@@ -45,7 +45,12 @@ class CuesPanel(wx.Panel):
         self.cuesPanelSizer = wx.BoxSizer(wx.VERTICAL)
         self.cueButtons = []
         self.appendCueButton()
-
+#        self.appendCueButton()
+#        self.appendCueButton()
+#        self.clearButtons()
+#        self.appendCueButton()
+#        self.appendCueButton()
+#        self.setSelectedCue(0)
         
         self.cuesPanel.SetSizer(self.cuesPanelSizer)
         self.mainSizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -60,8 +65,18 @@ class CuesPanel(wx.Panel):
             - addCue: 
             - setCue:
         """
-#    def setCuesFromSave(self, number):
-#        
+    def setSelectedCue(self, number):
+        if number < len(self.cueButtons):
+            self.cueButtons[number].SetDefault()
+            self.currentCue = number
+        
+    def clearButtons(self):
+        for i, button in enumerate(self.cueButtons):
+            button.Unbind(wx.EVT_BUTTON)
+            self.cuesPanelSizer.Remove(button)
+            button.Destroy()
+        self.cueButtons = []
+        self.cuesPanelSizer.Layout()
 
     def appendCueButton(self):
         number = str(len(self.cueButtons))
@@ -90,19 +105,34 @@ class CuesPanel(wx.Panel):
             self.parent.tracks.cueEvent(dictEvent)
         self.appendCueButton()
         
+    def setNumberOfCues(self, numbers):
+        return len(self.cueButtons)        
+
     def getNumberOfCues(self):
         return len(self.cueButtons)
         
     def getCurrentCue(self):
         return self.currentCue
 
+    def setSaveDict(self, dict):
+        self.clearButtons()
+        for i in range(dict["numberOfCues"]):
+            self.appendCueButton()
+        self.setSelectedCue(0)
+            
+        
+    def getSaveDict(self):
+        dict = {}
+        dict["numberOfCues"] = len(self.cueButtons)
+        return dict
+        
 if __name__ == "__main__":
     class TestWindow(wx.Frame):
         def __init__(self):
             wx.Frame.__init__(self, None)
             
             self.cuesPanel = CuesPanel(self)
-
+            self.cuesPanel.parent = None
     app = wx.App()
 
     frame = TestWindow()

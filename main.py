@@ -67,8 +67,13 @@ class MainWindow(wx.Frame):
         dlg = wx.FileDialog(self, "choose path to save Qlive projet", '', '', ".", wx.SAVE|wx.FD_OVERWRITE_PROMPT)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
-            print "saving:", self.tracks.getSaveDict()
-            dictSave = self.tracks.getSaveDict()
+            
+            dictSave = {}
+            dictTracks = self.tracks.getSaveDict()
+            dictCues = self.cues.getSaveDict()
+            dictSave["tracks"] = dictTracks
+            dictSave["cues"] = dictCues
+
             f = open(path, "w")
             f.write("dictSave = %s" % str(dictSave))
             f.close()
@@ -80,7 +85,10 @@ class MainWindow(wx.Frame):
             path = dlg.GetPath()
             execfile(path, globals())
             print "opening: ", dictSave
-            self.tracks.setSaveDict(dictSave)
+#            dictSave["tracks"] = dictTracks
+#            dictSave["cues"] = dictCues
+            self.tracks.setSaveDict(dictSave["tracks"])
+            self.cues.setSaveDict(dictSave["cues"])
         dlg.Destroy()
 
     def OnClose(self, evt):
