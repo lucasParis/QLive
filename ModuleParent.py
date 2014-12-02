@@ -13,7 +13,7 @@ class ModuleParameter(PyoObject):
         self.unit = unit
         self.exp = exp
         self.value = value
-        
+        self.type = "slider" # possible types: slider, choice box, path selection
         self.audioValue = Sig(value)
 
         self._base_objs = self.audioValue.getBaseObjects()
@@ -62,17 +62,27 @@ class ModuleParent(object):
         self.name = name_
 
     def getSaveDict(self):
-        dict = {'values': []}
-        for i, param in enumerate(self.parameters):
-            dict['values'].append(param.getValue())
+        # save current
+        list = []
+        for i,  param in enumerate(self.parameters):
+            list.append(param.getValue())
+        self.cues[self.currentCue] = list
+        
+        #into dict
+        dict = {'values': self.cues}
         return dict
         
     def setSaveDict(self, saveDict):
-        if len(saveDict['values']) == len(self.parameters):
-            for i, value in enumerate(saveDict['values']):
-                self.parameters[i].setValue(value)
-        else:
-            print "error in moduleParent in setSaveDict"
+        self.cues = saveDict['values']
+                    # in with the new
+        self.currentCue = 0
+        for i,  param in enumerate(self.parameters):
+            param.setValue(self.cues[int(self.currentCue)][i])
+#        if len(saveDict['values']) == len(self.parameters):
+#            for i, value in enumerate(saveDict['values']):
+#                self.parameters[i].setValue(value)
+#        else:
+#            print "error in moduleParent in setSaveDict"
             
     def cueEvent(self, eventDict):
         if eventDict["type"] == 'newCue':
@@ -93,8 +103,8 @@ class ModuleParent(object):
             self.currentCue = eventDict["totalCues"]
             
         elif eventDict["type"] == 'cueSelect':
-            #save current values
-#            print "audio got cue selected"
+
+            # saving current parameters
             list = []
             for i,  param in enumerate(self.parameters):
                 list.append(param.getValue())

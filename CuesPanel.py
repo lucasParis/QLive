@@ -60,6 +60,8 @@ class CuesPanel(wx.Panel):
             - addCue: 
             - setCue:
         """
+#    def setCuesFromSave(self, number):
+#        
 
     def appendCueButton(self):
         number = str(len(self.cueButtons))
