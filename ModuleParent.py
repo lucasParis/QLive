@@ -2,7 +2,7 @@
 # encoding: utf-8
 import wx
 from pyo import *
-
+# 
 class ModuleParameter(PyoObject):
     def __init__(self, name = "empty", value = 0, min = 0, max = 1, unit = "hz", exp = 1):
         PyoObject.__init__(self)
@@ -14,7 +14,7 @@ class ModuleParameter(PyoObject):
         self.exp = exp
         self.value = value
         self.type = "slider" # possible types: slider, choice box, path selection
-        self.audioValue = Sig(value)
+        self.audioValue = SigTo(value,1, init = value)
 
         self._base_objs = self.audioValue.getBaseObjects()
 

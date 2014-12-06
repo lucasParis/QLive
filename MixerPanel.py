@@ -16,13 +16,13 @@ class MixerPanel(wx.Panel):
         self.inputMeters = []
         self.outputMeters = []
         
-        inputSliderCallbacks = [self.inputSlider1, self.inputSlider2, self.inputSlider3,
-                                self.inputSlider4, self.inputSlider5, self.inputSlider6]
+#        inputSliderCallbacks = [self.inputSlider1, self.inputSlider2, self.inputSlider3,
+#                                self.inputSlider4, self.inputSlider5, self.inputSlider6]
         inputBox = wx.BoxSizer(wx.VERTICAL)        
         inputSliderBox = wx.BoxSizer(wx.HORIZONTAL)
         inputBox.Add(wx.StaticText(self, label = "Input"), 0, wx.EXPAND, 10)
         for i in range(6):
-            slide = ControlSlider(self, -80, 12, 0, orient=wx.VERTICAL, outFunction=inputSliderCallbacks[i])
+            slide = ControlSlider(self, -80, 12, 0, orient=wx.VERTICAL, outFunction=None)#inputSliderCallbacks[i]
             self.inputSliders.append(slide)
             inputSliderBox.Add(slide, 0, wx.ALL, 2)
             meter = VuMeter(self, size=(200,200), numSliders=2, orient=wx.VERTICAL)
@@ -49,21 +49,21 @@ class MixerPanel(wx.Panel):
         mainSizer.Add(outputBox, 1, wx.EXPAND)
         self.SetSizer(mainSizer)
 
-    def getInputMeterCallback(self, which):
-        return self.inputMeters[which].setRms
+#    def getInputMeterCallback(self, which):
+#        return self.inputMeters[which].setRms
 
-    def inputSlider1(self, value):
-        self.parent.gens[0].gain.value = 10**(value*0.05)
-    def inputSlider2(self, value):
-        self.parent.gens[1].gain.value = 10**(value*0.05)
-    def inputSlider3(self, value):
-        self.parent.gens[2].gain.value = 10**(value*0.05)
-    def inputSlider4(self, value):
-        self.parent.gens[3].gain.value = 10**(value*0.05)
-    def inputSlider5(self, value):
-        self.parent.gens[4].gain.value = 10**(value*0.05)
-    def inputSlider6(self, value):
-        self.parent.gens[5].gain.value = 10**(value*0.05)
+#    def inputSlider1(self, value):
+#        self.parent.gens[0].gain.value = 10**(value*0.05)
+#    def inputSlider2(self, value):
+#        self.parent.gens[1].gain.value = 10**(value*0.05)
+#    def inputSlider3(self, value):
+#        self.parent.gens[2].gain.value = 10**(value*0.05)
+#    def inputSlider4(self, value):
+#        self.parent.gens[3].gain.value = 10**(value*0.05)
+#    def inputSlider5(self, value):
+#        self.parent.gens[4].gain.value = 10**(value*0.05)
+#    def inputSlider6(self, value):
+#        self.parent.gens[5].gain.value = 10**(value*0.05)
 
 if __name__ == "__main__":
     class Generator:
@@ -81,7 +81,8 @@ if __name__ == "__main__":
             self.Bind(wx.EVT_CLOSE, self.onClose)
             self.pan = MixerPanel(self)
             self.gens = [Generator(freq=i*100) for i in range(1,7)]
-            [gen.setMeterCallback(self.pan.getInputMeterCallback(i)) for i, gen in enumerate(self.gens)]
+#            [gen.setMeterCallback(self.pan.getInputMeterCallback(i)) for i, gen in enumerate(self.gens)]
+            
         def onClose(self, evt):
             s.stop()
             self.Destroy()
