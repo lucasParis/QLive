@@ -147,6 +147,7 @@ class FxBox(ParentBox):
 class InputBox(ParentBox):
     def __init__(self, parent):
         ParentBox.__init__(self, parent)
+        self.audioOut.value = Sig(0)
         self.menu = InputBoxMenu
         self.creator = InputCreator
         

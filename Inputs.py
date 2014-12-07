@@ -11,14 +11,13 @@ class InputIn(ModuleParent):
         ModuleParent.__init__(self)
         self.setName("input")
         #ctrls
-#        self.ctrlFreq = ModuleParameter(name = "freq", value = 1000, min = 20, max = 20000, unit = "hz", exp = 2)
-#        self.addParameter(self.ctrlFreq)
+
         self.ctrlGain= ModuleParameter(name = "gain", value = 4, min = -90, max = 24, unit = "db", exp = 1)
         self.addParameter(self.ctrlGain)
         
         #audio
         self.dbValue = DBToA(self.ctrlGain)
-        self.amp = Sig(Input([0,1]),mul = self.dbValue)
+        self.amp = Sig(self.input, mul = self.dbValue)
         self.setOutput(self.amp)
 
 

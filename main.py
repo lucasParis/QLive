@@ -3,6 +3,9 @@
 """
 - how will choice boxes and paths behave in dicts? for now only values are taken care of
 - make parent class for both creators input and fxs
+
+Code style:
+    - always give other neccessary class through init argument ? never through parent.parent.parent... This facilitates creation of tests
 """
 import __builtin__
 __builtin__.QLIVE_APP_OPENED = True
@@ -46,8 +49,9 @@ class MainWindow(wx.Frame):
         self.tracks = FxTracks(self)
 #        self.soundfilePlayer = SoundFilePanel(self)
         self.cues = CuesPanel(self)
-        self.mixer = MixerPanel(self)
-
+        self.audioMixer = AudioMixer()
+        self.mixer = MixerPanel(self, self.audioMixer)
+        self.tracks.connectAudioMixer(self.audioMixer)
 
         # LAYOUT, SIZERS
 #        self.tracksSizer = wx.BoxSizer(wx.VERTICAL) 

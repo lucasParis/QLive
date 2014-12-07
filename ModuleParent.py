@@ -14,19 +14,14 @@ class ModuleParameter(PyoObject):
         self.exp = exp
         self.value = value
         self.type = "slider" # possible types: slider, choice box, path selection
-        self.audioValue = SigTo(value,1, init = value)
+        self.audioValue = SigTo(value,0.05, init = value)
 
         self._base_objs = self.audioValue.getBaseObjects()
 
     def setValue(self, value):
-#        print "seting"
         self.audioValue.setValue(value)
         self.value = value
-#        print value
-        
-#    def setFromFloat(self, float):
-#        self.value = float**self.exp*(self.max-self.min)+self.min
-#        self.audioValue = self.value
+
 
     def getValue(self):
         return self.value
@@ -78,17 +73,10 @@ class ModuleParent(object):
         self.currentCue = 0
         for i,  param in enumerate(self.parameters):
             param.setValue(self.cues[int(self.currentCue)][i])
-#        if len(saveDict['values']) == len(self.parameters):
-#            for i, value in enumerate(saveDict['values']):
-#                self.parameters[i].setValue(value)
-#        else:
-#            print "error in moduleParent in setSaveDict"
+
             
     def cueEvent(self, eventDict):
         if eventDict["type"] == 'newCue':
-#            print "audio got new cue"
-#            print eventDict["currentCue"], eventDict["totalCues"]
-            # on first cue save populate first cue
             if len(self.cues) == 0:
                 list = []
                 for i,  param in enumerate(self.parameters): 

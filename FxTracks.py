@@ -40,6 +40,9 @@ class FxTracks(wx.Panel):
         self.track.cueEvent(eventDict)
         self.fxsView.refresh()
         
+    def connectAudioMixer(self, audioMixer):
+        self.track.connectAudioMixer(audioMixer)
+        
 if __name__ == "__main__":
     class TestWindow(wx.Frame):
         def __init__(self):

@@ -21,7 +21,7 @@ class FxTrack(scrolled.ScrolledPanel):
         self.rows = 1
         self.buttonsFxs = []
         self.buttonsInputs = []
-        for i in range(self.rows):
+        for i in range(self.rows):##### INPUTS 
             col = []
             for j in range(self.cols):
                 but = FxBox(self)
@@ -29,6 +29,7 @@ class FxTrack(scrolled.ScrolledPanel):
                 col.append(but)
             self.buttonsFxs.append(col)
             but = InputBox(self)
+#            but.setInput()
             but.setId((0,i))
             self.buttonsInputs.append(but)
             
@@ -39,14 +40,14 @@ class FxTrack(scrolled.ScrolledPanel):
                 if j == len(row)-1:
 #                    print "output"
                     button.setInput(row[j-1].getOutput())
-                    button.getOutput().out()
+#                    button.getOutput().out()
                 elif j != 0:
 #                    print "chain"
                     button.setInput(row[j-1].getOutput())
                 else:
 #                    print "first"
                     button.setInput(self.buttonsInputs[0].getOutput())
-        self.outputTest = self.buttonsFxs[0][4].getOutput().out()
+        self.outputTest = self.buttonsFxs[0][4].getOutput().out()####OUTPUT
 
         self.SetSize((10+self.cols*100+10, 20+30+20))
         self.SetVirtualSize((10+(self.cols+1)*(self.buttonWidth+20)+10, 20+30+20))
@@ -61,6 +62,16 @@ class FxTrack(scrolled.ScrolledPanel):
         self.Bind(wx.EVT_LEFT_DOWN, self.leftClicked)
         self.Bind(wx.EVT_RIGHT_DOWN, self.rightClicked)
 #        self.Bind(wx.EVT_MOTION, self.mouseMotion)
+
+    def connectAudioMixer(self, audioMixer):
+        for but in self.buttonsInputs:
+            but.setInput(Sig([audioMixer.getInputChannel(i).getOutput() for i in range(2)]))
+
+        for i, row in enumerate(self.buttonsFxs):
+            for j, button in enumerate(row):
+                if j == len(row)-1:
+                    output = button.getOutput()
+                    [audioMixer.getOutputChannel(k).setInput(output[k]) for k in range(2)]
 
     def setViewPanelRef(self, ref):
         self.viewPanelRef = ref
