@@ -9,7 +9,7 @@ Code style:
 """
 import __builtin__
 __builtin__.QLIVE_APP_OPENED = True
-
+import time
 import wx
 from pyo import *
 from FxTrack import *
@@ -43,20 +43,12 @@ class MainWindow(wx.Frame):
         self.SetMenuBar(menubar)
         # end of menubar
 
-#        self.inaa = Input([0,1]).out()
-        # PANELS CREATION
-#        self.tracksToolBar = FxTracksToolBar(self)	
         self.tracks = FxTracks(self)
-#        self.soundfilePlayer = SoundFilePanel(self)
         self.cues = CuesPanel(self)
         self.audioMixer = AudioMixer()
         self.mixer = MixerPanel(self, self.audioMixer)
         self.tracks.connectAudioMixer(self.audioMixer)
 
-        # LAYOUT, SIZERS
-#        self.tracksSizer = wx.BoxSizer(wx.VERTICAL) 
-#        self.tracksSizer.Add(self.tracksToolBar, 1, wx.EXPAND)
-#        self.tracksSizer.Add(self.track, 1, wx.EXPAND)
 
         self.topCuesAndRestSizer = wx.BoxSizer(wx.HORIZONTAL)
         self.topCuesAndRestSizer.Add(self.cues, 0, wx.EXPAND, 5)
@@ -96,6 +88,10 @@ class MainWindow(wx.Frame):
         dlg.Destroy()
 
     def OnClose(self, evt):
+        print "asdad"
+        self.s.stop()
+        self.s.shutdown()
+        time.sleep(2)
         self.Destroy()
 
 

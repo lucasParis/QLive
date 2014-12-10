@@ -8,6 +8,43 @@ import  wx.lib.scrolledpanel as scrolled
 """
 - changed FxSlidersView from panel to Frame
 """
+class WidgetParent(wx.Panel):
+    def __init__(self, parameter, parent):
+        wx.Panel.__init__(self, parent)
+        self.parameter = parameter
+        pass
+        
+    def setValue(self, value):
+        pass
+        
+class SliderWidget(WidgetParent):
+    def __init__(self, parameter, parent):
+        WidgetParent.__init__(self, parameter, parent)
+        self.sizer = wx.BoxSizer(wx.VERTICAL)
+        self.slider = ControlSlider(self, parameter.min, parameter.max, parameter.audioValue.get(), outFunction = parameter.setValue)
+        self.sizer.Add(wx.StaticText(self, label = parameter.name), 0, wx.EXPAND | wx.ALL, 5)
+        self.sizer.Add(self.slider, 0, wx.EXPAND | wx.ALL, 5)
+        self.SetSizer(self.sizer)
+        pass    
+        
+    def setValue(self, value):
+        self.slider.SetValue(value)
+        
+class PathWidget(WidgetParent):
+    def __init__(self, parameter, parent):
+        WidgetParent.__init__(self, parameter, parent)
+
+        pass  
+         
+    def setValue(self, value):
+        pass        
+  
+def WidgetCreator(type):
+    dict = {}
+    dict["slider"] = SliderWidget
+    dict["path"] = PathWidget  
+    return dict[type]  
+    
 class FxSlidersToolBar(wx.ToolBar):
     def __init__(self, parent):
         wx.ToolBar.__init__(self, parent, size = (1000, 40))
@@ -56,12 +93,19 @@ class FxSlidersView(wx.Frame):
 
         self.sizer.Add(self.toolbar,1, wx.EXPAND)
         ##init CTRLS
-        self.sliders = []
+        self.widgets = []
         for i, param in enumerate(self.parameters):
-            slide = ControlSlider(self.panel, param.min, param.max, param.audioValue.get(), outFunction = param.setValue)
-            self.sliders.append(slide)
-            self.sizer.Add(wx.StaticText(self.panel, label = param.name), 0, wx.EXPAND | wx.ALL, 5)
-            self.sizer.Add(slide, 0, wx.EXPAND | wx.ALL, 2)
+            if param.type == "slider":
+                slider = WidgetCreator(param.type)(param, self.panel)
+#                slide = ControlSlider(self.panel, param.min, param.max, param.audioValue.get(), outFunction = param.setValue)
+                self.widgets.append(slider)
+                print slider
+#                self.sizer.Add(wx.StaticText(self.panel, label = param.name), 0, wx.EXPAND | wx.ALL, 5)
+                self.sizer.Add(slider, 0, wx.EXPAND | wx.ALL, 2)
+            elif param.type == "path":
+                pass
+#                boxy = BoxSizer(wx.HORIZONTAL)
+#                boxy.A
             
         self.panel.SetSizer(self.sizer)
         self.SetTitle(self.audio.name)
@@ -72,7 +116,7 @@ class FxSlidersView(wx.Frame):
 #        print "refreshing"
         for i, param in enumerate(self.parameters):
 #            print "setting value:", param.getValue()
-            self.sliders[i].SetValue(param.getValue())
+            self.widgets[i].setValue(param.getValue())
 
             
     def onLeave(self, event):
@@ -100,8 +144,8 @@ if __name__ == "__main__":
             self.fx.getOutput().out()
             self.fxs = FxDialogsManager(self)    
             self.fxs.openViewForAudioProcess(self.fx)
-            self.fxs.openViewForAudioProcess(self.fx)
-            self.fxs.openViewForAudioProcess(self.fx)
+#            self.fxs.openViewForAudioProcess(self.fx)
+#            self.fxs.openViewForAudioProcess(self.fx)
 
 #            self.view = FxSlidersView(self, self.fx)
 #            self.view.Show(True)

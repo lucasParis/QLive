@@ -10,11 +10,11 @@ class FxLowpass(ModuleParent):
         ModuleParent.__init__(self)
         self.setName("Lowpass")
         #ctrls
-        self.ctrlFreq = ModuleParameter(name = "freq", value = 1000, min = 20, max = 20000, unit = "hz", exp = 2)
+        self.ctrlFreq = SliderParameter(name = "freq", value = 1000, min = 20, max = 20000, unit = "hz", exp = 2)
         self.addParameter(self.ctrlFreq)
-        self.ctrlQ = ModuleParameter(name = "Q", value = 2, min = 0.1, max = 40, unit = "", exp = 1)
+        self.ctrlQ = SliderParameter(name = "Q", value = 2, min = 0.1, max = 40, unit = "", exp = 1)
         self.addParameter(self.ctrlQ)
-        self.ctrlGain= ModuleParameter(name = "gain", value = 0, min = -90, max = 24, unit = "db", exp = 1)
+        self.ctrlGain= SliderParameter(name = "gain", value = 0, min = -90, max = 24, unit = "db", exp = 1)
         self.addParameter(self.ctrlGain)
         
         #audio
@@ -28,11 +28,11 @@ class FxHighpass(ModuleParent):
         ModuleParent.__init__(self)
         self.setName("Highpass")
         #ctrls
-        self.ctrlFreq = ModuleParameter(name = "freq", value = 1000, min = 20, max = 20000, unit = "hz", exp = 2)
+        self.ctrlFreq = SliderParameter(name = "freq", value = 1000, min = 20, max = 20000, unit = "hz", exp = 2)
         self.addParameter(self.ctrlFreq)
-        self.ctrlQ = ModuleParameter(name = "Q", value = 2, min = 0.1, max = 40, unit = "", exp = 1)
+        self.ctrlQ = SliderParameter(name = "Q", value = 2, min = 0.1, max = 40, unit = "", exp = 1)
         self.addParameter(self.ctrlQ)
-        self.ctrlGain= ModuleParameter(name = "gain", value = 0, min = -90, max = 24, unit = "db", exp = 1)
+        self.ctrlGain= SliderParameter(name = "gain", value = 0, min = -90, max = 24, unit = "db", exp = 1)
         self.addParameter(self.ctrlGain)
         
         #audio
@@ -46,13 +46,13 @@ class FxFreeVerb(ModuleParent):
         ModuleParent.__init__(self)
         self.setName("FreeVerb")
         #ctrls
-        self.size = ModuleParameter(name = "size", value = 0.5, min = 0, max = 1, unit = "hz", exp = 2)
+        self.size = SliderParameter(name = "size", value = 0.5, min = 0, max = 1, unit = "hz", exp = 2)
         self.addParameter(self.size)
-        self.damp = ModuleParameter(name = "damp", value = 0.5, min = 0, max = 1, unit = "hz", exp = 2)
+        self.damp = SliderParameter(name = "damp", value = 0.5, min = 0, max = 1, unit = "hz", exp = 2)
         self.addParameter(self.damp)
-        self.balance = ModuleParameter(name = "balance", value = 0.5, min = 0, max = 1, unit = "hz", exp = 2)
+        self.balance = SliderParameter(name = "balance", value = 0.5, min = 0, max = 1, unit = "hz", exp = 2)
         self.addParameter(self.balance)
-        self.ctrlGain= ModuleParameter(name = "gain", value = 0, min = -90, max = 24, unit = "db", exp = 1)
+        self.ctrlGain= SliderParameter(name = "gain", value = 0, min = -90, max = 24, unit = "db", exp = 1)
         self.addParameter(self.ctrlGain)
         
         #audio
@@ -68,19 +68,19 @@ class FxStereoVerb(ModuleParent):
         ModuleParent.__init__(self)
         self.setName("StereoVerb")
         #ctrls
-        self.inputPosition = ModuleParameter(name = "pan", value = 0.5, min = 0, max = 1, unit = "")
+        self.inputPosition = SliderParameter(name = "pan", value = 0.5, min = 0, max = 1, unit = "")
         self.addParameter(self.inputPosition)
-        self.time = ModuleParameter(name = "time", value = 1, min = 0.05, max = 30, unit = "second")
+        self.time = SliderParameter(name = "time", value = 1, min = 0.05, max = 30, unit = "second")
         self.addParameter(self.time)
-        self.balance = ModuleParameter(name = "balance", value = 0.5, min = 0, max = 1, unit = "hz", exp = 2)
+        self.balance = SliderParameter(name = "balance", value = 0.5, min = 0, max = 1, unit = "hz", exp = 2)
         self.addParameter(self.balance)
-#        self.roomSize = ModuleParameter(name = "room size", value = 0.5, min = 0.25, max = 4, unit = "")
+#        self.roomSize = SliderParameter(name = "room size", value = 0.5, min = 0.25, max = 4, unit = "")
 #        self.addParameter(self.roomSize)
-#        self.reflection = ModuleParameter(name = "reflection", value = -3, min = -90, max = 12, unit = "db")
+#        self.reflection = SliderParameter(name = "reflection", value = -3, min = -90, max = 12, unit = "db")
 #        self.addParameter(self.reflection)
-        self.cutoff = ModuleParameter(name = "cutoff", value = 5000, min = 20, max = 20000, unit = "db")
+        self.cutoff = SliderParameter(name = "cutoff", value = 5000, min = 20, max = 20000, unit = "db")
         self.addParameter(self.cutoff)
-        self.ctrlGain= ModuleParameter(name = "gain", value = 0, min = -90, max = 24, unit = "db", exp = 1)
+        self.ctrlGain= SliderParameter(name = "gain", value = 0, min = -90, max = 24, unit = "db", exp = 1)
         self.addParameter(self.ctrlGain)
         
         #audio
@@ -94,11 +94,11 @@ class FxDisto(ModuleParent):
         ModuleParent.__init__(self)
         self.setName("Distortion")
         #ctrls
-        self.drive = ModuleParameter(name = "drive", value = 0.5, min = 0, max = 1, unit = "", exp = 2)
+        self.drive = SliderParameter(name = "drive", value = 0.5, min = 0, max = 1, unit = "", exp = 2)
         self.addParameter(self.drive)
-        self.slope = ModuleParameter(name = "slope", value = 0.5, min = 0, max = 1, unit = "", exp = 2)
+        self.slope = SliderParameter(name = "slope", value = 0.5, min = 0, max = 1, unit = "", exp = 2)
         self.addParameter(self.slope)
-        self.ctrlGain= ModuleParameter(name = "gain", value = 0, min = -90, max = 24, unit = "db", exp = 1)
+        self.ctrlGain= SliderParameter(name = "gain", value = 0, min = -90, max = 24, unit = "db", exp = 1)
         self.addParameter(self.ctrlGain)
         
         #audio
@@ -112,11 +112,11 @@ class FxDelay(ModuleParent):
         ModuleParent.__init__(self)
         self.setName("Delay")
         #ctrls
-        self.time = ModuleParameter(name = "time", value = 0.5, min = 0.01, max = 3, unit = "")
+        self.time = SliderParameter(name = "time", value = 0.5, min = 0.01, max = 3, unit = "")
         self.addParameter(self.time)
-        self.feedback = ModuleParameter(name = "feedback", value = 0.5, min = 0, max = 0.999, unit = "", exp = 2)
+        self.feedback = SliderParameter(name = "feedback", value = 0.5, min = 0, max = 0.999, unit = "", exp = 2)
         self.addParameter(self.feedback)
-        self.ctrlGain= ModuleParameter(name = "gain", value = 0, min = -90, max = 24, unit = "db", exp = 1)
+        self.ctrlGain= SliderParameter(name = "gain", value = 0, min = -90, max = 24, unit = "db", exp = 1)
         self.addParameter(self.ctrlGain)
         
         #audio
@@ -130,15 +130,15 @@ class FxCompressor(ModuleParent):
         ModuleParent.__init__(self)
         self.setName("Compressor")
         #ctrls
-        self.tresh = ModuleParameter(name = "tresh", value = -10, min = -90, max = 12, unit = "db")
+        self.tresh = SliderParameter(name = "tresh", value = -10, min = -90, max = 12, unit = "db")
         self.addParameter(self.tresh)
-        self.ratio = ModuleParameter(name = "ratio", value = 2, min = 1, max = 100, unit = "", exp = 2)
+        self.ratio = SliderParameter(name = "ratio", value = 2, min = 1, max = 100, unit = "", exp = 2)
         self.addParameter(self.ratio)
-        self.attack= ModuleParameter(name = "attack", value = 0.01, min = 0, max = 1, unit = "s", exp = 1)
+        self.attack= SliderParameter(name = "attack", value = 0.01, min = 0, max = 1, unit = "s", exp = 1)
         self.addParameter(self.attack)
-        self.decay = ModuleParameter(name = "decay", value = 0.1, min = 0, max = 1, unit = "s", exp = 1)
+        self.decay = SliderParameter(name = "decay", value = 0.1, min = 0, max = 1, unit = "s", exp = 1)
         self.addParameter(self.decay)
-        self.ctrlGain= ModuleParameter(name = "gain", value = 0, min = -90, max = 24, unit = "db", exp = 1)
+        self.ctrlGain= SliderParameter(name = "gain", value = 0, min = -90, max = 24, unit = "db", exp = 1)
         self.addParameter(self.ctrlGain)
         #audio
         self.dbValue = DBToA(self.ctrlGain)

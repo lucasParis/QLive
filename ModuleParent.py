@@ -3,11 +3,38 @@
 import wx
 from pyo import *
 # 
-class ModuleParameter(PyoObject):
-    def __init__(self, name = "empty", value = 0, min = 0, max = 1, unit = "hz", exp = 1):
-        PyoObject.__init__(self)
+
+class ParameterParent:
+    def __init__(self, name = "empty"):
+#        PyoObject.__init__(self)
 
         self.name = name
+#        self.min = min
+#        self.max = max
+#        self.unit = unit
+#        self.exp = exp
+#        self.value = value
+        self.type = "slider" # possible types: slider, choice box, path selection
+#        self.audioValue = SigTo(value,0.05, init = value)
+
+#        self._base_objs = self.audioValue.getBaseObjects()
+
+    def setValue(self, value):
+        pass
+#        self.audioValue.setValue(value)
+#        self.value = value
+
+
+    def getValue(self):
+        pass
+#        return self.value
+
+class SliderParameter(ParameterParent, PyoObject):
+    def __init__(self, name = "empty", value = 0, min = 0, max = 1, unit = "hz", exp = 1):
+        ParameterParent.__init__(self, name = name)
+        PyoObject.__init__(self)
+
+#        self.name = name
         self.min = min
         self.max = max
         self.unit = unit
@@ -25,6 +52,30 @@ class ModuleParameter(PyoObject):
 
     def getValue(self):
         return self.value
+
+class PathParameter(ParameterParent):
+    def __init__(self, name = "empty"):
+        ParameterParent.__init__(self, name = name)
+        self.path = None
+        self.type = "path"
+#        self.name = name
+#        self.min = min
+#        self.max = max
+#        self.unit = unit
+#        self.exp = exp
+#        self.value = value
+#        self.type = "slider" # possible types: slider, choice box, path selection
+#        self.audioValue = SigTo(value,0.05, init = value)
+
+#        self._base_objs = self.audioValue.getBaseObjects()
+
+    def setValue(self, value):
+#        self.audioValue.setValue(value)
+        self.path = value
+
+
+    def getValue(self):
+        return self.path
 
 class ModuleParent(object):
     name = "empty"
