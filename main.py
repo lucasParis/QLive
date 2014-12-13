@@ -46,8 +46,8 @@ class MainWindow(wx.Frame):
         self.tracks = FxTracks(self)
         self.cues = CuesPanel(self)
         self.audioMixer = AudioMixer()
-#        self.mixer = MixerPanel(self, self.audioMixer)
-#        self.tracks.connectAudioMixer(self.audioMixer)
+        self.mixer = MixerPanel(self, self.audioMixer)
+        self.tracks.connectAudioMixer(self.audioMixer)
 
 
         self.topCuesAndRestSizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -56,7 +56,7 @@ class MainWindow(wx.Frame):
 
         self.mainMixerVsRest = wx.BoxSizer(wx.VERTICAL)
         self.mainMixerVsRest.AddSizer(self.topCuesAndRestSizer, 2, wx.EXPAND, 5)
-#        self.mainMixerVsRest.Add(self.mixer, 0, wx.EXPAND, 5)
+        self.mainMixerVsRest.Add(self.mixer, 0, wx.EXPAND, 5)
         self.SetSizer(self.mainMixerVsRest)
 
     def onSave(self, event):
