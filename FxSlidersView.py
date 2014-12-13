@@ -34,8 +34,27 @@ class PathWidget(WidgetParent):
     def __init__(self, parameter, parent):
         WidgetParent.__init__(self, parameter, parent)
 
-        pass  
+        self.callback = parameter.setValue
+                
+        self.sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.openButton = wx.Button(self, label = "open")
+        self.openButton.Bind(wx.EVT_BUTTON, self.buttonEvent)
+
+
+        self.text = wx.StaticText(self, label = "path")
+        
+        self.sizer.Add(self.openButton, 0, wx.EXPAND | wx.ALL, 5)
+        self.sizer.Add(self.text, 0, wx.EXPAND | wx.ALL, 5)
+        self.SetSizer(self.sizer)
          
+    def buttonEvent(self, event):
+        dlg = wx.FileDialog(self, "choose Qlive projet", '', '', ".", wx.OPEN)
+        if dlg.ShowModal() == wx.ID_OK:
+            path = dlg.GetPath()
+#            print path
+            self.callback(path)
+        dlg.Destroy()
+        
     def setValue(self, value):
         pass        
   
@@ -97,13 +116,12 @@ class FxSlidersView(wx.Frame):
         for i, param in enumerate(self.parameters):
             if param.type == "slider":
                 slider = WidgetCreator(param.type)(param, self.panel)
-#                slide = ControlSlider(self.panel, param.min, param.max, param.audioValue.get(), outFunction = param.setValue)
                 self.widgets.append(slider)
-                print slider
-#                self.sizer.Add(wx.StaticText(self.panel, label = param.name), 0, wx.EXPAND | wx.ALL, 5)
                 self.sizer.Add(slider, 0, wx.EXPAND | wx.ALL, 2)
             elif param.type == "path":
-                pass
+                path = WidgetCreator(param.type)(param, self.panel)
+                self.widgets.append(path)
+                self.sizer.Add(path, 0, wx.EXPAND | wx.ALL, 2)
 #                boxy = BoxSizer(wx.HORIZONTAL)
 #                boxy.A
             
@@ -133,13 +151,14 @@ class FxSlidersView(wx.Frame):
 
 if __name__ == "__main__":
     from Fxs import FxCreator
+    from Inputs import InputCreator
     from FxDialogsManager import FxDialogsManager
     class TestWindow(wx.Frame):
         def __init__(self):
             wx.Frame.__init__(self, None)
             self.s = Server().boot()
             self.s.start()
-            self.fx = FxCreator().create(0)
+            self.fx = InputCreator().create(1)
             self.fx.setInput(Input([0,1]))
             self.fx.getOutput().out()
             self.fxs = FxDialogsManager(self)    

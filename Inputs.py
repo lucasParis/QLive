@@ -26,17 +26,29 @@ class Soundfile(ModuleParent):
         ModuleParent.__init__(self)
         self.setName("Soundfile")
         #ctrls
-
-        self.ctrlGain= SliderParameter(name = "gain", value = 4, min = -90, max = 24, unit = "db", exp = 1)
-        self.addParameter(self.ctrlGain)
-        self.path= PathParameter(name = "gain")
+                
+        self.path= PathParameter(name = "path")
         self.addParameter(self.path)
+        
+        self.speed= SliderParameter(name = "speed", value = 1, min = 0.25, max = 4, unit = "")
+        self.addParameter(self.speed)
+        
+        self.ctrlGain = SliderParameter(name = "gain", value = 4, min = -90, max = 24, unit = "db", exp = 1)
+        self.addParameter(self.ctrlGain)
+
+
+        
+
         #audio
+        self.sfPlayer = SfPlayer("silence.wav", speed=self.speed, loop=True, offset=0, interp=2, mul=1, add=0)
+        self.path.setCallback(self.loadPath)
+        
         self.dbValue = DBToA(self.ctrlGain)
-        self.amp = Sig(self.input, mul = self.dbValue)
+        self.amp = Sig(self.sfPlayer, mul = self.dbValue)
         self.setOutput(self.amp)
 
-
+    def loadPath(self, path):
+        self.sfPlayer.setPath(path)
 
 class InputCreator:
     def __init__(self):
@@ -46,7 +58,7 @@ class InputCreator:
         self.classes.append(InputIn)
         self.classes.append(Soundfile)
 
-
+        
 
         self.buildNames()
         

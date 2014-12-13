@@ -58,6 +58,7 @@ class PathParameter(ParameterParent):
         ParameterParent.__init__(self, name = name)
         self.path = None
         self.type = "path"
+        self.callback = None
 #        self.name = name
 #        self.min = min
 #        self.max = max
@@ -68,10 +69,14 @@ class PathParameter(ParameterParent):
 #        self.audioValue = SigTo(value,0.05, init = value)
 
 #        self._base_objs = self.audioValue.getBaseObjects()
-
+    def setCallback(self, function):
+        self.callback = function
+        
     def setValue(self, value):
 #        self.audioValue.setValue(value)
         self.path = value
+        if self.callback != None:
+            self.callback(self.path)
 
 
     def getValue(self):
