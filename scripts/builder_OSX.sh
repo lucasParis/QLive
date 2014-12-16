@@ -2,6 +2,7 @@ mkdir Resources
 cp *.py Resources/
 rm Resources/main.py
 cp main.py QLive.py
+cp scripts/info.plist .
 
 rm -rf build dist
 py2applet --make-setup QLive.py Resources/*
@@ -31,3 +32,4 @@ cp -R QLive_OSX/QLive.app .
 rm -rf QLive_OSX
 rm -rf Resources
 rm QLive.py
+rm info.plist

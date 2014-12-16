@@ -6,6 +6,9 @@ from MixerPanel import *
 #from FxBox import *
 #import  wx.lib.scrolledpanel as scrolled
 
+def dump():
+    pass
+
 class MidiLearn:
     def __init__(self, callback):
         self.callback = callback
@@ -70,6 +73,9 @@ class AudioChannel:
     def setAmpCallback(self, call):
         self.ampOut.function = call
 
+    def onQuit(self):
+        self.midipat.function = dump
+
 class AudioMixer:
     def __init__(self):
 #        self.inVolumes = Sig([0 for i in range(2)])
@@ -102,7 +108,12 @@ class AudioMixer:
         else:
             return None
 
-        
+    def onQuit(self):
+        for channel in self.inChannels:
+            channel.onQuit()
+        for channel in self.outChannels:
+            channel.onQuit()
+            
 if __name__ == "__main__":
     class TestWindow(wx.Frame):
         def __init__(self):

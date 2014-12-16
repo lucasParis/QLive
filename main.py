@@ -94,8 +94,11 @@ class MainWindow(wx.Frame):
 
     def OnClose(self, evt):
         self.s.stop()
+        time.sleep(0.25)
+        self.audioMixer.onQuit()
+        time.sleep(0.25)
         self.s.shutdown()
-        time.sleep(0.5)
+        time.sleep(0.25)
         self.Destroy()
 
 
