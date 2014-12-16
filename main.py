@@ -7,9 +7,8 @@
 Code style:
     - always give other neccessary class through init argument ? never through parent.parent.parent... This facilitates creation of tests
 """
-import __builtin__
-__builtin__.QLIVE_APP_OPENED = True
 import time
+import os
 import wx
 from pyo import *
 from FxTrack import *
@@ -24,7 +23,9 @@ class MainWindow(wx.Frame):
         wx.Frame.__init__(self, None, size = (1200, 700) )
         # There should be a AudioServer class created in 
         # its own file (all audio stuff manage there)
-        self.s = Server().boot()
+        self.s = Server()
+        self.s.setMidiInputDevice(99)
+        self.s.boot()
         self.s.start()
         
         # menubar
@@ -49,7 +50,6 @@ class MainWindow(wx.Frame):
         self.mixer = MixerPanel(self, self.audioMixer)
         self.tracks.connectAudioMixer(self.audioMixer)
 
-
         self.topCuesAndRestSizer = wx.BoxSizer(wx.HORIZONTAL)
         self.topCuesAndRestSizer.Add(self.cues, 0, wx.EXPAND, 5)
         self.topCuesAndRestSizer.Add(self.tracks, 1, wx.EXPAND, 5)
@@ -60,15 +60,18 @@ class MainWindow(wx.Frame):
         self.SetSizer(self.mainMixerVsRest)
 
     def onSave(self, event):
-        dlg = wx.FileDialog(self, "choose path to save Qlive projet", '', '', ".", wx.SAVE|wx.FD_OVERWRITE_PROMPT)
+        dlg = wx.FileDialog(self, "choose path to save Qlive projet", os.path.expanduser("~"), 
+                            style=wx.SAVE|wx.FD_OVERWRITE_PROMPT)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             
             dictSave = {}
             dictTracks = self.tracks.getSaveDict()
             dictCues = self.cues.getSaveDict()
+            mixerValues = self.mixer.getSaveDict()
             dictSave["tracks"] = dictTracks
             dictSave["cues"] = dictCues
+            dictSave["mixer"] = mixerValues
 
             f = open(path, "w")
             f.write("dictSave = %s" % str(dictSave))
@@ -76,7 +79,8 @@ class MainWindow(wx.Frame):
         dlg.Destroy()
 
     def onLoad(self, event):
-        dlg = wx.FileDialog(self, "choose Qlive projet", '', '', ".", wx.OPEN)
+        dlg = wx.FileDialog(self, "choose Qlive projet", os.path.expanduser("~"), 
+                            style=wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             execfile(path, globals())
@@ -85,13 +89,13 @@ class MainWindow(wx.Frame):
 #            dictSave["cues"] = dictCues
             self.tracks.setSaveDict(dictSave["tracks"])
             self.cues.setSaveDict(dictSave["cues"])
+            self.mixer.setSaveDict(dictSave["mixer"])
         dlg.Destroy()
 
     def OnClose(self, evt):
-        print "asdad"
         self.s.stop()
         self.s.shutdown()
-        time.sleep(2)
+        time.sleep(0.5)
         self.Destroy()
 
 

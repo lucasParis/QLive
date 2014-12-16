@@ -5,14 +5,59 @@ from pyo import *
 from MixerPanel import *
 #from FxBox import *
 #import  wx.lib.scrolledpanel as scrolled
+
+class MidiLearn:
+    def __init__(self, callback):
+        self.callback = callback
+        self.scanner = CtlScan2(self.scanned, False).stop()
+    
+    def scan(self):
+        self.scanner.reset()
+        self.scanner.play()
+
+    def stop(self):
+        self.scanner.stop()
+
+    def scanned(self, ctlnum, midichnl):
+        self.callback(ctlnum, midichnl)
+        self.scanner.stop()
+
 class AudioChannel:
     def __init__(self):
+        self.midicallback = None
+        self.oldMidiValue = 9999999
+        self.midictl = Midictl(128, -80, 12).stop()
+        self.midictl.setInterpolation(False)
+        self.midipat = Pattern(self.midiout, time=0.06)
         self.input = Sig(0)
         self.inVolume = SigTo(0, init = 0)
         self.inDB = DBToA(self.inVolume)
         self.out = Sig(self.input, mul = self.inDB)
         self.ampOut = PeakAmp(self.out)
-        
+
+    def midiout(self):
+        val = self.midictl.get()
+        if self.midicallback != None and val != self.oldMidiValue:
+            self.midicallback(val)
+            self.oldMidiValue = val
+
+    def setMidiCallback(self, callback):
+        self.midicallback = callback
+
+    def setMidiCtl(self, ctlnum):
+        if ctlnum != None:
+            self.midictl.setCtlNumber(ctlnum)
+            self.midictl.play()
+            self.midipat.play()
+
+    def stopMidiCtl(self):
+        self.midictl.setCtlNumber(128)
+        self.midictl.stop()
+        self.midipat.stop()
+ 
+    def setMidiCtlValue(self, value):
+        self.midictl.setValue(value)
+
     def setInput(self, input):
         self.input.setValue(input)
         
@@ -32,6 +77,7 @@ class AudioMixer:
 #        
 #        self.outVolumes = Sig([0 for i in range(2)])
 #        self.outDb = DBToA(self.outVolumes)
+
         self.inChannels = []
         for i in range(2):
             channel = AudioChannel()
@@ -43,7 +89,7 @@ class AudioMixer:
             channel = AudioChannel()
             channel.getOutput().out()
             self.outChannels.append(channel)
-            
+
     def getInputChannel(self, index):
         if index < len(self.inChannels):
             return self.inChannels[index]
