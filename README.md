@@ -6,7 +6,7 @@ Allo
 
 todo list:
 ----------
-- effects bypass and dry/wet
+- effects bypass
 - add 4 collums and 3 rows, hardwired series connexions
 - remove cue button
 - empty effect choice

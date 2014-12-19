@@ -9,6 +9,7 @@ class InputIn(ModuleParent):
     name = "input"
     def __init__(self):
         ModuleParent.__init__(self)
+        self.removeDryWet()
         self.setName("input")
         #ctrls
 
@@ -24,6 +25,7 @@ class Soundfile(ModuleParent):
     name = "Soundfile"
     def __init__(self):
         ModuleParent.__init__(self)
+        self.removeDryWet()
         self.setName("Soundfile")
         #ctrls
                 

@@ -53,14 +53,13 @@ class FxFreeVerb(ModuleParent):
         self.addParameter(self.size)
         self.damp = SliderParameter(name = "damp", value = 0.5, min = 0, max = 1, unit = "hz", exp = 2)
         self.addParameter(self.damp)
-        self.balance = SliderParameter(name = "balance", value = 0.5, min = 0, max = 1, unit = "hz", exp = 2)
-        self.addParameter(self.balance)
+
         self.ctrlGain= SliderParameter(name = "gain", value = 0, min = -90, max = 24, unit = "db", exp = 1)
         self.addParameter(self.ctrlGain)
         
         #audio
         self.dbValue = DBToA(self.ctrlGain)
-        self.verb = Freeverb(self.getInput(),self.size, self.damp, self.balance, mul = self.dbValue)
+        self.verb = Freeverb(self.getInput(),self.size, self.damp, 1, mul = self.dbValue)
         self.setOutput(self.verb)
 
 
@@ -75,12 +74,7 @@ class FxStereoVerb(ModuleParent):
         self.addParameter(self.inputPosition)
         self.time = SliderParameter(name = "time", value = 1, min = 0.05, max = 30, unit = "second")
         self.addParameter(self.time)
-        self.balance = SliderParameter(name = "balance", value = 0.5, min = 0, max = 1, unit = "hz", exp = 2)
-        self.addParameter(self.balance)
-#        self.roomSize = SliderParameter(name = "room size", value = 0.5, min = 0.25, max = 4, unit = "")
-#        self.addParameter(self.roomSize)
-#        self.reflection = SliderParameter(name = "reflection", value = -3, min = -90, max = 12, unit = "db")
-#        self.addParameter(self.reflection)
+
         self.cutoff = SliderParameter(name = "cutoff", value = 5000, min = 20, max = 20000, unit = "db")
         self.addParameter(self.cutoff)
         self.ctrlGain= SliderParameter(name = "gain", value = 0, min = -90, max = 24, unit = "db", exp = 1)
@@ -88,7 +82,7 @@ class FxStereoVerb(ModuleParent):
         
         #audio
         self.dbValue = DBToA(self.ctrlGain)
-        self.verb = STRev(self.getInput(), inpos=self.inputPosition, revtime=self.time, cutoff=self.cutoff, bal=self.balance, mul=self.dbValue)
+        self.verb = STRev(self.getInput(), inpos=self.inputPosition, revtime=self.time, cutoff=self.cutoff, bal=1, mul=self.dbValue)
         self.setOutput(self.verb)
 
 class FxDisto(ModuleParent):

@@ -127,14 +127,20 @@ class PathParameter(ParameterParent):
 class ModuleParent(object):
     name = "empty"
     def __init__(self):
+        self.parameters = [] #append parameters here
+
         self.input = Sig([0,0])
-        self.output = Sig([0,0])
+        self.preOutput = Sig([0,0])
+        self.ctrlDW = SliderParameter(name = "DryWet", value = 1, min = 0, max = 1, unit = "", exp = 1)
+        self.addParameter(self.ctrlDW)
+        self.output = Selector([self.input, self.preOutput], self.ctrlDW)
         self.bypass = False
         self.name = "empty"
-        self.parameters = [] #append parameters here
         self.cues = []
         self.currentCue = 0
-        pass
+        
+    def removeDryWet(self):
+        del self.parameters[0]
         
     def addParameter(self, param):
         self.parameters.append(param)
@@ -143,7 +149,7 @@ class ModuleParent(object):
         return self.input
         
     def setOutput(self, out):
-        self.output.setValue(out)
+        self.preOutput.setValue(out)
         
     def setInput(self, in_):
         self.input.setValue(in_)
