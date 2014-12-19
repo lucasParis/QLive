@@ -23,7 +23,7 @@ class MainWindow(wx.Frame):
         wx.Frame.__init__(self, None, size = (1200, 700) )
         # There should be a AudioServer class created in 
         # its own file (all audio stuff manage there)
-        self.s = Server()
+        self.s = Server(buffersize=64)
         self.s.setMidiInputDevice(99)
         self.s.boot()
         self.s.start()

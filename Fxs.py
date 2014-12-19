@@ -148,6 +148,38 @@ class FxCompressor(ModuleParent):
         self.comp = Compress(self.getInput(), thresh=self.tresh, ratio=self.ratio, risetime=self.attack, falltime=self.decay, lookahead=5.00, knee=0, mul = self.dbValue)
         self.setOutput(self.comp)
 
+class FxFreqShift(ModuleParent):
+    name = "FreqShift"
+    def __init__(self):
+        ModuleParent.__init__(self)
+        self.setName("FreqShift")
+        #ctrls
+        self.ctrlGain= SliderParameter(name = "gain", value = 0, min = -90, max = 24, unit = "db", exp = 1)
+        self.addParameter(self.ctrlGain)
+        self.ctrlShift= SliderParameter(name = "shift", value = 0, min = -5000, max = 5000, unit = "hz", exp = 1)
+        self.addParameter(self.ctrlShift)
+        #audio
+        self.dbValue = DBToA(self.ctrlGain)
+        self.comp = FreqShift(self.getInput(), self.ctrlShift, mul = self.dbValue)
+        self.setOutput(self.comp)
+
+class FxHarmonizer(ModuleParent):
+    name = "Harmonizer"
+    def __init__(self):
+        ModuleParent.__init__(self)
+        self.setName("Harmonizer")
+        #ctrls
+        self.ctrlGain= SliderParameter(name = "gain", value = 0, min = -90, max = 24, unit = "db", exp = 1)
+        self.addParameter(self.ctrlGain)
+        self.ctrlTranspo= SliderParameter(name = "transpo", value = 0, min = -24, max = 24, unit = "", exp = 1)
+        self.addParameter(self.ctrlTranspo)
+        self.ctrlFeed= SliderParameter(name = "feedback", value = 0, min = 0, max = 1, unit = "", exp = 1)
+        self.addParameter(self.ctrlFeed)
+        
+        #audio
+        self.dbValue = DBToA(self.ctrlGain)
+        self.comp = Harmonizer(self.getInput(), self.ctrlTranspo, self.ctrlFeed, mul = self.dbValue)
+        self.setOutput(self.comp)
 
 
 
@@ -163,7 +195,9 @@ class FxCreator:
         self.fxs.append(FxDisto)
         self.fxs.append(FxDelay)
         self.fxs.append(FxCompressor)
-        
+        self.fxs.append(FxFreqShift)
+        self.fxs.append(FxHarmonizer)
+
         self.buildNames()
         
     def buildNames(self):

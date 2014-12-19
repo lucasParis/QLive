@@ -52,7 +52,49 @@ class SliderParameter(ParameterParent, PyoObject):
 
     def getValue(self):
         return self.value
+        
+class ButtonParameter(ParameterParent):
+    def __init__(self, name = "empty"):
+        ParameterParent.__init__(self, name = name)
+        self.type = "button"
+        self.callback = None
 
+#        self._base_objs = self.audioValue.getBaseObjects()
+    def setCallback(self, function):
+        self.callback = function
+        
+    def setValue(self, value):
+#        self.audioValue.setValue(value)
+#        self.path = value
+        if self.callback != None:
+            self.callback()
+
+
+    def getValue(self):
+        return self.path
+
+class ToggleParameter(ParameterParent):
+    def __init__(self, name = "empty"):
+        ParameterParent.__init__(self, name = name)
+        self.type = "toggle"
+        self.value = 0
+        self.callback = None
+
+#        self._base_objs = self.audioValue.getBaseObjects()
+    def setCallback(self, function):
+        self.callback = function
+        
+    def setValue(self, value):
+#        self.audioValue.setValue(value)
+        self.value = value
+        print "toggle value", value
+        if self.callback != None:
+            self.callback(value)
+
+
+    def getValue(self):
+        return self.path
+        
 class PathParameter(ParameterParent):
     def __init__(self, name = "empty"):
         ParameterParent.__init__(self, name = name)

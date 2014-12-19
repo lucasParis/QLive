@@ -36,13 +36,22 @@ class Soundfile(ModuleParent):
         self.ctrlGain = SliderParameter(name = "gain", value = 4, min = -90, max = 24, unit = "db", exp = 1)
         self.addParameter(self.ctrlGain)
 
-
+        self.playButton = ButtonParameter(name = "play")
+        self.addParameter(self.playButton)
         
+        self.stopButton = ButtonParameter(name = "stop")
+        self.addParameter(self.stopButton)
+
+        self.loopButton = ToggleParameter(name = "loop")
+        self.addParameter(self.loopButton)
 
         #audio
-        self.sfPlayer = SfPlayer("silence.wav", speed=self.speed, loop=True, offset=0, interp=2, mul=1, add=0)
+        self.sfPlayer = SfPlayer("silence.wav", speed=self.speed, loop=False, offset=0, interp=2, mul=1, add=0)
         self.path.setCallback(self.loadPath)
-        
+        self.playButton.setCallback(self.sfPlayer.play)
+        self.stopButton.setCallback(self.sfPlayer.stop)
+        self.loopButton.setCallback(self.setLoop)
+
         self.dbValue = DBToA(self.ctrlGain)
         self.amp = Sig(self.sfPlayer, mul = self.dbValue)
         self.setOutput(self.amp)
@@ -50,6 +59,9 @@ class Soundfile(ModuleParent):
     def loadPath(self, path):
         self.sfPlayer.setPath(path)
 
+    def setLoop(self, onOff):
+        self.sfPlayer.setLoop(onOff)
+        
 class InputCreator:
     def __init__(self):
         self.classes = []
@@ -81,7 +93,7 @@ if __name__ == "__main__":
             self.s = Server().boot()
             self.s.start()
             print InputCreator().getNames()
-            self.input = InputCreator().create(0)
+            self.input = InputCreator().create(1)
             self.input.getOutput().out()
             pass
 

@@ -57,12 +57,55 @@ class PathWidget(WidgetParent):
         dlg.Destroy()
         
     def setValue(self, value):
+        pass 
+               
+class ButtonWidget(WidgetParent):
+    def __init__(self, parameter, parent):
+        WidgetParent.__init__(self, parameter, parent)
+
+        self.callback = parameter.setValue
+                
+        self.sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.openButton = wx.Button(self, label = parameter.name)
+        self.openButton.Bind(wx.EVT_BUTTON, self.buttonEvent)
+
+        self.sizer.Add(self.openButton, 0, wx.EXPAND | wx.ALL, 5)
+        self.SetSizer(self.sizer)
+         
+    def buttonEvent(self, event):
+
+        self.callback(1)
+        
+    def setValue(self, value):
         pass        
   
+class ToggleWidget(WidgetParent):
+    def __init__(self, parameter, parent):
+        WidgetParent.__init__(self, parameter, parent)
+
+        self.callback = parameter.setValue
+        
+        self.sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.openButton = wx.ToggleButton(self, label = parameter.name)
+        self.openButton.Bind(wx.EVT_TOGGLEBUTTON, self.buttonEvent)
+
+        self.sizer.Add(self.openButton, 0, wx.EXPAND | wx.ALL, 5)
+        self.SetSizer(self.sizer)
+         
+    def buttonEvent(self, event):
+        print "vent"
+        self.callback(self.openButton.GetValue())
+        
+    def setValue(self, value):
+        self.openButton.SetValue(value)
+               
 def WidgetCreator(type):
     dict = {}
     dict["slider"] = SliderWidget
-    dict["path"] = PathWidget  
+    dict["path"] = PathWidget 
+    dict["button"] = ButtonWidget  
+    dict["toggle"] = ToggleWidget  
+
     return dict[type]  
     
 class FxSlidersToolBar(wx.ToolBar):
@@ -125,8 +168,15 @@ class FxSlidersView(wx.Frame):
                 path = WidgetCreator(param.type)(param, self.panel)
                 self.widgets.append(path)
                 self.sizer.Add(path, 0, wx.EXPAND | wx.ALL, 2)
-#                boxy = BoxSizer(wx.HORIZONTAL)
-#                boxy.A
+            elif param.type == "button":
+                butt = WidgetCreator(param.type)(param, self.panel)
+                self.widgets.append(butt)
+                self.sizer.Add(butt, 0, wx.EXPAND | wx.ALL, 2)
+            elif param.type == "toggle":
+                butt = WidgetCreator(param.type)(param, self.panel)
+                self.widgets.append(butt)
+                self.sizer.Add(butt, 0, wx.EXPAND | wx.ALL, 2)
+
             
         self.panel.SetSizer(self.sizer)
         self.SetTitle(self.audio.name)
