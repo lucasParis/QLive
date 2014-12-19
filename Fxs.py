@@ -6,6 +6,9 @@ from ModuleParent import *
 
 class FxLowpass(ModuleParent):
     name = "Lowpass"
+    """
+        
+    """
     def __init__(self):
         ModuleParent.__init__(self)
         self.setName("Lowpass")
