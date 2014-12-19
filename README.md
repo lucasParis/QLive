@@ -6,11 +6,14 @@ Allo
 
 todo list:
 ----------
-- DONE save Load basics
-- DONE hardwired simple chain
-- cues, needs toolbar and connection to fxBoxes/InputBoxes
-- usecase empty effect on load
-- soundfile player
-- basics of mixer for audio input to modular
+- lower default buffersize
+- add FXs: freqshift, Harmonizer
+- soundfile player: play stop and loop buttons
+- effects bypass and dry/wet
+- add 4 collums and 3 rows, hardwired series connexions
+- remove cue button
+- empty effect choice
+- soundcard setup menu (on launch?)
+- midi cue triggering 
+- record master out
 - drag and drop modular connexions (patch audio)
-- figure out a way to not reopen an opened FxSliderView frame in FxDialogsManager
