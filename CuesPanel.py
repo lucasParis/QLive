@@ -84,7 +84,7 @@ class CuesPanel(wx.Panel):
         but = wx.Button(self.cuesPanel, size = (40, -1), label = number, name = number)
         but.Bind(wx.EVT_BUTTON, self.onCueSelection)
         but.SetDefault()
-        self.cuesPanelSizer.Add(but, 1, wx.EXPAND|wx.ALL, 2)
+        self.cuesPanelSizer.Add(but, 0, wx.EXPAND|wx.ALL, 2)
         self.cueButtons.append(but)
         self.cuesPanelSizer.Layout()
 

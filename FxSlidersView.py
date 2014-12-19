@@ -1,8 +1,8 @@
 #!/usr/bin/python
 # encoding: utf-8
-import wx
+import wx, os
 from pyo import *
-from pyolib._wxwidgets import ControlSlider
+from pyolib._wxwidgets import ControlSlider, BACKGROUND_COLOUR
 import  wx.lib.scrolledpanel as scrolled
 
 """
@@ -11,6 +11,7 @@ import  wx.lib.scrolledpanel as scrolled
 class WidgetParent(wx.Panel):
     def __init__(self, parameter, parent):
         wx.Panel.__init__(self, parent)
+        self.SetBackgroundColour(BACKGROUND_COLOUR)
         self.parameter = parameter
         pass
         
@@ -48,7 +49,7 @@ class PathWidget(WidgetParent):
         self.SetSizer(self.sizer)
          
     def buttonEvent(self, event):
-        dlg = wx.FileDialog(self, "choose Qlive projet", '', '', ".", wx.OPEN)
+        dlg = wx.FileDialog(self, "choose Qlive projet", os.path.expanduser("~"), style=wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
 #            print path
@@ -67,6 +68,7 @@ def WidgetCreator(type):
 class FxSlidersToolBar(wx.ToolBar):
     def __init__(self, parent):
         wx.ToolBar.__init__(self, parent, size = (1000, 40))
+        self.SetBackgroundColour(BACKGROUND_COLOUR)
 #        self.remRowButton = wx.Button(self, size = (30,-1), pos = (-1,-1))
 #        self.remRowButton.SetLabel("-")    
 #        self.AddControl(wx.StaticText(self, label = "row"))
@@ -106,11 +108,12 @@ class FxSlidersView(wx.Frame):
         self.parameters = audioProcess.parameters
         
         self.panel = wx.Panel(self)
+        self.panel.SetBackgroundColour(BACKGROUND_COLOUR)
 
         self.sizer = wx.BoxSizer(wx.VERTICAL)
         self.toolbar = FxSlidersToolBar(self.panel)
 
-        self.sizer.Add(self.toolbar,1, wx.EXPAND)
+        self.sizer.Add(self.toolbar,0, wx.EXPAND)
         ##init CTRLS
         self.widgets = []
         for i, param in enumerate(self.parameters):

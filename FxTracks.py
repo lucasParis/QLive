@@ -14,7 +14,7 @@ class FxTracks(wx.Panel):
         
         self.track = FxTrack(self)
 
-        self.sizer.Add(self.toolbar,1, wx.EXPAND)
+        self.sizer.Add(self.toolbar,0, wx.EXPAND)
         self.sizer.Add(self.track,1, wx.EXPAND)
         self.SetSizer(self.sizer)
         
