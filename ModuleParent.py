@@ -58,6 +58,7 @@ class ButtonParameter(ParameterParent):
         ParameterParent.__init__(self, name = name)
         self.type = "button"
         self.callback = None
+        self.path = ""
 
 #        self._base_objs = self.audioValue.getBaseObjects()
     def setCallback(self, function):
@@ -65,10 +66,9 @@ class ButtonParameter(ParameterParent):
         
     def setValue(self, value):
 #        self.audioValue.setValue(value)
-#        self.path = value
+        self.path = value
         if self.callback != None:
             self.callback()
-
 
     def getValue(self):
         return self.path
@@ -91,9 +91,8 @@ class ToggleParameter(ParameterParent):
         if self.callback != None:
             self.callback(value)
 
-
     def getValue(self):
-        return self.path
+        return self.value
         
 class PathParameter(ParameterParent):
     def __init__(self, name = "empty"):
