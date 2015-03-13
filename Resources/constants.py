@@ -1,4 +1,4 @@
-import os, sys, unicodedata
+import os, sys, unicodedata, copy
 from types import UnicodeType
 from pyolib._wxwidgets import BACKGROUND_COLOUR
 
@@ -24,8 +24,27 @@ else:
 if not os.path.isdir(RESOURCES_PATH) and PLATFORM == "win32":
     RESOURCES_PATH = os.path.join(os.getenv("ProgramFiles"), "QLive", "Resources")
 
-SOUNDS_PATH = os.path.join(RESOURCES_PATH, "sounds")
+TEMP_PATH = os.path.join(os.path.expanduser('~'), '.qlive')
+if not os.path.isdir(TEMP_PATH):
+    os.mkdir(TEMP_PATH)
 
+OPEN_RECENT_PATH = os.path.join(TEMP_PATH, "open_recents.txt")
+if not os.path.isfile(OPEN_RECENT_PATH):
+    with open(OPEN_RECENT_PATH, "w") as f:
+        pass
+
+PREFERENCES_PATH = os.path.join(TEMP_PATH, "qlive-prefs.py")
+if not os.path.isfile(PREFERENCES_PATH):
+    with open(PREFERENCES_PATH, "w") as f:
+        f.write("qlive_prefs = {}")
+
+qlive_prefs = {}
+with open(PREFERENCES_PATH, "r") as f:
+    text = f.read()
+exec text in locals()
+PREFERENCES = copy.deepcopy(qlive_prefs)
+
+SOUNDS_PATH = os.path.join(RESOURCES_PATH, "sounds")
 NEW_FILE_PATH = os.path.join(RESOURCES_PATH, "qlive_new_file.qlp")
 
 DEBUG = True
