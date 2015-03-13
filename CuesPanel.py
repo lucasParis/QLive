@@ -1,14 +1,13 @@
 #!/usr/bin/env python
 # encoding: utf-8
 import wx
-from pyo import *
-import  wx.lib.scrolledpanel as scrolled
-
+import wx.lib.scrolledpanel as scrolled
+import QLiveLib
 
 class CuesToolBar(wx.ToolBar):
-    def __init__(self, parent, parent2):
+    def __init__(self, parent, newCueCallback):
         wx.ToolBar.__init__(self, parent, size = (-1, -1), style = wx.TB_VERTICAL)
-        self.parentForCallBacks = parent2
+        self.newCueCallback = newCueCallback
 #        self.remRowButton = wx.Button(self, size = (30,-1), pos = (-1,-1))
 #        self.remRowButton.SetLabel("-")    
 #        self.AddControl(wx.StaticText(self, label = "New \nCue"))
@@ -16,23 +15,17 @@ class CuesToolBar(wx.ToolBar):
         self.remRowButton.Bind(wx.EVT_BUTTON, self.onNewCue)
         self.remRowButton.SetLabel("New\nCue")
         self.AddControl(self.remRowButton)
-
-
         self.Realize()
         
     def onNewCue(self, event):
-        self.parentForCallBacks.onNewCue(event)
-
-
+        self.newCueCallback()
 
 class CuesPanel(wx.Panel):
-    def __init__(self, parent = None):
-        wx.Panel.__init__(self, parent, size = (150, 500))
-        self.SetBackgroundColour((80,80,80))
-        self.parent = parent
+    def __init__(self, parent=None):
+        wx.Panel.__init__(self, parent, size=(150, 500))
    
         self.panel = wx.Panel(self)
-        self.toolbar = CuesToolBar(self.panel, self)
+        self.toolbar = CuesToolBar(self.panel, self.onNewCue)
         boxSizer = wx.BoxSizer(wx.HORIZONTAL)
         boxSizer.Add(self.toolbar, 2, wx.EXPAND)
         self.panel.SetSizer(boxSizer)
@@ -72,7 +65,7 @@ class CuesPanel(wx.Panel):
         
     def clearButtons(self):
         for i, button in enumerate(self.cueButtons):
-            button.Unbind(wx.EVT_BUTTON)
+            button.Unbind(wx.EVT_BUTTON) # why ?
             self.cuesPanelSizer.Remove(button)
             button.Destroy()
         self.cueButtons = []
@@ -93,16 +86,17 @@ class CuesPanel(wx.Panel):
         button.SetDefault()
         number = int(button.GetName())
         self.currentCue = number
-        if self.parent != None:
-#            self.parent.tracks.loadCue(self.currentCue)
+        if QLiveLib.getVar("MainWindow") != None:
+#            QLiveLib.getVar("MainWindow").tracks.loadCue(self.currentCue)
             dictEvent = {'type': "cueSelect", "selectedCue": self.currentCue}
-            self.parent.tracks.cueEvent(dictEvent)
+            QLiveLib.getVar("MainWindow").tracks.cueEvent(dictEvent)
         
-    def onNewCue(self, event):
-        if self.parent != None:
-#            self.parent.tracks.copyCue(self.currentCue)
-            dictEvent = {'type': "newCue", "currentCue":self.currentCue, "totalCues": len(self.cueButtons)}
-            self.parent.tracks.cueEvent(dictEvent)
+    def onNewCue(self):
+        if QLiveLib.getVar("MainWindow") != None:
+#            QLiveLib.getVar("MainWindow").tracks.copyCue(self.currentCue)
+            dictEvent = {'type': "newCue", "currentCue":self.currentCue, 
+                                 "totalCues": len(self.cueButtons)}
+            QLiveLib.getVar("MainWindow").tracks.cueEvent(dictEvent)
         self.appendCueButton()
         
     def setNumberOfCues(self, numbers):
@@ -130,12 +124,9 @@ if __name__ == "__main__":
     class TestWindow(wx.Frame):
         def __init__(self):
             wx.Frame.__init__(self, None)
-            
             self.cuesPanel = CuesPanel(self)
             self.cuesPanel.parent = None
     app = wx.App()
-
     frame = TestWindow()
     frame.Show()
-
     app.MainLoop()

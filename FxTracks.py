@@ -1,13 +1,33 @@
 import wx
-from FxTracksToolbar import *
 from FxTrack import *
 from FxDialogsManager import *
 
+class FxTracksToolBar(wx.ToolBar):
+    def __init__(self, parent):
+        wx.ToolBar.__init__(self, parent, size = (1000, 40))
+#        self.remRowButton = wx.Button(self, size = (30,-1), pos = (-1,-1))
+#        self.remRowButton.SetLabel("-")    
+        self.AddControl(wx.StaticText(self, label = "row"))
+        self.remRowButton = wx.Button(self, size = (30,-1), pos = (-1,-1))
+        self.remRowButton.SetLabel("-")    
+        self.AddControl(self.remRowButton)
+        self.addRowButton = wx.Button(self, size = (30,-1), pos = (-1,-1))
+        self.addRowButton.SetLabel("+")    
+        self.AddControl(self.addRowButton)
+        
+        self.AddControl(wx.StaticText(self, label = "column"))
+        self.remColButton = wx.Button(self, size = (30,-1), pos = (-1,-1))
+        self.remColButton.SetLabel("-")    
+        self.AddControl(self.remColButton)
+        self.addColButton = wx.Button(self, size = (30,-1), pos = (-1,-1))
+        self.addColButton.SetLabel("+")    
+        self.AddControl(self.addColButton)
+
+        self.Realize()
 
 class FxTracks(wx.Panel):
     def __init__(self, parent, size = (-1,800)):
         wx.Panel.__init__(self, parent)
-        self.parent = parent
         self.sizer = wx.BoxSizer(wx.VERTICAL)
         
         self.toolbar = FxTracksToolBar(self)
@@ -47,18 +67,13 @@ if __name__ == "__main__":
     class TestWindow(wx.Frame):
         def __init__(self):
             wx.Frame.__init__(self, None)
-            self.s = Server().boot()
+            self.server = Server().boot()
             self.tracks = FxTracks(self)
             self.sizer = wx.BoxSizer(wx.VERTICAL)
             self.sizer.Add(self.tracks,1, wx.EXPAND)
             self.SetSizer(self.sizer)
-        
-#            self.pan = MixerPanel(self)
-            pass
 
     app = wx.App()
-
     frame = TestWindow()
     frame.Show()
-
     app.MainLoop()

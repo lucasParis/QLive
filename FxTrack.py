@@ -9,13 +9,13 @@ import  wx.lib.scrolledpanel as scrolled
 class FxTrack(scrolled.ScrolledPanel):
     def __init__(self, parent):
         scrolled.ScrolledPanel.__init__(self, parent)
-        self.parent = parent
         
         self.buttonWidth = 80
         self.buttonHeight = 25
         self.connectionWidth = self.buttonWidth/10.
         self.connectionHeight = self.buttonHeight-8
         
+        self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
         self.SetBackgroundColour(wx.Colour(100, 100, 100))
         self.cols = 5
         self.rows = 1
@@ -121,10 +121,11 @@ class FxTrack(scrolled.ScrolledPanel):
                     buttonPos = self.idToPositionFX(id)
                     if pos[0] > buttonPos[0] and pos[0] < buttonPos[0] + self.buttonWidth and pos[1] > buttonPos[1] and pos[1] < buttonPos[1] + self.buttonHeight:
                         self.buttonsFxs[id[1]][id[0]].openMenu(event)
-                        self.Refresh()
+                        wx.CallAfter(self.Refresh)
         
     def onPaint(self, event):
-        dc = wx.PaintDC(self)
+        dc = wx.AutoBufferedPaintDC(self)
+        dc.Clear()
         self.PrepareDC(dc)
 
         w, h = self.GetSize()

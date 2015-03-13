@@ -1,16 +1,17 @@
 #!/usr/bin/env python
 # encoding: utf-8
 import wx
-from pyo import *
-import  wx.lib.scrolledpanel as scrolled
 from pyolib._wxwidgets import ControlSlider, BACKGROUND_COLOUR, VuMeter
 from AudioMixer import *
+from constants import *
 
 class QLiveControlSlider(ControlSlider):
-    def __init__(self, parent, minvalue, maxvalue, init=None, pos=(0,0), size=(200,16), log=False, 
-                 outFunction=None, integer=False, powoftwo=False, backColour=None, orient=wx.HORIZONTAL):
-        ControlSlider.__init__(self, parent, minvalue, maxvalue, init, pos, size, log, outFunction, integer, 
-                               powoftwo, backColour, orient)
+    def __init__(self, parent, minvalue, maxvalue, init=None, pos=(0,0), 
+                 size=(200,16), log=False, outFunction=None, integer=False, 
+                 powoftwo=False, backColour=None, orient=wx.HORIZONTAL):
+        ControlSlider.__init__(self, parent, minvalue, maxvalue, init, pos, 
+                               size, log, outFunction, integer, powoftwo, 
+                               backColour, orient)
         self.channelobject = None
         self.midiscanning = False
         self.midiscan = MidiLearn(self.getMidiScan)
@@ -27,7 +28,7 @@ class QLiveControlSlider(ControlSlider):
         if not self.midiscanning:
             self.midiscanning = True
             self.midiscan.scan()
-            self.setBackgroundColour("#FF2299")
+            self.setBackgroundColour(MIDILEARN_COLOUR)
         else:
             self.midiscanning = False
             self.midiscan.stop()
@@ -41,7 +42,6 @@ class QLiveControlSlider(ControlSlider):
 class MixerPanel(wx.Panel):
     def __init__(self, parent, audioMixer):
         wx.Panel.__init__(self, parent, size = (800,200))
-        self.parent = parent
         self.audioMixer = audioMixer
         self.SetBackgroundColour(BACKGROUND_COLOUR)
 
@@ -54,9 +54,10 @@ class MixerPanel(wx.Panel):
         inputBox = wx.BoxSizer(wx.VERTICAL)        
         inputSliderBox = wx.BoxSizer(wx.HORIZONTAL)
         inputBox.Add(wx.StaticText(self, label = "Input"), 0, wx.EXPAND, 10)
-        for i in range(2):
+        for i in range(NUM_INPUTS):
             channel = self.audioMixer.getInputChannel(i)
-            slide = QLiveControlSlider(self, -80, 12, 0, orient=wx.VERTICAL, outFunction=channel.setVolume)
+            slide = QLiveControlSlider(self, -80, 12, 0, orient=wx.VERTICAL, 
+                                       outFunction=channel.setVolume)
             slide.setChannelObject(channel)
             channel.setMidiCallback(slide.SetValue)
             self.inputSliders.append(slide)
@@ -77,9 +78,10 @@ class MixerPanel(wx.Panel):
         outputBox = wx.BoxSizer(wx.VERTICAL)
         outputSliderBox = wx.BoxSizer(wx.HORIZONTAL)
         outputBox.Add(wx.StaticText(self, label = "Output"), 0, wx.EXPAND, 10)
-        for i in range(2):
+        for i in range(NUM_OUTPUTS):
             channel = self.audioMixer.getOutputChannel(i)            
-            slide = QLiveControlSlider(self, -80, 12, 0, orient=wx.VERTICAL, outFunction=channel.setVolume)
+            slide = QLiveControlSlider(self, -80, 12, 0, orient=wx.VERTICAL, 
+                                       outFunction=channel.setVolume)
             slide.setChannelObject(channel)
             channel.setMidiCallback(slide.SetValue)
             self.outputSliders.append(slide)
@@ -140,21 +142,19 @@ class MixerPanel(wx.Panel):
             self.audioMixer.getOutputChannel(i).setMidiCtlValue(val)
             
 if __name__ == "__main__":
-
+    from pyo import *
     class TestWindow(wx.Frame):
         def __init__(self):
-            wx.Frame.__init__(self, None, size=(1000,200))
+            wx.Frame.__init__(self, None)
             self.Bind(wx.EVT_CLOSE, self.onClose)
+            self.server = Server().boot().start()
+            self.server.amp = 0.1
             self.mixer = AudioMixer()
-            self.pan = MixerPanel(self, self.mixer)
-
-            
+            self.panel = MixerPanel(self, self.mixer)
+            self.SetSize(self.panel.GetBestSize())
         def onClose(self, evt):
-            s.stop()
+            self.server.stop()
             self.Destroy()
-
-    s = Server().boot().start()
-    s.amp = 0.1
     app = wx.App()
     frame = TestWindow()
     frame.Show()

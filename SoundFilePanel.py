@@ -2,14 +2,10 @@
 # encoding: utf-8
 import wx
 import wx.grid
-from pyo import *
-
-import  wx.lib.scrolledpanel as scrolled
 
 class ActionMenu(wx.Menu):
     def __init__(self, parent):
         wx.Menu.__init__(self)
-        self.parent = parent
         self.actions = ["None", "Play", "Stop"]
         self.idsIndexDict = {}
         for i, name in enumerate(self.actions):
@@ -25,7 +21,6 @@ class ActionMenu(wx.Menu):
         
     def getSelection(self):
         return self.result
-        
 
 class SoundFilePanel(wx.Panel):
     def __init__(self, parent):
@@ -56,21 +51,13 @@ class SoundFilePanel(wx.Panel):
             self.PopupMenu(menu, event.GetPosition())
         print row , col
 
-
-
-
-
-
 if __name__ == "__main__":
     class TestWindow(wx.Frame):
         def __init__(self):
             wx.Frame.__init__(self, None)
             self.panel = SoundFilePanel(self)
-            pass
 
     app = wx.App()
-
     frame = TestWindow()
     frame.Show()
-
     app.MainLoop()

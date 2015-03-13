@@ -2,13 +2,13 @@
 # encoding: utf-8
 import wx
 from pyo import *
+import QLiveLib
 from Fxs import FxCreator
 from Inputs import InputCreator
 
 class FxBoxMenu(wx.Menu):
     def __init__(self, parent):
         wx.Menu.__init__(self)
-        self.parent = parent
         self.fxNames = FxCreator().getNames()
         self.idsIndexDict = {}
         for i, name in enumerate(self.fxNames):
@@ -28,7 +28,6 @@ class FxBoxMenu(wx.Menu):
 class InputBoxMenu(wx.Menu):
     def __init__(self, parent):
         wx.Menu.__init__(self)
-        self.parent = parent
         self.inputNames = InputCreator().getNames()
         self.idsIndexDict = {}
         for i, name in enumerate(self.inputNames):
@@ -44,7 +43,6 @@ class InputBoxMenu(wx.Menu):
         
     def getSelection(self):
         return self.result
-
 
 class ParentBox(object):
     def __init__(self, parent):
@@ -82,7 +80,6 @@ class ParentBox(object):
             if self.audio != None:
                 self.parent.viewPanelRef.openViewForAudioProcess(self.audio)
 
-        
     def openMenu(self, event):
         menu = self.menu(self)
         if self.parent.PopupMenu(menu, event.GetPosition()):
@@ -97,7 +94,7 @@ class ParentBox(object):
         self.audio.setInput(self.audioIn)
         self.audioOut.setValue(self.audio.getOutput())
         # setup empty cues
-        cuesPanel = self.parent.parent.parent.cues
+        cuesPanel = QLiveLib.getVar("CuesPanel")
         numberOfCues = cuesPanel.getNumberOfCues()
         if numberOfCues > 1:
             currentCue = cuesPanel.getCurrentCue()
@@ -134,28 +131,18 @@ class ParentBox(object):
 #            print eventDict["selectedCue"]
 #            dictEvent = {'type': "cueSelect", "selectedCue": self.currentCue}
 
-    
 class FxBox(ParentBox):
     def __init__(self, parent):
         ParentBox.__init__(self, parent)
         self.menu = FxBoxMenu
         self.creator = FxCreator
-        
-        
-        
 
 class InputBox(ParentBox):
     def __init__(self, parent):
         ParentBox.__init__(self, parent)
-        self.audioOut.value = Sig(0)
+        self.audioOut.value = Sig(0) # PyoObject - should not be here...
         self.menu = InputBoxMenu
         self.creator = InputCreator
-        
-        
-
-
-
-
 
 if __name__ == "__main__":
     class TestWindow(wx.Frame):

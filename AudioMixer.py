@@ -1,42 +1,21 @@
 #!/usr/bin/python
 # encoding: utf-8
-import wx
 from pyo import *
-from MixerPanel import *
-#from FxBox import *
-#import  wx.lib.scrolledpanel as scrolled
-
-def dump():
-    pass
-
-class MidiLearn:
-    def __init__(self, callback):
-        self.callback = callback
-        self.scanner = CtlScan2(self.scanned, False).stop()
-    
-    def scan(self):
-        self.scanner.reset()
-        self.scanner.play()
-
-    def stop(self):
-        self.scanner.stop()
-
-    def scanned(self, ctlnum, midichnl):
-        self.callback(ctlnum, midichnl)
-        self.scanner.stop()
+from constants import *
+from AudioUtilities import MidiLearn
 
 class AudioChannel:
-    def __init__(self):
+    def __init__(self, input=0):
         self.midicallback = None
         self.oldMidiValue = 9999999
         self.midictl = Midictl(128, -80, 12).stop()
         self.midictl.setInterpolation(False)
         self.midipat = Pattern(self.midiout, time=0.06)
-        self.input = Sig(0)
-        self.inVolume = SigTo(0, init = 0)
+        self.input = Sig(input)
+        self.inVolume = SigTo(0, init=0)
         self.inDB = DBToA(self.inVolume)
-        self.out = Sig(self.input, mul = self.inDB)
-        self.ampOut = PeakAmp(self.out)
+        self.output = Sig(self.input, mul=self.inDB)
+        self.ampOut = PeakAmp(self.output)
 
     def midiout(self):
         val = self.midictl.get()
@@ -64,8 +43,12 @@ class AudioChannel:
     def setInput(self, input):
         self.input.setValue(input)
         
+    def out(self, chnl=0):
+        self.output.out(chnl)
+        return self
+
     def getOutput(self):
-        return self.out
+        return self.output
         
     def setVolume(self, value):
         self.inVolume.setValue(value)
@@ -73,28 +56,10 @@ class AudioChannel:
     def setAmpCallback(self, call):
         self.ampOut.function = call
 
-    def onQuit(self):
-        self.midipat.function = dump
-
 class AudioMixer:
     def __init__(self):
-#        self.inVolumes = Sig([0 for i in range(2)])
-#        self.inDb = DBToA(self.inVolumes)
-#        
-#        self.outVolumes = Sig([0 for i in range(2)])
-#        self.outDb = DBToA(self.outVolumes)
-
-        self.inChannels = []
-        for i in range(2):
-            channel = AudioChannel()
-            channel.setInput(Input(i))
-            self.inChannels.append(channel)
-        
-        self.outChannels = []
-        for i in range(2):
-            channel = AudioChannel()
-            channel.getOutput().out()
-            self.outChannels.append(channel)
+        self.inChannels = [AudioChannel(Input(i)) for i in range(NUM_INPUTS)]        
+        self.outChannels = [AudioChannel().out(i) for i in range(NUM_OUTPUTS)]
 
     def getInputChannel(self, index):
         if index < len(self.inChannels):
@@ -107,27 +72,22 @@ class AudioMixer:
             return self.outChannels[index]
         else:
             return None
-
-    def onQuit(self):
-        for channel in self.inChannels:
-            channel.onQuit()
-        for channel in self.outChannels:
-            channel.onQuit()
-            
+                    
 if __name__ == "__main__":
+    import wx
+    from MixerPanel import *
     class TestWindow(wx.Frame):
         def __init__(self):
             wx.Frame.__init__(self, None)
-            self.s= Server().boot()
-            self.s.start()
+            self.Bind(wx.EVT_CLOSE, self.onClose)
+            self.server = Server().boot().start()
             self.mixer = AudioMixer()
             self.panel = MixerPanel(self, self.mixer)
-#            self.fxTrack = FxTrack(self)
-
-
+            self.SetSize(self.panel.GetBestSize())
+        def onClose(self, evt):
+            self.server.stop()
+            self.Destroy()
     app = wx.App()
-
     frame = TestWindow()
     frame.Show()
-
     app.MainLoop()
