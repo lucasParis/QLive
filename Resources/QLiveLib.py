@@ -11,6 +11,7 @@ def PRINT(*args):
     if DEBUG:
         for arg in args:
             print arg,
+        print
 
 def ensureNFD(unistr):
     if unistr == None:

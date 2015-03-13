@@ -26,6 +26,8 @@ if not os.path.isdir(RESOURCES_PATH) and PLATFORM == "win32":
 
 SOUNDS_PATH = os.path.join(RESOURCES_PATH, "sounds")
 
+NEW_FILE_PATH = os.path.join(RESOURCES_PATH, "qlive_new_file.qlp")
+
 DEBUG = True
 
 NUM_INPUTS = 4

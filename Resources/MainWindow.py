@@ -10,6 +10,9 @@ from MixerPanel import MixerPanel
 class MainWindow(wx.Frame):
     def __init__(self, pos, size):
         wx.Frame.__init__(self, None, pos=pos, size=size)
+        
+        self.SetMinSize((600, 400))
+
         self.audioServer = AudioServer()
         self.audioServer.start() ### Need a way to start/stop the audio backend
 
@@ -17,6 +20,8 @@ class MainWindow(wx.Frame):
         menubar = wx.MenuBar()
         menu1 = wx.Menu()
 
+        menu1.Append(wx.ID_NEW, "New\tCtrl+N")
+        self.Bind(wx.EVT_MENU, self.onNew, id=wx.ID_NEW)        
         menu1.Append(wx.ID_SAVE, "Save\tCtrl+S")
         self.Bind(wx.EVT_MENU, self.onSave, id=wx.ID_SAVE)        
         menu1.Append(wx.ID_OPEN, "Open\tCtrl+O")
@@ -51,7 +56,12 @@ class MainWindow(wx.Frame):
         
         self.Show()
 
-    def onSave(self, event):
+    def onNew(self, evt):
+        # if self.modified:
+        #     ask for saving
+        self.loadFile(NEW_FILE_PATH)
+
+    def onSave(self, evt):
         dlg = wx.FileDialog(self, "Save Qlive Projet", 
                             os.path.expanduser("~"), "",
                             "QLive Project files (*.qlp)|*.qlp",
@@ -67,7 +77,7 @@ class MainWindow(wx.Frame):
             with open(path, "w") as f:
                 f.write(QLIVE_MAGIC_LINE)
                 f.write("### %s ###\n" % APP_VERSION)
-                f.write("dictSave = \n%s" % pprint.pformat(dictSave, indent=4))
+                f.write("dictSave = %s" % pprint.pformat(dictSave, indent=4))
         dlg.Destroy()
 
     def loadFile(self, path):
@@ -78,11 +88,11 @@ class MainWindow(wx.Frame):
             return
         execfile(path, globals())
         QLiveLib.PRINT("opening: ", dictSave)
-        self.tracks.setSaveDict(dictSave["tracks"])
+        self.tracks.setSaveDict(dictSave["tracks"]) # there's a bug here... (on new)
         self.cues.setSaveDict(dictSave["cues"])
         self.mixer.setSaveDict(dictSave["mixer"])
         
-    def onLoad(self, event):
+    def onLoad(self, evt):
         dlg = wx.FileDialog(self, "Open Qlive Projet", 
                             os.path.expanduser("~"), "",
                             "QLive Project files (*.qlp)|*.qlp",

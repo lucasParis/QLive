@@ -46,7 +46,6 @@ class FxTracks(wx.Panel):
         # for now simple thru, later compile differents tracks into dict
         return self.track.getSaveDict()
 
-        
     def setSaveDict(self, saveDict):
         self.track.setSaveDict(saveDict)
         

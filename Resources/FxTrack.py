@@ -19,35 +19,8 @@ class FxTrack(scrolled.ScrolledPanel):
         self.SetBackgroundColour(wx.Colour(100, 100, 100))
         self.cols = 5
         self.rows = 1
-        self.buttonsFxs = []
-        self.buttonsInputs = []
-        for i in range(self.rows):##### INPUTS 
-            col = []
-            for j in range(self.cols):
-                but = FxBox(self)
-                but.setId((j,i))
-                col.append(but)
-            self.buttonsFxs.append(col)
-            but = InputBox(self)
-#            but.setInput()
-            but.setId((0,i))
-            self.buttonsInputs.append(but)
-            
-        ## Connections
-        for i, row in enumerate(self.buttonsFxs):
-            for j, button in enumerate(row):
-#                print j
-                if j == len(row)-1:
-#                    print "output"
-                    button.setInput(row[j-1].getOutput())
-#                    button.getOutput().out()
-                elif j != 0:
-#                    print "chain"
-                    button.setInput(row[j-1].getOutput())
-                else:
-#                    print "first"
-                    button.setInput(self.buttonsInputs[0].getOutput())
-        self.outputTest = self.buttonsFxs[0][4].getOutput().out()####OUTPUT
+        self.createButtons()
+        self.createConnections()
 
         self.SetSize((10+self.cols*100+10, 20+30+20))
         self.SetVirtualSize((10+(self.cols+1)*(self.buttonWidth+20)+10, 20+30+20))
@@ -62,6 +35,31 @@ class FxTrack(scrolled.ScrolledPanel):
         self.Bind(wx.EVT_LEFT_DOWN, self.leftClicked)
         self.Bind(wx.EVT_RIGHT_DOWN, self.rightClicked)
 #        self.Bind(wx.EVT_MOTION, self.mouseMotion)
+
+    def createButtons(self):
+        self.buttonsFxs = []
+        self.buttonsInputs = []
+        for i in range(self.rows): # INPUTS 
+            col = []
+            for j in range(self.cols):
+                but = FxBox(self)
+                but.setId((j,i))
+                col.append(but)
+            self.buttonsFxs.append(col)
+            but = InputBox(self)
+            but.setId((0,i))
+            self.buttonsInputs.append(but)
+
+    def createConnections(self):
+        for i, row in enumerate(self.buttonsFxs):
+            for j, button in enumerate(row):
+                if j == len(row)-1:
+                    button.setInput(row[j-1].getOutput())
+                elif j != 0:
+                    button.setInput(row[j-1].getOutput())
+                else:
+                    button.setInput(self.buttonsInputs[0].getOutput())
+        self.outputTest = self.buttonsFxs[0][4].getOutput().out() # OUTPUT
 
     def connectAudioMixer(self, audioMixer):
         for but in self.buttonsInputs:
@@ -197,13 +195,17 @@ class FxTrack(scrolled.ScrolledPanel):
         
     def setSaveDict(self, saveDict):
         #resize according to dict row col size
+        print saveDict
+        self.rows = len(saveDict["fxsValues"])
+        self.cols = len(saveDict["fxsValues"][0])
+        self.createButtons()
+        self.createConnections()
         for i, row in enumerate(self.buttonsFxs):
             for j, button in enumerate(row):
                 button.setSaveDict(saveDict["fxsValues"][i][j])
         for i, inputBut in enumerate(self.buttonsInputs):
             inputBut.setSaveDict(saveDict["inputValues"][i])
-#            dict["inputValues"].append(inputBut.getSaveDict())
-        self.Refresh()
+        wx.CallAfter(self.Refresh)
 
     def loadCue(self, cue):
         for i, row in enumerate(self.buttonsFxs):

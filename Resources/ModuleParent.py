@@ -164,7 +164,10 @@ class ModuleParent(object):
         list = []
         for i,  param in enumerate(self.parameters):
             list.append(param.getValue())
-        self.cues[self.currentCue] = list
+        if len(self.cues) <= self.currentCue:
+            self.cues.append(list)
+        else:
+            self.cues[self.currentCue] = list
         
         #into dict
         dict = {'values': self.cues}
