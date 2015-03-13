@@ -1,4 +1,4 @@
-import wx, time, os
+import wx, time, os, pprint
 from constants import *
 import QLiveLib
 from AudioServer import AudioServer
@@ -6,9 +6,6 @@ from AudioMixer import AudioMixer
 from FxTracks import FxTracks
 from CuesPanel import CuesPanel
 from MixerPanel import MixerPanel
-
-# this one should be in variables.py file
-from pyolib._wxwidgets import BACKGROUND_COLOUR
 
 class MainWindow(wx.Frame):
     def __init__(self, pos, size):
@@ -55,7 +52,7 @@ class MainWindow(wx.Frame):
         self.Show()
 
     def onSave(self, event):
-        dlg = wx.FileDialog(self, "Choose path to save Qlive projet", 
+        dlg = wx.FileDialog(self, "Save Qlive Projet", 
                             os.path.expanduser("~"), "",
                             "QLive Project files (*.qlp)|*.qlp",
                             style=wx.SAVE|wx.FD_OVERWRITE_PROMPT)
@@ -70,7 +67,7 @@ class MainWindow(wx.Frame):
             with open(path, "w") as f:
                 f.write(QLIVE_MAGIC_LINE)
                 f.write("### %s ###\n" % APP_VERSION)
-                f.write("dictSave = %s" % str(dictSave))
+                f.write("dictSave = \n%s" % pprint.pformat(dictSave, indent=4))
         dlg.Destroy()
 
     def loadFile(self, path):
@@ -86,7 +83,7 @@ class MainWindow(wx.Frame):
         self.mixer.setSaveDict(dictSave["mixer"])
         
     def onLoad(self, event):
-        dlg = wx.FileDialog(self, "Choose Qlive projet", 
+        dlg = wx.FileDialog(self, "Open Qlive Projet", 
                             os.path.expanduser("~"), "",
                             "QLive Project files (*.qlp)|*.qlp",
                             style=wx.OPEN)
@@ -96,6 +93,7 @@ class MainWindow(wx.Frame):
         dlg.Destroy()
 
     def OnClose(self, evt):
+        self.tracks.fxsView.closeAll()
         self.audioServer.stop()
         time.sleep(0.25)
         self.audioServer.shutdown()

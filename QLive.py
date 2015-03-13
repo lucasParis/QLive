@@ -3,14 +3,7 @@
 """
 - how will choice boxes and paths behave in dicts? for now only values are taken care of
 - make parent class for both creators input and fxs
-- Effects window stay opened on quit
-Code style:
-    - always give other neccessary class through init argument ? with variables...
-    - never through parent.parent.parent... Yep, will use variables instead
-    
-To delete:
-    - MenuBar.py
-    - FxTracksToolbar.py
+
 """
 import wx
 from Resources.constants import *

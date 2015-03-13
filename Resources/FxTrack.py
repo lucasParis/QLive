@@ -79,8 +79,6 @@ class FxTrack(scrolled.ScrolledPanel):
     def mouseMotion(self, event):
         pos = self.CalcUnscrolledPosition( event.GetPosition())
         id = self.positionToIdFX(pos)
-        
-#        print pos
 
     def leftClicked(self, event):
         pos = self.CalcUnscrolledPosition( event.GetPosition() )
@@ -102,8 +100,6 @@ class FxTrack(scrolled.ScrolledPanel):
 
                         self.Refresh()
 
-                    
-        
     def rightClicked(self, event):
         pos = self.CalcUnscrolledPosition( event.GetPosition() )
         if pos[0] < 100: # inputs

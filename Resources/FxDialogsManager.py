@@ -9,27 +9,28 @@ from FxSlidersView import *
 changing FxViewsPanel from panel to frame manager FxDialogsManager
 """
 
-
 class FxDialogsManager(object):
     """
     only allow one frame open per FX
     """
     def __init__(self, parent):
         self.openViews = []
-        pass
         
-
     def openViewForAudioProcess(self, audioProcess):
-        # make sure it's not already opened
+        for view in self.openViews:
+            if view.audio == audioProcess:
+                view.Raise()
+                return
         view = FxSlidersView(self, audioProcess)
-        view.Show()
         self.openViews.append(view)
         
     def refresh(self):
         for view in self.openViews:
             view.refresh()
-            
 
+    def closeAll(self):
+        for view in self.openViews:
+            view.Destroy()
 
 if __name__ == "__main__":
     from pyo import *

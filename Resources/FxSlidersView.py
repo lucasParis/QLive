@@ -182,6 +182,8 @@ class FxSlidersView(wx.Frame):
         self.SetTitle(self.audio.name)
 #        self.Bind(wx.EVT_LEAVE_WINDOW, self.onLeave)
         self.Bind(wx.EVT_CLOSE, self.onClose)
+        
+        self.Show()
 
     def refresh(self):
 #        print "refreshing"
@@ -192,13 +194,9 @@ class FxSlidersView(wx.Frame):
             
     def onLeave(self, event):
         print "leaver"
-        pass
-#        self.Show(True)
 
     def onClose(self, evt):
-        # remove from the list here...
         index = self.parent.openViews.index(self)
-        print "deleting", index
         self.parent.openViews.pop(index)
         self.Destroy()
 
