@@ -56,7 +56,8 @@ class MainWindow(wx.Frame):
 
     def onSave(self, event):
         dlg = wx.FileDialog(self, "Choose path to save Qlive projet", 
-                            os.path.expanduser("~"), 
+                            os.path.expanduser("~"), "",
+                            "QLive Project files (*.qlp)|*.qlp",
                             style=wx.SAVE|wx.FD_OVERWRITE_PROMPT)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
@@ -68,7 +69,7 @@ class MainWindow(wx.Frame):
 
             with open(path, "w") as f:
                 f.write(QLIVE_MAGIC_LINE)
-                f.write("### %s ###\n" % QLIVE_VERSION)
+                f.write("### %s ###\n" % APP_VERSION)
                 f.write("dictSave = %s" % str(dictSave))
         dlg.Destroy()
 
@@ -86,7 +87,8 @@ class MainWindow(wx.Frame):
         
     def onLoad(self, event):
         dlg = wx.FileDialog(self, "Choose Qlive projet", 
-                            os.path.expanduser("~"), 
+                            os.path.expanduser("~"), "",
+                            "QLive Project files (*.qlp)|*.qlp",
                             style=wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()

@@ -13,9 +13,9 @@ To delete:
     - FxTracksToolbar.py
 """
 import wx
-from constants import *
-import QLiveLib
-from MainWindow import MainWindow
+from Resources.constants import *
+import Resources.QLiveLib as QLiveLib
+from Resources.MainWindow import MainWindow
 
 class QLiveApp(wx.App):
     def __init__(self, *args, **kwargs):

@@ -1,9 +1,9 @@
 #!/usr/bin/python
 # encoding: utf-8
-import wx
+import wx, os
+from constants import *
 from pyo import *
 from ModuleParent import *
-
 
 class InputIn(ModuleParent):
     name = "input"
@@ -11,9 +11,10 @@ class InputIn(ModuleParent):
         ModuleParent.__init__(self)
         self.removeDryWet()
         self.setName("input")
-        #ctrls
 
-        self.ctrlGain= SliderParameter(name = "gain", value = 4, min = -90, max = 24, unit = "db", exp = 1)
+        #ctrls
+        self.ctrlGain = SliderParameter(name="gain", value=4, min=-90, max=24, 
+                                        unit="db", exp=1)
         self.addParameter(self.ctrlGain)
         
         #audio
@@ -27,15 +28,16 @@ class Soundfile(ModuleParent):
         ModuleParent.__init__(self)
         self.removeDryWet()
         self.setName("Soundfile")
-        #ctrls
                 
-        self.path= PathParameter(name = "path")
+        #ctrls
+        self.path = PathParameter(name = "path")
         self.addParameter(self.path)
         
-        self.speed= SliderParameter(name = "speed", value = 1, min = 0.25, max = 4, unit = "")
+        self.speed = SliderParameter(name="speed", value=1, min=0.25, max=4, unit="")
         self.addParameter(self.speed)
         
-        self.ctrlGain = SliderParameter(name = "gain", value = 4, min = -90, max = 24, unit = "db", exp = 1)
+        self.ctrlGain = SliderParameter(name="gain", value=4, min=-90, max=24, 
+                                        unit="db", exp=1)
         self.addParameter(self.ctrlGain)
 
         self.playButton = ButtonParameter(name = "play")
@@ -48,7 +50,9 @@ class Soundfile(ModuleParent):
         self.addParameter(self.loopButton)
 
         #audio
-        self.sfPlayer = SfPlayer("silence.wav", speed=self.speed, loop=False, offset=0, interp=2, mul=1, add=0)
+        filepath = os.path.join(SOUNDS_PATH, "silence.wav")
+        self.sfPlayer = SfPlayer(filepath, speed=self.speed, loop=False, 
+                                 offset=0, interp=2, mul=1, add=0)
         self.path.setCallback(self.loadPath)
         self.playButton.setCallback(self.sfPlayer.play)
         self.stopButton.setCallback(self.sfPlayer.stop)
@@ -72,13 +76,10 @@ class InputCreator:
         self.classes.append(InputIn)
         self.classes.append(Soundfile)
 
-        
-
         self.buildNames()
         
     def buildNames(self):
-        self.names = [cla.name for cla in self.classes]
-
+        self.names = [cls.name for cls in self.classes]
         
     def getNames(self):
         return self.names
@@ -86,22 +87,3 @@ class InputCreator:
     def create(self, index):
         if index < len(self.classes):
             return self.classes[index]()
-
-
-if __name__ == "__main__":
-    class TestWindow(wx.Frame):
-        def __init__(self):
-            wx.Frame.__init__(self, None)
-            self.s = Server().boot()
-            self.s.start()
-            print InputCreator().getNames()
-            self.input = InputCreator().create(1)
-            self.input.getOutput().out()
-            pass
-
-    app = wx.App()
-
-    frame = TestWindow()
-    frame.Show()
-
-    app.MainLoop()
