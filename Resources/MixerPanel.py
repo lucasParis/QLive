@@ -41,7 +41,7 @@ class QLiveControlSlider(ControlSlider):
         
 class MixerPanel(wx.Panel):
     def __init__(self, parent, audioMixer):
-        wx.Panel.__init__(self, parent, size = (800,200))
+        wx.Panel.__init__(self, parent, size=(800,200), style=wx.SUNKEN_BORDER)
         self.audioMixer = audioMixer
         self.SetBackgroundColour(BACKGROUND_COLOUR)
 
@@ -53,7 +53,9 @@ class MixerPanel(wx.Panel):
         ### INPUT SECTION
         inputBox = wx.BoxSizer(wx.VERTICAL)        
         inputSliderBox = wx.BoxSizer(wx.HORIZONTAL)
-        inputBox.Add(wx.StaticText(self, label = "Input"), 0, wx.EXPAND, 10)
+        inputBox.AddSpacer((-1,5))
+        inputBox.Add(wx.StaticText(self, label="Input Channels"), 0, wx.LEFT|wx.EXPAND, 10)
+        inputBox.Add(wx.StaticLine(self, size=(1, -1)), 0, wx.EXPAND|wx.ALL, 5)
         for i in range(NUM_INPUTS):
             channel = self.audioMixer.getInputChannel(i)
             slide = QLiveControlSlider(self, -80, 12, 0, orient=wx.VERTICAL, 
@@ -74,10 +76,14 @@ class MixerPanel(wx.Panel):
                 inputSliderBox.AddSpacer(15)
         inputBox.Add(inputSliderBox, 0, wx.EXPAND|wx.ALL, 5)
         
+        separator = wx.StaticLine(self, size=(1, -1), style=wx.LI_VERTICAL)
+
         #### OUTPUT SECTION
         outputBox = wx.BoxSizer(wx.VERTICAL)
         outputSliderBox = wx.BoxSizer(wx.HORIZONTAL)
-        outputBox.Add(wx.StaticText(self, label = "Output"), 0, wx.EXPAND, 10)
+        outputBox.AddSpacer((-1,5))
+        outputBox.Add(wx.StaticText(self, label = "Output Channels"), 0, wx.LEFT|wx.EXPAND, 10)
+        outputBox.Add(wx.StaticLine(self, size=(1, -1)), 0, wx.EXPAND|wx.ALL, 5)
         for i in range(NUM_OUTPUTS):
             channel = self.audioMixer.getOutputChannel(i)            
             slide = QLiveControlSlider(self, -80, 12, 0, orient=wx.VERTICAL, 
@@ -102,6 +108,7 @@ class MixerPanel(wx.Panel):
             
         mainSizer = wx.BoxSizer(wx.HORIZONTAL)
         mainSizer.Add(inputBox, 1, wx.EXPAND)
+        mainSizer.Add(separator, 0, wx.EXPAND|wx.ALL, 5)
         mainSizer.Add(outputBox, 1, wx.EXPAND)
         self.SetSizer(mainSizer)
 

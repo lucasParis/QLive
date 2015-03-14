@@ -28,8 +28,6 @@ class MainWindow(wx.Frame):
         self.Bind(wx.EVT_MENU, self.onNew, id=wx.ID_NEW)        
         menu1.Append(wx.ID_OPEN, "Open\tCtrl+O")
         self.Bind(wx.EVT_MENU, self.onLoad, id=wx.ID_OPEN)
-        # Open Recent here (when prefs and tmp directory added)
-
         self.submenu1 = wx.Menu()
         ID_OPEN_RECENT = 2000
         recentFiles = []
@@ -45,7 +43,6 @@ class MainWindow(wx.Frame):
                 self.Bind(wx.EVT_MENU, self.openRecent, id=ID_OPEN_RECENT)
                 ID_OPEN_RECENT += 1
         menu1.AppendMenu(1999, "Open Recent...", self.submenu1)
-
         menu1.AppendSeparator()
         menu1.Append(wx.ID_CLOSE, "Close\tCtrl+W")
         self.Bind(wx.EVT_MENU, self.onClose, id=wx.ID_CLOSE)        
@@ -68,7 +65,7 @@ class MainWindow(wx.Frame):
 
         self.audioMixer = AudioMixer()
 
-        self.mainPanel = wx.Panel(self)
+        self.mainPanel = wx.Panel(self, style=wx.SUNKEN_BORDER)
         self.mainPanel.SetBackgroundColour(BACKGROUND_COLOUR)
 
         self.tracks = FxTracks(self.mainPanel)
@@ -78,7 +75,7 @@ class MainWindow(wx.Frame):
         self.mixer = MixerPanel(self.mainPanel, self.audioMixer)
 
         self.topCuesAndRestSizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.topCuesAndRestSizer.Add(self.cues, 0, wx.EXPAND, 5)
+        self.topCuesAndRestSizer.Add(self.cues, 0)
         self.topCuesAndRestSizer.Add(self.tracks, 1, wx.EXPAND, 5)
 
         self.mainMixerVsRest = wx.BoxSizer(wx.VERTICAL)
