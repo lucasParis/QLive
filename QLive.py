@@ -3,6 +3,7 @@
 """
 - how will choice boxes and paths behave in dicts? for now only values are taken care of
 - make parent class for both creators input and fxs
+- row -+ col -+ not sure...
 
 """
 import wx

@@ -4,6 +4,7 @@ import wx, os
 from pyo import *
 from pyolib._wxwidgets import ControlSlider, BACKGROUND_COLOUR
 import  wx.lib.scrolledpanel as scrolled
+from Widgets import *
 
 """
 - changed FxSlidersView from panel to Frame
@@ -22,9 +23,10 @@ class SliderWidget(WidgetParent):
     def __init__(self, parameter, parent):
         WidgetParent.__init__(self, parameter, parent)
         self.sizer = wx.BoxSizer(wx.VERTICAL)
-        self.slider = ControlSlider(self, parameter.min, parameter.max, parameter.audioValue.get(), outFunction = parameter.setValue)
-        self.sizer.Add(wx.StaticText(self, label = parameter.name), 0, wx.EXPAND | wx.ALL, 5)
-        self.sizer.Add(self.slider, 0, wx.EXPAND | wx.ALL, 5)
+        self.slider = QLiveControlKnob(self, parameter.min, parameter.max, 
+                                       parameter.audioValue.get(), label=parameter.name,
+                                       outFunction=parameter.setValue)
+        self.sizer.Add(self.slider, 0, wx.ALL, 5)
         self.SetSizer(self.sizer)
         pass    
         
@@ -52,7 +54,6 @@ class PathWidget(WidgetParent):
         dlg = wx.FileDialog(self, "choose Qlive projet", os.path.expanduser("~"), style=wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
-#            print path
             self.callback(path)
         dlg.Destroy()
         
@@ -108,6 +109,7 @@ def WidgetCreator(type):
 
     return dict[type]  
     
+# What is its purpose?
 class FxSlidersToolBar(wx.ToolBar):
     def __init__(self, parent):
         wx.ToolBar.__init__(self, parent, size = (1000, 40))
@@ -126,7 +128,7 @@ class FxSlidersToolBar(wx.ToolBar):
 #        self.remColButton = wx.Button(self, size = (30,-1), pos = (-1,-1))
 #        self.remColButton.SetLabel("-")    
 #        self.AddControl(self.remColButton)
-        self.addColButton = wx.Button(self, size = (300,-1), pos = (-1,-1))
+        self.addColButton = wx.Button(self, size = (-1,-1), pos = (-1,-1))
         self.addColButton.SetLabel("Tool")    
         self.AddControl(self.addColButton)
 
@@ -155,15 +157,17 @@ class FxSlidersView(wx.Frame):
 
         self.sizer = wx.BoxSizer(wx.VERTICAL)
         self.toolbar = FxSlidersToolBar(self.panel)
+        self.sizer.Add(self.toolbar, 0, wx.EXPAND)
 
-        self.sizer.Add(self.toolbar,0, wx.EXPAND)
         ##init CTRLS
         self.widgets = []
+        self.knobSizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.sizer.Add(self.knobSizer, 0, wx.EXPAND)
         for i, param in enumerate(self.parameters):
             if param.type == "slider":
                 slider = WidgetCreator(param.type)(param, self.panel)
                 self.widgets.append(slider)
-                self.sizer.Add(slider, 0, wx.EXPAND | wx.ALL, 2)
+                self.knobSizer.Add(slider, 0, wx.EXPAND | wx.ALL, 2)
             elif param.type == "path":
                 path = WidgetCreator(param.type)(param, self.panel)
                 self.widgets.append(path)
@@ -177,23 +181,15 @@ class FxSlidersView(wx.Frame):
                 self.widgets.append(butt)
                 self.sizer.Add(butt, 0, wx.EXPAND | wx.ALL, 2)
 
-            
         self.panel.SetSizer(self.sizer)
         self.SetTitle(self.audio.name)
-#        self.Bind(wx.EVT_LEAVE_WINDOW, self.onLeave)
         self.Bind(wx.EVT_CLOSE, self.onClose)
         
         self.Show()
 
     def refresh(self):
-#        print "refreshing"
         for i, param in enumerate(self.parameters):
-#            print "setting value:", param.getValue()
             self.widgets[i].setValue(param.getValue())
-
-            
-    def onLeave(self, event):
-        print "leaver"
 
     def onClose(self, evt):
         index = self.parent.openViews.index(self)
