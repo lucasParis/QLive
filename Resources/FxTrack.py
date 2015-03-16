@@ -7,7 +7,7 @@ import  wx.lib.scrolledpanel as scrolled
 
 
 class FxTrack(scrolled.ScrolledPanel):
-    def __init__(self, parent):
+    def __init__(self, parent, viewPanelRef):
         scrolled.ScrolledPanel.__init__(self, parent)
         
         self.buttonWidth = 80
@@ -26,7 +26,7 @@ class FxTrack(scrolled.ScrolledPanel):
         self.SetVirtualSize((10+(self.cols+1)*(self.buttonWidth+20)+10, 20+30+20))
         self.SetScrollRate(1,1)
 
-        self.viewPanelRef = None # to open fxSlidersView
+        self.viewPanelRef = viewPanelRef # to open fxSlidersView
         
         self.Bind(wx.EVT_PAINT, self.onPaint)
         self.Bind(wx.EVT_SIZE, self.onSize)
@@ -70,9 +70,6 @@ class FxTrack(scrolled.ScrolledPanel):
                 if j == len(row)-1:
                     output = button.getOutput()
                     [audioMixer.getOutputChannel(k).setInput(output[k]) for k in range(2)]
-
-    def setViewPanelRef(self, ref):
-        self.viewPanelRef = ref
 
     def mouseMotion(self, event):
         pos = self.CalcUnscrolledPosition( event.GetPosition())

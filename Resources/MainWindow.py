@@ -20,10 +20,8 @@ class MainWindow(wx.Frame):
         self.currentProject = ""
         self.saveState = None
 
-        # menubar
         menubar = wx.MenuBar()
         menu1 = wx.Menu()
-
         menu1.Append(wx.ID_NEW, "New\tCtrl+N")
         self.Bind(wx.EVT_MENU, self.onNew, id=wx.ID_NEW)        
         menu1.Append(wx.ID_OPEN, "Open\tCtrl+O")
@@ -59,30 +57,34 @@ class MainWindow(wx.Frame):
         quitItem = menu1.Append(wx.ID_EXIT, "Quit\tCtrl+Q")
         self.Bind(wx.EVT_MENU, self.OnClose, quitItem)
         menubar.Append(menu1, 'File')
-        
         self.SetMenuBar(menubar)
-        # end of menubar
-
-        self.audioMixer = AudioMixer()
 
         self.mainPanel = wx.Panel(self, style=wx.SUNKEN_BORDER)
         self.mainPanel.SetBackgroundColour(BACKGROUND_COLOUR)
 
+        self.audioMixer = AudioMixer()
+        QLiveLib.setVar("AudioMixer", self.audioMixer)
+
         self.tracks = FxTracks(self.mainPanel)
+        QLiveLib.setVar("FxTracks", self.tracks)
+
+        # We need something more dynamic than this...
         self.tracks.connectAudioMixer(self.audioMixer)
+
         self.cues = CuesPanel(self.mainPanel)
         QLiveLib.setVar("CuesPanel", self.cues)
+
         self.mixer = MixerPanel(self.mainPanel, self.audioMixer)
+        QLiveLib.setVar("MixerPanel", self.mixer)
 
-        self.topCuesAndRestSizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.topCuesAndRestSizer.Add(self.cues, 0)
-        self.topCuesAndRestSizer.Add(self.tracks, 1, wx.EXPAND, 5)
+        self.mainSizer = wx.BoxSizer(wx.VERTICAL)
+        self.topSizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.topSizer.Add(self.cues, 0)
+        self.topSizer.Add(self.tracks, 1, wx.EXPAND, 5)
+        self.mainSizer.AddSizer(self.topSizer, 2, wx.EXPAND, 5)
+        self.mainSizer.Add(self.mixer, 0, wx.EXPAND, 5)
+        self.mainPanel.SetSizer(self.mainSizer)
 
-        self.mainMixerVsRest = wx.BoxSizer(wx.VERTICAL)
-        self.mainMixerVsRest.AddSizer(self.topCuesAndRestSizer, 2, wx.EXPAND, 5)
-        self.mainMixerVsRest.Add(self.mixer, 0, wx.EXPAND, 5)
-        self.mainPanel.SetSizer(self.mainMixerVsRest)
-        
         self.loadFile(NEW_FILE_PATH)
 
         self.Show()

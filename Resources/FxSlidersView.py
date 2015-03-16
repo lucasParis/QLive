@@ -74,7 +74,6 @@ class ButtonWidget(WidgetParent):
         self.SetSizer(self.sizer)
          
     def buttonEvent(self, event):
-
         self.callback(1)
         
     def setValue(self, value):

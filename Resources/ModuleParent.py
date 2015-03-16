@@ -2,8 +2,10 @@
 # encoding: utf-8
 import wx
 from pyo import *
-# 
 
+### All these classes should be in the same file as Fxs and Inputs
+
+### This one should inherits from PyoObject
 class ParameterParent:
     def __init__(self, name = "empty"):
 #        PyoObject.__init__(self)
@@ -18,16 +20,6 @@ class ParameterParent:
 #        self.audioValue = SigTo(value,0.05, init = value)
 
 #        self._base_objs = self.audioValue.getBaseObjects()
-
-    def setValue(self, value):
-        pass
-#        self.audioValue.setValue(value)
-#        self.value = value
-
-
-    def getValue(self):
-        pass
-#        return self.value
 
 class SliderParameter(ParameterParent, PyoObject):
     def __init__(self, name = "empty", value = 0, min = 0, max = 1, unit = "hz", exp = 1):
@@ -48,7 +40,6 @@ class SliderParameter(ParameterParent, PyoObject):
     def setValue(self, value):
         self.audioValue.setValue(value)
         self.value = value
-
 
     def getValue(self):
         return self.value
@@ -119,14 +110,13 @@ class PathParameter(ParameterParent):
         if self.callback != None:
             self.callback(self.path)
 
-
     def getValue(self):
         return self.path
 
 class ModuleParent(object):
     name = "empty"
     def __init__(self):
-        self.parameters = [] #append parameters here
+        self.parameters = []
 
         self.input = Sig([0,0])
         self.preOutput = Sig([0,0])
@@ -137,113 +127,77 @@ class ModuleParent(object):
         self.name = "empty"
         self.cues = []
         self.currentCue = 0
+
+    def setName(self, name):
+        self.name = name
         
     def removeDryWet(self):
         del self.parameters[0]
         
     def addParameter(self, param):
         self.parameters.append(param)
+
+    def setInput(self, input):
+        self.input.setValue(input)
         
     def getInput(self):
         return self.input
         
     def setOutput(self, out):
         self.preOutput.setValue(out)
-        
-    def setInput(self, in_):
-        self.input.setValue(in_)
-        
+
     def getOutput(self):
         return self.output
-        
-    def setName(self, name_):
-        self.name = name_
 
     def getSaveDict(self):
-        # save current
-        list = []
-        for i,  param in enumerate(self.parameters):
-            list.append(param.getValue())
         if len(self.cues) <= self.currentCue:
-            self.cues.append(list)
+            self.appendCurrentState()
         else:
-            self.cues[self.currentCue] = list
-        
-        #into dict
+            self.saveCurrentState(self.currentCue)
         dict = {'values': self.cues}
         return dict
         
     def setSaveDict(self, saveDict):
         self.cues = saveDict['values']
-                    # in with the new
         self.currentCue = 0
-        for i,  param in enumerate(self.parameters):
-            param.setValue(self.cues[int(self.currentCue)][i])
+        self.loadingCurrentCue()
 
-            
+    def saveCurrentState(self, cue):
+        self.cues[cue] = [param.getValue() for param in self.parameters]
+
+    def appendCurrentState(self):
+        l = [param.getValue() for param in self.parameters]
+        self.cues.append(l)
+
+    def loadingCurrentCue(self):
+        for i, param in enumerate(self.parameters):
+            param.setValue(self.cues[self.currentCue][i])
+        
     def cueEvent(self, eventDict):
         if eventDict["type"] == 'newCue':
+            # save current state
             if len(self.cues) == 0:
-                list = []
-                for i,  param in enumerate(self.parameters): 
-                    list.append(param.getValue())
-                self.cues.append(list)
-
-            #creating new Cue
-            list = []
-            for i,  param in enumerate(self.parameters):
-                list.append(param.getValue())
-            self.cues.append(list)
-            self.currentCue = eventDict["totalCues"]
-            
+                self.appendCurrentState()
+            else:
+                self.saveCurrentState(self.currentCue)
+            # append a copy of the current state
+            self.appendCurrentState()
+            self.currentCue = eventDict["totalCues"] - 1
         elif eventDict["type"] == 'cueSelect':
-
-            # saving current parameters
-            list = []
-            for i,  param in enumerate(self.parameters):
-                list.append(param.getValue())
-            self.cues[self.currentCue] = list
-            
-            # in with the new
+            # save current state
+            self.saveCurrentState(self.currentCue)
+            # load the selected cue
             self.currentCue = eventDict["selectedCue"]
-            for i,  param in enumerate(self.parameters):
-                param.setValue(self.cues[int(self.currentCue)][i])
-            
+            self.loadingCurrentCue()
+        elif eventDict["type"] == 'deleteCue':
+            # remove the current cue
+            self.cues.pop(eventDict["deletedCue"])
+            # load the new selected cue
+            self.currentCue = eventDict["currentCue"]
+            self.loadingCurrentCue()
 
     def initCues(self, numberOfCues, currentCue):
         for i in range(numberOfCues):
-            list = []
-            for j,  param in enumerate(self.parameters):
-                list.append(param.getValue())
-            self.cues.append(list)
+            l = [param.getValue() for param in self.parameters]
+            self.cues.append(l)
         self.currentCue = currentCue
-        
-    def loadCue(self, cue):
-        pass
-        # only save on cue change (and save) before changing
-        
-#        list = []
-#        for i, param in enumerate(self.parameters):
-#            list.append(param.getValue())
-#        self.currentCue = cue
-        
-    def copyCue(self, cueToCopy):
-        # need to know: current cue, max cues...
-        pass
-                  
-if __name__ == "__main__":
-    class TestWindow(wx.Frame):
-        def __init__(self):
-            wx.Frame.__init__(self, None)
-            self.s = Server().boot()
-            self.s.start()
-            self.module = ModuleParent()
-            pass
-
-    app = wx.App()
-
-    frame = TestWindow()
-    frame.Show()
-    
-
-    app.MainLoop()

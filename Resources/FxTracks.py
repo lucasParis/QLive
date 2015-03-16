@@ -2,6 +2,7 @@ import wx
 from FxTrack import *
 from FxDialogsManager import *
 
+# I am not convinced by the FxTracksToolBar (ob)
 class FxTracksToolBar(wx.ToolBar):
     def __init__(self, parent):
         wx.ToolBar.__init__(self, parent, size = (1000, 40))
@@ -31,17 +32,17 @@ class FxTracks(wx.Panel):
         self.sizer = wx.BoxSizer(wx.VERTICAL)
         
         self.toolbar = FxTracksToolBar(self)
-        
-        self.track = FxTrack(self)
 
-        self.sizer.Add(self.toolbar,0, wx.EXPAND)
-        self.sizer.Add(self.track,1, wx.EXPAND)
-        self.SetSizer(self.sizer)
-        
         # FX WINDOW MANAGER
         self.fxsView = FxDialogsManager(self)
-        self.track.setViewPanelRef(self.fxsView)
         
+        # This should be an  array of FxTrack objects
+        self.track = FxTrack(self, self.fxsView)
+
+        self.sizer.Add(self.toolbar, 0, wx.EXPAND)
+        self.sizer.Add(self.track, 1, wx.EXPAND)
+        self.SetSizer(self.sizer)
+
     def getSaveDict(self):
         # for now simple thru, later compile differents tracks into dict
         return self.track.getSaveDict()
@@ -63,15 +64,19 @@ class FxTracks(wx.Panel):
         self.track.connectAudioMixer(audioMixer)
         
 if __name__ == "__main__":
+    from CuesPanel import CuesPanel
     class TestWindow(wx.Frame):
         def __init__(self):
             wx.Frame.__init__(self, None)
             self.server = Server().boot()
-            self.tracks = FxTracks(self)
-            self.sizer = wx.BoxSizer(wx.VERTICAL)
+            panel = wx.Panel(self)
+            self.cues = CuesPanel(panel)
+            QLiveLib.setVar("CuesPanel", self.cues)
+            self.tracks = FxTracks(panel)
+            self.sizer = wx.BoxSizer(wx.HORIZONTAL)
+            self.sizer.Add(self.cues,0, wx.EXPAND)
             self.sizer.Add(self.tracks,1, wx.EXPAND)
-            self.SetSizer(self.sizer)
-
+            panel.SetSizer(self.sizer)
     app = wx.App()
     frame = TestWindow()
     frame.Show()
