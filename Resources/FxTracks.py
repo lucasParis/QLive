@@ -1,6 +1,6 @@
 import wx
 from FxTrack import *
-from FxSlidersView import FxViewManager
+from FxView import FxViewManager
 
 class FxTracksToolBar(wx.ToolBar):
     def __init__(self, parent):

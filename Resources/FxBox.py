@@ -3,8 +3,7 @@
 import wx
 from pyo import *
 import QLiveLib
-from Fxs import FxCreator
-from Inputs import InputCreator
+from AudioModule import FxCreator, InputCreator
 
 class FxBoxMenu(wx.Menu):
     def __init__(self, parent):
@@ -19,7 +18,6 @@ class FxBoxMenu(wx.Menu):
         self.result = None
             
     def fxSelected(self, event):
-#        print self.fxNames[self.idsIndexDict[event.GetId()]]
         self.result = self.idsIndexDict[event.GetId()]
         
     def getSelection(self):
@@ -38,7 +36,6 @@ class InputBoxMenu(wx.Menu):
         self.result = None
             
     def fxSelected(self, event):
-#        print self.inputNames[self.idsIndexDict[event.GetId()]]
         self.result = self.idsIndexDict[event.GetId()]
         
     def getSelection(self):
@@ -113,7 +110,7 @@ class ParentBox(object):
         if saveDict != None:
             self.initModule(saveDict["creatorId"])
             self.audio.setSaveDict(saveDict)
-        else:#use case: empty fx/input, load default/empty
+        else: # use case: empty fx/input, load default/empty
             pass
         
     def loadCue(self, cue):

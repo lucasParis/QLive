@@ -194,21 +194,3 @@ class FxViewManager(object):
     def closeAll(self):
         for view in self.openViews:
             view.Destroy()
-
-if __name__ == "__main__":
-    from pyo import *
-    from Fxs import FxCreator
-    class TestWindow(wx.Frame):
-        def __init__(self):
-            wx.Frame.__init__(self, None)
-            self.s = Server().boot()
-            self.s.start()
-            self.fx = FxCreator().create(0)
-            self.fx.setInput(Input([0,1]))
-            #self.fx.getOutput().out()            
-            self.fxs = FxViewManager(self)    
-            self.fxs.openViewForAudioProcess(self.fx)
-    app = wx.App()
-    frame = TestWindow()
-    frame.Show()
-    app.MainLoop()
