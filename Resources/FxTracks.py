@@ -1,29 +1,11 @@
 import wx
 from FxTrack import *
-from FxDialogsManager import *
+from FxSlidersView import FxViewManager
 
-# I am not convinced by the FxTracksToolBar (ob)
 class FxTracksToolBar(wx.ToolBar):
     def __init__(self, parent):
         wx.ToolBar.__init__(self, parent, size = (1000, 40))
-#        self.remRowButton = wx.Button(self, size = (30,-1), pos = (-1,-1))
-#        self.remRowButton.SetLabel("-")    
-        self.AddControl(wx.StaticText(self, label = "row"))
-        self.remRowButton = wx.Button(self, size = (30,-1), pos = (-1,-1))
-        self.remRowButton.SetLabel("-")    
-        self.AddControl(self.remRowButton)
-        self.addRowButton = wx.Button(self, size = (30,-1), pos = (-1,-1))
-        self.addRowButton.SetLabel("+")    
-        self.AddControl(self.addRowButton)
-        
-        self.AddControl(wx.StaticText(self, label = "column"))
-        self.remColButton = wx.Button(self, size = (30,-1), pos = (-1,-1))
-        self.remColButton.SetLabel("-")    
-        self.AddControl(self.remColButton)
-        self.addColButton = wx.Button(self, size = (30,-1), pos = (-1,-1))
-        self.addColButton.SetLabel("+")    
-        self.AddControl(self.addColButton)
-
+        self.AddControl(wx.StaticText(self, label=" FxTracks Toolbar (what controls go here?)"))
         self.Realize()
 
 class FxTracks(wx.Panel):
@@ -33,8 +15,8 @@ class FxTracks(wx.Panel):
         
         self.toolbar = FxTracksToolBar(self)
 
-        # FX WINDOW MANAGER
-        self.fxsView = FxDialogsManager(self)
+        # FX window manager
+        self.fxsView = FxViewManager(self)
         
         # This should be an  array of FxTrack objects
         self.track = FxTrack(self, self.fxsView)

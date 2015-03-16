@@ -6,15 +6,11 @@ from pyolib._wxwidgets import ControlSlider, BACKGROUND_COLOUR
 import  wx.lib.scrolledpanel as scrolled
 from Widgets import *
 
-"""
-- changed FxSlidersView from panel to Frame
-"""
 class WidgetParent(wx.Panel):
     def __init__(self, parameter, parent):
         wx.Panel.__init__(self, parent)
         self.SetBackgroundColour(BACKGROUND_COLOUR)
         self.parameter = parameter
-        pass
         
     def setValue(self, value):
         pass
@@ -43,7 +39,6 @@ class PathWidget(WidgetParent):
         self.openButton = wx.Button(self, label = "open")
         self.openButton.Bind(wx.EVT_BUTTON, self.buttonEvent)
 
-
         self.text = wx.StaticText(self, label = "path")
         
         self.sizer.Add(self.openButton, 0, wx.EXPAND | wx.ALL, 5)
@@ -51,7 +46,8 @@ class PathWidget(WidgetParent):
         self.SetSizer(self.sizer)
          
     def buttonEvent(self, event):
-        dlg = wx.FileDialog(self, "choose Qlive projet", os.path.expanduser("~"), style=wx.OPEN)
+        dlg = wx.FileDialog(self, "Choose Soundfile", 
+                            os.path.expanduser("~"), style=wx.OPEN)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             self.callback(path)
@@ -93,7 +89,6 @@ class ToggleWidget(WidgetParent):
         self.SetSizer(self.sizer)
          
     def buttonEvent(self, event):
-        print "vent"
         self.callback(self.openButton.GetValue())
         
     def setValue(self, value):
@@ -104,8 +99,7 @@ def WidgetCreator(type):
     dict["slider"] = SliderWidget
     dict["path"] = PathWidget 
     dict["button"] = ButtonWidget  
-    dict["toggle"] = ToggleWidget  
-
+    dict["toggle"] = ToggleWidget
     return dict[type]  
     
 # What is its purpose?
@@ -113,20 +107,6 @@ class FxSlidersToolBar(wx.ToolBar):
     def __init__(self, parent):
         wx.ToolBar.__init__(self, parent, size = (1000, 40))
         self.SetBackgroundColour(BACKGROUND_COLOUR)
-#        self.remRowButton = wx.Button(self, size = (30,-1), pos = (-1,-1))
-#        self.remRowButton.SetLabel("-")    
-#        self.AddControl(wx.StaticText(self, label = "row"))
-#        self.remRowButton = wx.Button(self, size = (30,-1), pos = (-1,-1))
-#        self.remRowButton.SetLabel("-")    
-#        self.AddControl(self.remRowButton)
-#        self.addRowButton = wx.Button(self, size = (30,-1), pos = (-1,-1))
-#        self.addRowButton.SetLabel("+")    
-#        self.AddControl(self.addRowButton)
-#        
-#        self.AddControl(wx.StaticText(self, label = "column"))
-#        self.remColButton = wx.Button(self, size = (30,-1), pos = (-1,-1))
-#        self.remColButton.SetLabel("-")    
-#        self.AddControl(self.remColButton)
         self.addColButton = wx.Button(self, size = (-1,-1), pos = (-1,-1))
         self.addColButton.SetLabel("Tool")    
         self.AddControl(self.addColButton)
@@ -195,30 +175,40 @@ class FxSlidersView(wx.Frame):
         self.parent.openViews.pop(index)
         self.Destroy()
 
+class FxViewManager(object):
+    def __init__(self, parent):
+        self.openViews = []
+        
+    def openViewForAudioProcess(self, audioProcess):
+        for view in self.openViews:
+            if view.audio == audioProcess:
+                view.Raise()
+                return
+        view = FxSlidersView(self, audioProcess)
+        self.openViews.append(view)
+        
+    def refresh(self):
+        for view in self.openViews:
+            view.refresh()
+
+    def closeAll(self):
+        for view in self.openViews:
+            view.Destroy()
+
 if __name__ == "__main__":
+    from pyo import *
     from Fxs import FxCreator
-    from Inputs import InputCreator
-    from FxDialogsManager import FxDialogsManager
     class TestWindow(wx.Frame):
         def __init__(self):
             wx.Frame.__init__(self, None)
             self.s = Server().boot()
             self.s.start()
-            self.fx = InputCreator().create(1)
+            self.fx = FxCreator().create(0)
             self.fx.setInput(Input([0,1]))
-            self.fx.getOutput().out()
-            self.fxs = FxDialogsManager(self)    
+            #self.fx.getOutput().out()            
+            self.fxs = FxViewManager(self)    
             self.fxs.openViewForAudioProcess(self.fx)
-#            self.fxs.openViewForAudioProcess(self.fx)
-#            self.fxs.openViewForAudioProcess(self.fx)
-
-#            self.view = FxSlidersView(self, self.fx)
-#            self.view.Show(True)
-            print "delloh"
-
     app = wx.App()
-
     frame = TestWindow()
     frame.Show()
-
     app.MainLoop()
