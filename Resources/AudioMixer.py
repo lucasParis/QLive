@@ -2,7 +2,7 @@
 # encoding: utf-8
 from pyo import *
 from constants import *
-from AudioUtilities import MidiLearn
+from AudioServer import MidiLearn
 
 class AudioChannel:
     def __init__(self, input=0):
