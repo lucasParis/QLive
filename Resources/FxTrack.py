@@ -1,10 +1,9 @@
 #!/usr/bin/python
 # encoding: utf-8
 import wx
-from pyo import *
+from constants import *
 from FxBox import *
 import  wx.lib.scrolledpanel as scrolled
-
 
 class FxTrack(scrolled.ScrolledPanel):
     def __init__(self, parent, viewPanelRef):
@@ -15,7 +14,7 @@ class FxTrack(scrolled.ScrolledPanel):
         self.connectionWidth = self.buttonWidth/10.
         self.connectionHeight = self.buttonHeight-8
         
-        self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
+        self.SetBackgroundStyle(wx.BG_STYLE_CUSTOM)  
         self.SetBackgroundColour(wx.Colour(100, 100, 100))
         self.cols = 5
         self.rows = 1
@@ -25,21 +24,26 @@ class FxTrack(scrolled.ScrolledPanel):
         self.SetSize((10+self.cols*100+10, 20+30+20))
         self.SetVirtualSize((10+(self.cols+1)*(self.buttonWidth+20)+10, 20+30+20))
         self.SetScrollRate(1,1)
+        self.SetupScrolling(self)
 
         self.viewPanelRef = viewPanelRef # to open fxSlidersView
         
         self.Bind(wx.EVT_PAINT, self.onPaint)
         self.Bind(wx.EVT_SIZE, self.onSize)
-        self.SetupScrolling(self)
 
         self.Bind(wx.EVT_LEFT_DOWN, self.leftClicked)
         self.Bind(wx.EVT_RIGHT_DOWN, self.rightClicked)
-#        self.Bind(wx.EVT_MOTION, self.mouseMotion)
+        self.Bind(wx.EVT_MOTION, self.mouseMotion)
+
+        if PLATFORM == "win32":
+            self.dcref = wx.BufferedPaintDC
+        else:
+            self.dcref = wx.PaintDC
 
     def createButtons(self):
         self.buttonsFxs = []
         self.buttonsInputs = []
-        for i in range(self.rows): # INPUTS 
+        for i in range(self.rows):
             col = []
             for j in range(self.cols):
                 but = FxBox(self)
@@ -59,103 +63,98 @@ class FxTrack(scrolled.ScrolledPanel):
                     button.setInput(row[j-1].getOutput())
                 else:
                     button.setInput(self.buttonsInputs[0].getOutput())
-        self.outputTest = self.buttonsFxs[0][4].getOutput().out() # OUTPUT
+        # test case
+        self.outputTest = self.buttonsFxs[0][4].getOutput().out()
 
     def connectAudioMixer(self, audioMixer):
         for but in self.buttonsInputs:
-            but.setInput(Sig([audioMixer.getInputChannel(i).getOutput() for i in range(2)]))
-
+            but.setInput([audioMixer.getInputChannel(i).getOutput() for i in range(NUM_CHNLS)])
         for i, row in enumerate(self.buttonsFxs):
             for j, button in enumerate(row):
                 if j == len(row)-1:
                     output = button.getOutput()
-                    [audioMixer.getOutputChannel(k).setInput(output[k]) for k in range(2)]
+                    [audioMixer.getOutputChannel(k).setInput(output[k]) for k in range(NUM_CHNLS)]
 
     def mouseMotion(self, event):
-        pos = self.CalcUnscrolledPosition( event.GetPosition())
-        id = self.positionToIdFX(pos)
-
+        pass
+        #pos = self.CalcUnscrolledPosition( event.GetPosition())
+        #id = self.positionToIdFX(pos)
+                
     def leftClicked(self, event):
         pos = self.CalcUnscrolledPosition( event.GetPosition() )
         if pos[0] < 100: # inputs
             id = self.positionToIdInput(pos)
-            if id[1] < len(self.buttonsInputs): #valid Y
+            if id[1] < len(self.buttonsInputs): # valid Y
                     buttonPos = self.idToPositionInput(id)
-                    if pos[0] > buttonPos[0] and pos[0] < buttonPos[0] + self.buttonWidth and pos[1] > buttonPos[1] and pos[1] < buttonPos[1] + self.buttonHeight:
+                    butRect = wx.Rect(buttonPos[0], buttonPos[1], self.buttonWidth, self.buttonHeight)
+                    if butRect.Contains(pos):
                         self.buttonsInputs[id[1]].openView()
-#                        self.Refresh()
-        else: #normal Fxs
+        else: # normal Fxs
             id = self.positionToIdFX(pos)
-            if id[1] < len(self.buttonsFxs): #valid Y
-                if id[0] < len(self.buttonsFxs[id[1]]): #valid X
+            if id[1] < len(self.buttonsFxs): # valid Y
+                if id[0] < len(self.buttonsFxs[id[1]]): # valid X
                     buttonPos = self.idToPositionFX(id)
-                    if pos[0] > buttonPos[0] and pos[0] < buttonPos[0] + self.buttonWidth and pos[1] > buttonPos[1] and pos[1] < buttonPos[1] + self.buttonHeight:
-#                        print "save:", self.buttonsFxs[id[1]][id[0]].getSaveDict()
+                    butRect = wx.Rect(buttonPos[0], buttonPos[1], self.buttonWidth, self.buttonHeight)
+                    if butRect.Contains(pos):
                         self.buttonsFxs[id[1]][id[0]].openView()
-
-                        self.Refresh()
 
     def rightClicked(self, event):
         pos = self.CalcUnscrolledPosition( event.GetPosition() )
         if pos[0] < 100: # inputs
             id = self.positionToIdInput(pos)
-#            print id
-            if id[1] < len(self.buttonsInputs): #valid Y
+            if id[1] < len(self.buttonsInputs): # valid Y
                     buttonPos = self.idToPositionInput(id)
-                    if pos[0] > buttonPos[0] and pos[0] < buttonPos[0] + self.buttonWidth and pos[1] > buttonPos[1] and pos[1] < buttonPos[1] + self.buttonHeight:
+                    butRect = wx.Rect(buttonPos[0], buttonPos[1], self.buttonWidth, self.buttonHeight)
+                    if butRect.Contains(pos):
                         self.buttonsInputs[id[1]].openMenu(event)
-                        self.Refresh()
-        else: #normal Fxs
+                        wx.CallAfter(self.Refresh)
+        else: # normal Fxs
             id = self.positionToIdFX(pos)
-            if id[1] < len(self.buttonsFxs): #valid Y
-                if id[0] < len(self.buttonsFxs[id[1]]): #valid X
+            if id[1] < len(self.buttonsFxs): # valid Y
+                if id[0] < len(self.buttonsFxs[id[1]]): # valid X
                     buttonPos = self.idToPositionFX(id)
-                    if pos[0] > buttonPos[0] and pos[0] < buttonPos[0] + self.buttonWidth and pos[1] > buttonPos[1] and pos[1] < buttonPos[1] + self.buttonHeight:
+                    butRect = wx.Rect(buttonPos[0], buttonPos[1], self.buttonWidth, self.buttonHeight)
+                    if butRect.Contains(pos):
                         self.buttonsFxs[id[1]][id[0]].openMenu(event)
                         wx.CallAfter(self.Refresh)
         
     def onPaint(self, event):
-        dc = wx.AutoBufferedPaintDC(self)
+        dc = self.dcref(self)
+        gc = wx.GraphicsContext_Create(dc)
         dc.Clear()
         self.PrepareDC(dc)
 
         w, h = self.GetSize()
-        dc.SetTextForeground("#000000")
-#        dc.DrawRectangle(10,10,30,30)
+        dc.SetTextForeground(FXBOX_FOREGROUND_COLOUR)
+        gc.SetPen(wx.Pen(FXBOX_OUTLINE_COLOUR, 1, wx.SOLID))
+        gc.SetBrush(wx.Brush(FXBOX_BACKGROUND_COLOUR, wx.SOLID))
         for i, row in enumerate(self.buttonsFxs):
             for j, button in enumerate(row):
                 pos = self.idToPositionFX(button.getId())
-                rect = wx.Rect(pos[0], pos[1], self.buttonWidth, self.buttonHeight)#(10+i*100,20)
-                dc.DrawRoundedRectangleRect(rect, 5)
-                rectIn = wx.Rect(pos[0], pos[1]+4, self.buttonWidth/10., self.buttonHeight-8)#(10+i*100,20)
-                rectOut = wx.Rect(pos[0]+(self.buttonWidth*9)/10., pos[1]+4, self.buttonWidth/10., self.buttonHeight-8)#(10+i*100,20)
-
-                dc.DrawRoundedRectangleRect(rectIn, 2)
-                dc.DrawRoundedRectangleRect(rectOut, 2)
+                rect = wx.Rect(pos[0], pos[1], self.buttonWidth, self.buttonHeight)
+                rectIn = wx.Rect(pos[0], pos[1]+4, self.buttonWidth/10., self.buttonHeight-8)
+                rectOut = wx.Rect(pos[0]+self.buttonWidth*9/10., pos[1]+4, self.buttonWidth/10., self.buttonHeight-8)
+                gc.DrawRoundedRectangle(rect[0], rect[1], rect[2], rect[3], 5)
+                gc.DrawRoundedRectangle(rectIn[0], rectIn[1], rectIn[2], rectIn[3], 2)
+                gc.DrawRoundedRectangle(rectOut[0], rectOut[1], rectOut[2], rectOut[3], 2)
 
                 dc.DrawLabel(button.name, rect, wx.ALIGN_CENTER)
     
         for i, inputBut in enumerate(self.buttonsInputs):
-#            print i
             pos = self.idToPositionInput(inputBut.getId())
-#            print pos
             rect = wx.Rect(pos[0], pos[1], self.buttonWidth, self.buttonHeight)
-            dc.DrawRoundedRectangleRect(rect, 5)
-#            rectIn = wx.Rect(pos[0], pos[1]+4, self.buttonWidth/10., self.buttonHeight-8)
             rectOut = wx.Rect(pos[0]+(self.buttonWidth*9)/10., pos[1]+4, self.buttonWidth/10., self.buttonHeight-8)
-
-            dc.DrawRoundedRectangleRect(rectIn, 2)
-            dc.DrawRoundedRectangleRect(rectOut, 2)
+            gc.DrawRoundedRectangle(rect[0], rect[1], rect[2], rect[3], 5)
+            gc.DrawRoundedRectangle(rectOut[0], rectOut[1], rectOut[2], rectOut[3], 2)
 
             dc.DrawLabel(inputBut.name, rect, wx.ALIGN_CENTER)
 
-
-        rect = wx.Rect(0, 0, 100, 20)#(10+i*100,20)
-        dc.DrawLabel("Inputs", rect, wx.ALIGN_CENTER)
+        dc.SetTextForeground("#FFFFFF")
+        dc.DrawLabel("Inputs", wx.Rect(0, 0, 100, 20), wx.ALIGN_CENTER)
+        dc.DrawLabel("Fxs", wx.Rect(100, 0, 100, 20), wx.ALIGN_CENTER)
 
         dc.DrawLine(100, 0, 100, h)
-        
-        
+
     def idToPositionFX(self, id):
         return (10+(id[0]+1)*100, (id[1])*50+20)
 
@@ -226,7 +225,6 @@ class FxTrack(scrolled.ScrolledPanel):
         for i, inputBut in enumerate(self.buttonsInputs):
             inputBut.cueEvent(eventDict)
 
-               
 if __name__ == "__main__":
     class TestWindow(wx.Frame):
         def __init__(self):
@@ -234,11 +232,7 @@ if __name__ == "__main__":
             self.s= Server().boot()
             self.s.start()
             self.fxTrack = FxTrack(self)
-
-
     app = wx.App()
-
     frame = TestWindow()
     frame.Show()
-
     app.MainLoop()

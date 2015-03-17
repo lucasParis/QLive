@@ -2,6 +2,7 @@
 # encoding: utf-8
 import wx
 from pyo import *
+from constants import *
 import QLiveLib
 from AudioModule import FxCreator, InputCreator
 
@@ -105,7 +106,6 @@ class ParentBox(object):
         else:
             return None
 
-        
     def setSaveDict(self, saveDict):
         if saveDict != None:
             self.initModule(saveDict["creatorId"])
@@ -137,7 +137,7 @@ class FxBox(ParentBox):
 class InputBox(ParentBox):
     def __init__(self, parent):
         ParentBox.__init__(self, parent)
-        self.audioOut.value = Sig(0) # PyoObject - should not be here...
+        self.audioOut.value = Sig([0]*NUM_CHNLS)
         self.menu = InputBoxMenu
         self.creator = InputCreator
 
