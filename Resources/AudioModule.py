@@ -93,9 +93,9 @@ class AudioModule(object):
     def __init__(self):
         self.name = "empty"
         self.parameters = []
-        self.bypass = False
         self.cues = []
         self.currentCue = 0
+        self.enable = True
 
         self.input = Sig([0] * NUM_CHNLS)
         self.preOutput = Sig([0] * NUM_CHNLS)
@@ -115,8 +115,10 @@ class AudioModule(object):
 
     def setEnable(self, state):
         if state:
+            self.enable = True
             self.setOutput(self.process)
         else:
+            self.enable = False
             self.setOutput(self.input)
 
     def setInput(self, input):
@@ -185,6 +187,15 @@ class AudioModule(object):
         self.currentCue = currentCue
 
 ######## Available effect modules ########
+class FxNone(AudioModule):
+    name = "None"
+    def __init__(self):
+        AudioModule.__init__(self)
+        self.setName("")
+        self.removeDryWet()
+        self.process = self.getInput()
+        self.setOutput(self.getInput())
+
 class FxLowpass(AudioModule):
     name = "Lowpass"
     def __init__(self):
@@ -356,6 +367,7 @@ class FxCreator:
         self.fxs = []
 
         ### Add FXs here
+        self.fxs.append(FxNone)
         self.fxs.append(FxLowpass)
         self.fxs.append(FxHighpass)
         self.fxs.append(FxFreeVerb)

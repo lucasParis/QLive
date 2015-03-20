@@ -17,7 +17,7 @@ class BoxMenu(wx.Menu):
             id = wx.NewId()
             self.idsIndexDict[id] = i
             self.Append(id, name)
-            self.Bind(wx.EVT_MENU, self.fxSelected, id=id)
+        self.Bind(wx.EVT_MENU, self.fxSelected, id=-1, id2=i)
 
     def fxSelected(self, event):
         self.result = self.idsIndexDict[event.GetId()]
@@ -38,16 +38,14 @@ class InputBoxMenu(BoxMenu):
 class ParentBox(object):
     def __init__(self, parent):
         self.parent = parent
+        self.initialize()
+
+    def initialize(self):
         self.name = ""
-        
         self.audio = None
         self.presets = None
-
         self.id = (0,0)
-        self.creatorId = None
-        
-        self.menu = None
-        self.creator = None
+        self.creatorId = None        
         self.audioIn = Sig([0] * NUM_CHNLS)
         self.audioOut = Sig(self.audioIn)    
         
@@ -69,12 +67,14 @@ class ParentBox(object):
     def openView(self):
         if self.parent.viewPanelRef != None:
             if self.audio != None:
-                self.parent.viewPanelRef.openViewForAudioProcess(self.audio)
+                if self.audio.name:
+                    self.parent.viewPanelRef.openViewForAudioProcess(self.audio)
 
     def openMenu(self, event):
         menu = self.menu(self)
         if self.parent.PopupMenu(menu, event.GetPosition()):
             if not menu.getSelection() == None:
+                print menu.getSelection()
                 self.initModule(menu.getSelection())
         menu.Destroy()
         
@@ -94,6 +94,8 @@ class ParentBox(object):
     def getSaveDict(self):
         if self.audio != None:
             dict = self.audio.getSaveDict()
+            # TODO: change the way creatorId is handled (it can lead to
+            # pick the wrong creator as the app evolved...)
             dict["creatorId"] = self.creatorId
             return dict
         else:
