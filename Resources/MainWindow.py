@@ -104,6 +104,7 @@ class MainWindow(wx.Frame):
 
     def saveFile(self, path):
         dictSave = self.getCurrentState()
+        self.saveState = copy.deepcopy(dictSave)
         self.currentProject = path
         with open(path, "w") as f:
             f.write(QLIVE_MAGIC_LINE)
@@ -221,11 +222,11 @@ class MainWindow(wx.Frame):
     def OnClose(self, evt):
         if not self.askForSaving():
             return
-        self.tracks.fxsView.closeAll()
         if self.audioServer.isStarted():
             self.audioServer.stop()
             time.sleep(0.25)
         if self.audioServer.isBooted():
             self.audioServer.shutdown()
             time.sleep(0.25)
+        self.tracks.fxsView.closeAll()
         self.Destroy()

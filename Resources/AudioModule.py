@@ -23,7 +23,7 @@ class SliderParameter(ParameterParent, PyoObject):
         self.unit = unit
         self.exp = exp
         self.value = value
-        self.audioValue = SigTo(value,0.05, init=value)
+        self.audioValue = SigTo(value, 0.05, init=value)
         self._base_objs = self.audioValue.getBaseObjects()
 
     def setValue(self, value):
@@ -408,11 +408,8 @@ class Soundfile(AudioModule):
                                         unit="db", exp=1)
         self.addParameter(self.ctrlGain)
 
-        self.playButton = ButtonParameter(name = "play")
+        self.playButton = ToggleParameter(name="play")
         self.addParameter(self.playButton)
-        
-        self.stopButton = ButtonParameter(name = "stop")
-        self.addParameter(self.stopButton)
 
         self.loopButton = ToggleParameter(name = "loop")
         self.addParameter(self.loopButton)
@@ -420,10 +417,9 @@ class Soundfile(AudioModule):
         #audio
         filepath = os.path.join(SOUNDS_PATH, "silence.wav")
         self.sfPlayer = SfPlayer(filepath, speed=self.speed, loop=False, 
-                                 offset=0, interp=2, mul=1, add=0)
+                                 offset=0, interp=2, mul=1, add=0).stop()
         self.path.setCallback(self.loadPath)
-        self.playButton.setCallback(self.sfPlayer.play)
-        self.stopButton.setCallback(self.sfPlayer.stop)
+        self.playButton.setCallback(self.setPlay)
         self.loopButton.setCallback(self.setLoop)
 
         self.dbValue = DBToA(self.ctrlGain)
@@ -432,6 +428,12 @@ class Soundfile(AudioModule):
 
     def loadPath(self, path):
         self.sfPlayer.setPath(path)
+
+    def setPlay(self, state):
+        if state:
+            self.sfPlayer.play()
+        else:
+            self.sfPlayer.stop()
 
     def setLoop(self, onOff):
         self.sfPlayer.setLoop(onOff)
