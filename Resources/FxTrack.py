@@ -19,6 +19,7 @@ class FxTrack(scrolled.ScrolledPanel):
         self.cols = 5
         self.rows = 1
         self.createButtonBitmap()
+        self.createButtonBitmap(False)
         self.createButtons()
         self.createConnections()
 
@@ -42,7 +43,7 @@ class FxTrack(scrolled.ScrolledPanel):
         else:
             self.dcref = wx.PaintDC
 
-    def createButtonBitmap(self):
+    def createButtonBitmap(self, enable=True):
         w, h = self.buttonWidth, self.buttonHeight
         b = wx.EmptyBitmap(w, h)
         dc = wx.MemoryDC(b)
@@ -51,7 +52,10 @@ class FxTrack(scrolled.ScrolledPanel):
         dc.DrawRectangle(0, 0, w, h)
         gc = wx.GraphicsContext_Create(dc)
         gc.SetPen(wx.Pen(FXBOX_OUTLINE_COLOUR, 1, wx.SOLID))
-        gc.SetBrush(wx.Brush(FXBOX_BACKGROUND_COLOUR, wx.SOLID))
+        if enable:
+            gc.SetBrush(wx.Brush(FXBOX_ENABLE_BACKGROUND_COLOUR, wx.SOLID))
+        else:
+            gc.SetBrush(wx.Brush(FXBOX_DISABLE_BACKGROUND_COLOUR, wx.SOLID))
         rect = wx.Rect(0, 0, w, h)
         rectIn = wx.Rect(0, 4, w/10., h-8)
         rectOut = wx.Rect(w*9/10., 4, w/10., h-8)
@@ -59,8 +63,11 @@ class FxTrack(scrolled.ScrolledPanel):
         gc.DrawRoundedRectangle(rectIn[0], rectIn[1], rectIn[2], rectIn[3], 2)
         gc.DrawRoundedRectangle(rectOut[0], rectOut[1], rectOut[2], rectOut[3], 2)
         dc.SelectObject(wx.NullBitmap)
-        self.buttonBitmap = b
-        
+        if enable:
+            self.buttonBitmap = b
+        else:
+            self.disableButtonBitmap = b
+
     def createButtons(self):
         self.buttonsFxs = []
         self.buttonsInputs = []
@@ -91,6 +98,9 @@ class FxTrack(scrolled.ScrolledPanel):
         for i, row in enumerate(self.buttonsFxs):
             output = row[-1].getOutput()
             [audioMixer.getOutputChannel(k).setInput(output[k]) for k in range(NUM_CHNLS)]
+
+    def refresh(self):
+        wx.CallAfter(self.Refresh)
 
     def mouseMotion(self, event):
         pass
@@ -143,13 +153,16 @@ class FxTrack(scrolled.ScrolledPanel):
         self.PrepareDC(dc)
 
         dc.SetTextForeground(FXBOX_FOREGROUND_COLOUR)
-        gc.SetPen(wx.Pen(FXBOX_OUTLINE_COLOUR, 1, wx.SOLID))
-        gc.SetBrush(wx.Brush(FXBOX_BACKGROUND_COLOUR, wx.SOLID))
+        #gc.SetPen(wx.Pen(FXBOX_OUTLINE_COLOUR, 1, wx.SOLID))
+        #gc.SetBrush(wx.Brush(FXBOX_BACKGROUND_COLOUR, wx.SOLID))
         for i, row in enumerate(self.buttonsFxs):
             for j, button in enumerate(row):
                 pos = self.idToPositionFX(button.getId())
                 rect = wx.Rect(pos[0], pos[1], self.buttonWidth, self.buttonHeight)
-                gc.DrawBitmap(self.buttonBitmap, rect[0], rect[1], rect[2], rect[3])
+                if button.isEnable():
+                    gc.DrawBitmap(self.buttonBitmap, rect[0], rect[1], rect[2], rect[3])
+                else:
+                    gc.DrawBitmap(self.disableButtonBitmap, rect[0], rect[1], rect[2], rect[3])
                 dc.DrawLabel(button.name, rect, wx.ALIGN_CENTER)    
         for i, inputBut in enumerate(self.buttonsInputs):
             pos = self.idToPositionInput(inputBut.getId())

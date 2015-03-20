@@ -12,15 +12,14 @@ class BoxMenu(wx.Menu):
         self.result = None
 
     def prepareMenu(self, names):
-        self.idsIndexDict = {}
-        for i, name in enumerate(names):
-            id = wx.NewId()
-            self.idsIndexDict[id] = i
+        id = BOX_MENU_ITEM_FIRST_ID
+        for name in names:
             self.Append(id, name)
-        self.Bind(wx.EVT_MENU, self.fxSelected, id=-1, id2=i)
+            id += 1
+        self.Bind(wx.EVT_MENU, self.fxSelected, id=BOX_MENU_ITEM_FIRST_ID, id2=id)
 
-    def fxSelected(self, event):
-        self.result = self.idsIndexDict[event.GetId()]
+    def fxSelected(self, evt):
+        self.result = self.GetLabel(evt.GetId())
         
     def getSelection(self):
         return self.result
@@ -45,10 +44,15 @@ class ParentBox(object):
         self.audio = None
         self.presets = None
         self.id = (0,0)
-        self.creatorId = None        
         self.audioIn = Sig([0] * NUM_CHNLS)
         self.audioOut = Sig(self.audioIn)    
-        
+ 
+    def isEnable(self):
+        if self.audio == None:
+            return True
+        else:
+            return self.audio.enable
+
     def setInput(self, input):
         self.audioIn.setValue(input)
         
@@ -73,14 +77,12 @@ class ParentBox(object):
     def openMenu(self, event):
         menu = self.menu(self)
         if self.parent.PopupMenu(menu, event.GetPosition()):
-            if not menu.getSelection() == None:
-                print menu.getSelection()
+            if menu.getSelection() is not None:
                 self.initModule(menu.getSelection())
         menu.Destroy()
         
-    def initModule(self, index):
-        self.creatorId = index
-        self.audio = self.creator().create(self.creatorId)
+    def initModule(self, name):
+        self.audio = self.creator().createByName(name)
         self.name = self.audio.name
         self.audio.setInput(self.audioIn)
         self.audioOut.setValue(self.audio.getOutput())
@@ -94,16 +96,14 @@ class ParentBox(object):
     def getSaveDict(self):
         if self.audio != None:
             dict = self.audio.getSaveDict()
-            # TODO: change the way creatorId is handled (it can lead to
-            # pick the wrong creator as the app evolved...)
-            dict["creatorId"] = self.creatorId
+            dict["name"] = self.name
             return dict
         else:
             return None
 
     def setSaveDict(self, saveDict):
         if saveDict != None:
-            self.initModule(saveDict["creatorId"])
+            self.initModule(saveDict["name"])
             self.audio.setSaveDict(saveDict)
         else: # use case: empty fx/input, load default/empty
             pass

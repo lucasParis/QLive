@@ -6,6 +6,7 @@ from pyo import *
 from pyolib._wxwidgets import ControlSlider, BACKGROUND_COLOUR
 import  wx.lib.scrolledpanel as scrolled
 from Widgets import *
+import QLiveLib
 
 class WidgetParent(wx.Panel):
     def __init__(self, parameter, parent):
@@ -172,6 +173,7 @@ class FxSlidersView(wx.Frame):
 
     def enableFx(self, evt):
         self.audio.setEnable(evt.GetInt())
+        QLiveLib.getVar("FxTracks").refresh()
             
     def refresh(self):
         for i, param in enumerate(self.parameters):

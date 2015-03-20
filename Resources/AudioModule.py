@@ -362,34 +362,6 @@ class FxHarmonizer(AudioModule):
         self.process = Harmonizer(self.getInput(), self.ctrlTranspo, self.ctrlFeed, mul = self.dbValue)
         self.setOutput(self.process)
 
-class FxCreator:
-    def __init__(self):
-        self.fxs = []
-
-        ### Add FXs here
-        self.fxs.append(FxNone)
-        self.fxs.append(FxLowpass)
-        self.fxs.append(FxHighpass)
-        self.fxs.append(FxFreeVerb)
-        self.fxs.append(FxStereoVerb)
-        self.fxs.append(FxDisto)
-        self.fxs.append(FxDelay)
-        self.fxs.append(FxCompressor)
-        self.fxs.append(FxFreqShift)
-        self.fxs.append(FxHarmonizer)
-
-        self.buildNames()
-        
-    def buildNames(self):
-        self.names = [fx.name for fx in self.fxs]
-
-    def getNames(self):
-        return self.names
-        
-    def create(self, index):
-        if index < len(self.fxs):
-            return self.fxs[index]()
-
 ######## Available input modules ########
 class InputIn(AudioModule):
     name = "input"
@@ -455,23 +427,32 @@ class Soundfile(AudioModule):
 
     def setLoop(self, onOff):
         self.sfPlayer.setLoop(onOff)
-        
-class InputCreator:
-    def __init__(self):
-        self.classes = []
 
-        ### Add inputs here
-        self.classes.append(InputIn)
-        self.classes.append(Soundfile)
-
-        self.buildNames()
-        
+######## Module Creators ########
+class Creator:
     def buildNames(self):
         self.names = [cls.name for cls in self.classes]
-        
+
     def getNames(self):
         return self.names
         
+    def createByName(self, name):
+        if name in self.names:
+            index = self.names.index(name)
+            return self.classes[index]()
+
     def create(self, index):
         if index < len(self.classes):
             return self.classes[index]()
+    
+class FxCreator(Creator):
+    def __init__(self):
+        self.classes = [FxNone, FxLowpass, FxHighpass, FxFreeVerb, FxStereoVerb,
+                        FxDisto, FxDelay, FxCompressor, FxFreqShift, FxHarmonizer]
+        self.buildNames()
+        
+class InputCreator(Creator):
+    def __init__(self):
+        self.classes = [InputIn, Soundfile]
+        self.buildNames()
+
