@@ -97,8 +97,8 @@ class AudioModule(object):
         self.cues = []
         self.currentCue = 0
 
-        self.input = Sig([0,0])
-        self.preOutput = Sig([0,0])
+        self.input = Sig([0] * NUM_CHNLS)
+        self.preOutput = Sig([0] * NUM_CHNLS)
         self.ctrlDW = SliderParameter(name="DryWet", value=1, min=0, max=1, 
                                       unit="", exp=1)
         self.addParameter(self.ctrlDW)
@@ -381,7 +381,7 @@ class InputIn(AudioModule):
         self.setName("input")
 
         #ctrls
-        self.ctrlGain = SliderParameter(name="gain", value=4, min=-90, max=24, 
+        self.ctrlGain = SliderParameter(name="gain", value=0, min=-90, max=24, 
                                         unit="db", exp=1)
         self.addParameter(self.ctrlGain)
         
@@ -404,7 +404,7 @@ class Soundfile(AudioModule):
         self.speed = SliderParameter(name="speed", value=1, min=0.25, max=4, unit="")
         self.addParameter(self.speed)
         
-        self.ctrlGain = SliderParameter(name="gain", value=4, min=-90, max=24, 
+        self.ctrlGain = SliderParameter(name="gain", value=0, min=-90, max=24, 
                                         unit="db", exp=1)
         self.addParameter(self.ctrlGain)
 

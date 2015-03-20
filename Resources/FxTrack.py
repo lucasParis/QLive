@@ -15,12 +15,14 @@ class FxTrack(scrolled.ScrolledPanel):
         self.connectionHeight = self.buttonHeight-8
         
         self.SetBackgroundStyle(wx.BG_STYLE_CUSTOM)  
-        self.SetBackgroundColour(wx.Colour(100, 100, 100))
+        self.SetBackgroundColour(TRACKS_BACKGROUND_COLOUR)
         self.cols = 5
         self.rows = 1
+        self.createButtonBitmap()
         self.createButtons()
         self.createConnections()
 
+        # what is 20+30+20 ?
         self.SetSize((10+self.cols*100+10, 20+30+20))
         self.SetVirtualSize((10+(self.cols+1)*(self.buttonWidth+20)+10, 20+30+20))
         self.SetScrollRate(1,1)
@@ -40,6 +42,25 @@ class FxTrack(scrolled.ScrolledPanel):
         else:
             self.dcref = wx.PaintDC
 
+    def createButtonBitmap(self):
+        w, h = self.buttonWidth, self.buttonHeight
+        b = wx.EmptyBitmap(w, h)
+        dc = wx.MemoryDC(b)
+        dc.SetPen(wx.Pen(TRACKS_BACKGROUND_COLOUR, 1))
+        dc.SetBrush(wx.Brush(TRACKS_BACKGROUND_COLOUR))
+        dc.DrawRectangle(0, 0, w, h)
+        gc = wx.GraphicsContext_Create(dc)
+        gc.SetPen(wx.Pen(FXBOX_OUTLINE_COLOUR, 1, wx.SOLID))
+        gc.SetBrush(wx.Brush(FXBOX_BACKGROUND_COLOUR, wx.SOLID))
+        rect = wx.Rect(0, 0, w, h)
+        rectIn = wx.Rect(0, 4, w/10., h-8)
+        rectOut = wx.Rect(w*9/10., 4, w/10., h-8)
+        gc.DrawRoundedRectangle(rect[0], rect[1], rect[2], rect[3], 5)
+        gc.DrawRoundedRectangle(rectIn[0], rectIn[1], rectIn[2], rectIn[3], 2)
+        gc.DrawRoundedRectangle(rectOut[0], rectOut[1], rectOut[2], rectOut[3], 2)
+        dc.SelectObject(wx.NullBitmap)
+        self.buttonBitmap = b
+        
     def createButtons(self):
         self.buttonsFxs = []
         self.buttonsInputs = []
@@ -64,7 +85,7 @@ class FxTrack(scrolled.ScrolledPanel):
                 else:
                     button.setInput(self.buttonsInputs[0].getOutput())
         # test case
-        self.outputTest = self.buttonsFxs[0][4].getOutput().out()
+        self.buttonsFxs[0][4].getOutput().out()
 
     def connectAudioMixer(self, audioMixer):
         for but in self.buttonsInputs:
@@ -119,12 +140,12 @@ class FxTrack(scrolled.ScrolledPanel):
                         wx.CallAfter(self.Refresh)
         
     def onPaint(self, event):
+        w, h = self.GetSize()
         dc = self.dcref(self)
         gc = wx.GraphicsContext_Create(dc)
         dc.Clear()
         self.PrepareDC(dc)
 
-        w, h = self.GetSize()
         dc.SetTextForeground(FXBOX_FOREGROUND_COLOUR)
         gc.SetPen(wx.Pen(FXBOX_OUTLINE_COLOUR, 1, wx.SOLID))
         gc.SetBrush(wx.Brush(FXBOX_BACKGROUND_COLOUR, wx.SOLID))
@@ -132,21 +153,12 @@ class FxTrack(scrolled.ScrolledPanel):
             for j, button in enumerate(row):
                 pos = self.idToPositionFX(button.getId())
                 rect = wx.Rect(pos[0], pos[1], self.buttonWidth, self.buttonHeight)
-                rectIn = wx.Rect(pos[0], pos[1]+4, self.buttonWidth/10., self.buttonHeight-8)
-                rectOut = wx.Rect(pos[0]+self.buttonWidth*9/10., pos[1]+4, self.buttonWidth/10., self.buttonHeight-8)
-                gc.DrawRoundedRectangle(rect[0], rect[1], rect[2], rect[3], 5)
-                gc.DrawRoundedRectangle(rectIn[0], rectIn[1], rectIn[2], rectIn[3], 2)
-                gc.DrawRoundedRectangle(rectOut[0], rectOut[1], rectOut[2], rectOut[3], 2)
-
-                dc.DrawLabel(button.name, rect, wx.ALIGN_CENTER)
-    
+                gc.DrawBitmap(self.buttonBitmap, rect[0], rect[1], rect[2], rect[3])
+                dc.DrawLabel(button.name, rect, wx.ALIGN_CENTER)    
         for i, inputBut in enumerate(self.buttonsInputs):
             pos = self.idToPositionInput(inputBut.getId())
             rect = wx.Rect(pos[0], pos[1], self.buttonWidth, self.buttonHeight)
-            rectOut = wx.Rect(pos[0]+(self.buttonWidth*9)/10., pos[1]+4, self.buttonWidth/10., self.buttonHeight-8)
-            gc.DrawRoundedRectangle(rect[0], rect[1], rect[2], rect[3], 5)
-            gc.DrawRoundedRectangle(rectOut[0], rectOut[1], rectOut[2], rectOut[3], 2)
-
+            gc.DrawBitmap(self.buttonBitmap, rect[0], rect[1], rect[2], rect[3])
             dc.DrawLabel(inputBut.name, rect, wx.ALIGN_CENTER)
 
         dc.SetTextForeground("#FFFFFF")

@@ -5,15 +5,17 @@ import wx.lib.scrolledpanel as scrolled
 from constants import *
 import QLiveLib
 
-class CuesPanel(scrolled.ScrolledPanel):
-    def __init__(self, parent=None):
-        scrolled.ScrolledPanel.__init__(self, parent, size=(95, 500), style=wx.SUNKEN_BORDER)
-
-        self.currentCue = 0
-        self.cueButtons = []
-        
+class ControlPanel(wx.Panel):
+    def __init__(self, parent):
+        wx.Panel.__init__(self, parent, size=(95, -1), style=wx.SUNKEN_BORDER)
         self.mainSizer = wx.BoxSizer(wx.VERTICAL)
         self.buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
+
+        self.startButton = wx.ToggleButton(self, label="Audio off", size=(70, -1))
+        self.mainSizer.Add(self.startButton, 0, wx.EXPAND|wx.TOP|wx.LEFT|wx.RIGHT, 5)
+        self.startButton.Bind(wx.EVT_TOGGLEBUTTON, self.audioStartStop)
+
+        self.mainSizer.Add(wx.StaticLine(self, size=(1, 1)), 0, wx.EXPAND|wx.ALL, 5)        
 
         title = wx.StaticText(self, label="--- CUES ---")
         self.mainSizer.Add(title, 0, wx.ALIGN_CENTER|wx.TOP, 5)
@@ -25,8 +27,31 @@ class CuesPanel(scrolled.ScrolledPanel):
         self.delButton.Bind(wx.EVT_BUTTON, self.onDelCue)
         self.buttonSizer.Add(self.delButton, 1)
         self.mainSizer.Add(self.buttonSizer, 0, wx.EXPAND|wx.ALL, 5)
+
+        self.SetSizerAndFit(self.mainSizer)
+
+    def audioStartStop(self, evt):
+        if evt.GetInt() == 1:
+            QLiveLib.getVar("AudioServer").start()
+            self.startButton.SetLabel("Audio on")
+        else:
+            QLiveLib.getVar("AudioServer").stop()
+            self.startButton.SetLabel("Audio off")
+
+    def onDelCue(self, evt):
+        QLiveLib.getVar("CuesPanel").onDelCue()
+
+    def onNewCue(self, evt):
+        QLiveLib.getVar("CuesPanel").onNewCue()
+
+class CuesPanel(scrolled.ScrolledPanel):
+    def __init__(self, parent=None, size=(95, 500)):
+        scrolled.ScrolledPanel.__init__(self, parent, size=size, style=wx.SUNKEN_BORDER)
+
+        self.currentCue = 0
+        self.cueButtons = []
         
-        self.mainSizer.Add(wx.StaticLine(self, size=(1, 1)), 0, wx.EXPAND|wx.ALL, 5)        
+        self.mainSizer = wx.BoxSizer(wx.VERTICAL)
         self.SetSizer(self.mainSizer)
 
     def setSelectedCue(self, number):
@@ -46,14 +71,15 @@ class CuesPanel(scrolled.ScrolledPanel):
     def appendCueButton(self):
         number = str(len(self.cueButtons))
         butHeight = self.GetTextExtent("9")[1] + 8
-        but = wx.Button(self, size=(70, butHeight), label=number, name=number)
+        but = wx.Button(self, size=(50, butHeight), label=number, name=number)
         but.Bind(wx.EVT_BUTTON, self.onCueSelection)
         self.mainSizer.Add(but, 0, wx.EXPAND|wx.TOP|wx.LEFT|wx.RIGHT, 5)
         self.cueButtons.append(but)
         self.setSelectedCue(int(number))
-        self.SetupScrolling()
+        self.SetupScrolling(scroll_x=False, scroll_y=True, scrollToTop=False)
         self.mainSizer.Layout()
-
+        self.ScrollChildIntoView(but)
+        
     def onCueSelection(self, event):
         button = event.GetEventObject()
         self.setSelectedCue(int(button.GetName())) 
@@ -62,7 +88,7 @@ class CuesPanel(scrolled.ScrolledPanel):
                          "selectedCue": self.currentCue}
             QLiveLib.getVar("MainWindow").tracks.cueEvent(dictEvent)
 
-    def onDelCue(self, evt):
+    def onDelCue(self):
         button = self.cueButtons.pop(self.currentCue)
         button.Destroy()
         self.mainSizer.Layout()
@@ -84,7 +110,7 @@ class CuesPanel(scrolled.ScrolledPanel):
                          "totalCues": len(self.cueButtons)}
             QLiveLib.getVar("MainWindow").tracks.cueEvent(dictEvent)
 
-    def onNewCue(self, evt):
+    def onNewCue(self):
         self.appendCueButton()
         if QLiveLib.getVar("MainWindow") != None:
             dictEvent = {"type": "newCue", 

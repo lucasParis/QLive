@@ -5,7 +5,7 @@ class AudioServer:
         self.server = Server(buffersize=64)
         self.server.setMidiInputDevice(99)
         self.server.boot()
-        
+
     def start(self):
         self.server.start()
 
@@ -14,6 +14,12 @@ class AudioServer:
 
     def shutdown(self):
         self.server.shutdown()
+
+    def isStarted(self):
+        return self.server.getIsStarted()
+
+    def isBooted(self):
+        return self.server.getIsBooted()
 
 class MidiLearn:
     def __init__(self, callback):

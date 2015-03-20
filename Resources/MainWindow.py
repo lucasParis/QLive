@@ -4,7 +4,7 @@ import QLiveLib
 from AudioServer import AudioServer
 from AudioMixer import AudioMixer
 from FxTracks import FxTracks
-from CuesPanel import CuesPanel
+from CuesPanel import ControlPanel, CuesPanel
 from MixerPanel import MixerPanel
 
 class MainWindow(wx.Frame):
@@ -15,7 +15,7 @@ class MainWindow(wx.Frame):
         self.SetTitle("QLive Session")
     
         self.audioServer = AudioServer()
-        self.audioServer.start() ### Need a way to start/stop the audio backend
+        QLiveLib.setVar("AudioServer", self.audioServer)
 
         self.currentProject = ""
         self.saveState = None
@@ -71,7 +71,10 @@ class MainWindow(wx.Frame):
         # We need something more dynamic than this...
         self.tracks.connectAudioMixer(self.audioMixer)
 
-        self.cues = CuesPanel(self.mainPanel)
+        self.controlPanel = ControlPanel(self.mainPanel)
+        csize = self.controlPanel.GetSize()
+        
+        self.cues = CuesPanel(self.mainPanel, size=(csize[0], 500))
         QLiveLib.setVar("CuesPanel", self.cues)
 
         self.mixer = MixerPanel(self.mainPanel, self.audioMixer)
@@ -79,7 +82,10 @@ class MainWindow(wx.Frame):
 
         self.mainSizer = wx.BoxSizer(wx.VERTICAL)
         self.topSizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.topSizer.Add(self.cues, 0)
+        self.controlSizer = wx.BoxSizer(wx.VERTICAL)
+        self.controlSizer.Add(self.controlPanel, 0)
+        self.controlSizer.Add(self.cues, 1, wx.EXPAND)
+        self.topSizer.Add(self.controlSizer, 0)
         self.topSizer.Add(self.tracks, 1, wx.EXPAND, 5)
         self.mainSizer.AddSizer(self.topSizer, 2, wx.EXPAND, 5)
         self.mainSizer.Add(self.mixer, 0, wx.EXPAND, 5)
@@ -98,6 +104,7 @@ class MainWindow(wx.Frame):
 
     def saveFile(self, path):
         dictSave = self.getCurrentState()
+        self.currentProject = path
         with open(path, "w") as f:
             f.write(QLIVE_MAGIC_LINE)
             f.write("### %s ###\n" % APP_VERSION)
@@ -215,8 +222,10 @@ class MainWindow(wx.Frame):
         if not self.askForSaving():
             return
         self.tracks.fxsView.closeAll()
-        self.audioServer.stop()
-        time.sleep(0.25)
-        self.audioServer.shutdown()
-        time.sleep(0.25)
+        if self.audioServer.isStarted():
+            self.audioServer.stop()
+            time.sleep(0.25)
+        if self.audioServer.isBooted():
+            self.audioServer.shutdown()
+            time.sleep(0.25)
         self.Destroy()

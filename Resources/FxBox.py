@@ -6,41 +6,34 @@ from constants import *
 import QLiveLib
 from AudioModule import FxCreator, InputCreator
 
-class FxBoxMenu(wx.Menu):
+class BoxMenu(wx.Menu):
     def __init__(self, parent):
         wx.Menu.__init__(self)
-        self.fxNames = FxCreator().getNames()
+        self.result = None
+
+    def prepareMenu(self, names):
         self.idsIndexDict = {}
-        for i, name in enumerate(self.fxNames):
+        for i, name in enumerate(names):
             id = wx.NewId()
             self.idsIndexDict[id] = i
             self.Append(id, name)
             self.Bind(wx.EVT_MENU, self.fxSelected, id=id)
-        self.result = None
-            
+
     def fxSelected(self, event):
         self.result = self.idsIndexDict[event.GetId()]
         
     def getSelection(self):
         return self.result
 
-class InputBoxMenu(wx.Menu):
+class FxBoxMenu(BoxMenu):
     def __init__(self, parent):
-        wx.Menu.__init__(self)
-        self.inputNames = InputCreator().getNames()
-        self.idsIndexDict = {}
-        for i, name in enumerate(self.inputNames):
-            id = wx.NewId()
-            self.idsIndexDict[id] = i
-            self.Append(id, name)
-            self.Bind(wx.EVT_MENU, self.fxSelected, id=id)
-        self.result = None
-            
-    def fxSelected(self, event):
-        self.result = self.idsIndexDict[event.GetId()]
-        
-    def getSelection(self):
-        return self.result
+        BoxMenu.__init__(self, parent)
+        self.prepareMenu(FxCreator().getNames())
+
+class InputBoxMenu(BoxMenu):
+    def __init__(self, parent):
+        BoxMenu.__init__(self, parent)
+        self.prepareMenu(InputCreator().getNames())
 
 class ParentBox(object):
     def __init__(self, parent):
@@ -55,7 +48,7 @@ class ParentBox(object):
         
         self.menu = None
         self.creator = None
-        self.audioIn = Sig([0,0])
+        self.audioIn = Sig([0] * NUM_CHNLS)
         self.audioOut = Sig(self.audioIn)    
         
     def setInput(self, input):
@@ -145,26 +138,17 @@ if __name__ == "__main__":
     class TestWindow(wx.Frame):
         def __init__(self):
             wx.Frame.__init__(self, None)
-            
             self.s = Server().boot()
             self.s.start()
-            
             self.but = InputBox(self)
             self.but.getOutput().out()
             self.but.setInput(Input([0,1]))
-#            self.Bind(wx.EVT_LEFT_DOWN, self.leftClicked)
             self.Bind(wx.EVT_RIGHT_DOWN, self.rightClicked)
-
-#        def leftClicked(self, event):
-#            self.but.openView()
 
         def rightClicked(self, event):
             self.but.openMenu(event)
 
-
     app = wx.App()
-
     frame = TestWindow()
     frame.Show()
-
     app.MainLoop()
