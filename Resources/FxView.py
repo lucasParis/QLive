@@ -124,12 +124,21 @@ class FxSlidersView(wx.Frame):
         self.panel.SetBackgroundColour(BACKGROUND_COLOUR)
 
         self.sizer = wx.BoxSizer(wx.VERTICAL)
+        self.headSizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.knobSizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
+
+        self.headSizer.AddStretchSpacer(1)
+        self.enable = wx.CheckBox(self.panel, -1, "Enable FX:", style=wx.ALIGN_RIGHT)
+        self.enable.SetValue(1)
+        self.enable.Bind(wx.EVT_CHECKBOX, self.enableFx)
+        self.headSizer.Add(self.enable, 0, wx.TOP|wx.RIGHT, 7)
+
+        self.sizer.Add(self.headSizer, 0, wx.EXPAND)
+        self.sizer.Add(self.knobSizer, 0, wx.EXPAND)
 
         ##init CTRLS
         self.widgets = []
-        self.knobSizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.sizer.Add(self.knobSizer, 0, wx.EXPAND)
         for param in self.parameters:
             if param.type == "slider":
                 slider = WidgetCreator(param.type)(param, self.panel)
@@ -161,6 +170,9 @@ class FxSlidersView(wx.Frame):
         
         self.Show()
 
+    def enableFx(self, evt):
+        self.audio.setEnable(evt.GetInt())
+            
     def refresh(self):
         for i, param in enumerate(self.parameters):
             self.widgets[i].setValue(param.getValue())

@@ -58,7 +58,7 @@ class MixerPanel(wx.Panel):
         inputBox.Add(wx.StaticLine(self, size=(1, -1)), 0, wx.EXPAND|wx.ALL, 5)
         for i in range(NUM_INPUTS):
             channel = self.audioMixer.getInputChannel(i)
-            slide = QLiveControlSlider(self, -80, 12, 0, orient=wx.VERTICAL, 
+            slide = QLiveControlSlider(self, -60, 18, 0, orient=wx.VERTICAL, 
                                        outFunction=channel.setVolume)
             slide.setChannelObject(channel)
             channel.setMidiCallback(slide.SetValue)
@@ -86,7 +86,7 @@ class MixerPanel(wx.Panel):
         outputBox.Add(wx.StaticLine(self, size=(1, -1)), 0, wx.EXPAND|wx.ALL, 5)
         for i in range(NUM_OUTPUTS):
             channel = self.audioMixer.getOutputChannel(i)            
-            slide = QLiveControlSlider(self, -80, 12, 0, orient=wx.VERTICAL, 
+            slide = QLiveControlSlider(self, -60, 18, 0, orient=wx.VERTICAL, 
                                        outFunction=channel.setVolume)
             slide.setChannelObject(channel)
             channel.setMidiCallback(slide.SetValue)

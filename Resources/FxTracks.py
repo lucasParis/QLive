@@ -42,6 +42,7 @@ class FxTracks(wx.Panel):
         self.track.cueEvent(eventDict)
         self.fxsView.refresh()
         
+    # no more used...
     def connectAudioMixer(self, audioMixer):
         self.track.connectAudioMixer(audioMixer)
         

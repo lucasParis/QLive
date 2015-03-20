@@ -4,6 +4,7 @@ import wx
 from constants import *
 from FxBox import *
 import  wx.lib.scrolledpanel as scrolled
+from pyo import *
 
 class FxTrack(scrolled.ScrolledPanel):
     def __init__(self, parent, viewPanelRef):
@@ -78,23 +79,19 @@ class FxTrack(scrolled.ScrolledPanel):
     def createConnections(self):
         for i, row in enumerate(self.buttonsFxs):
             for j, button in enumerate(row):
-                if j == len(row)-1:
-                    button.setInput(row[j-1].getOutput())
-                elif j != 0:
-                    button.setInput(row[j-1].getOutput())
+                if j == 0:
+                    button.setInput(self.buttonsInputs[i].getOutput())
                 else:
-                    button.setInput(self.buttonsInputs[0].getOutput())
-        # test case
-        self.buttonsFxs[0][4].getOutput().out()
+                    button.setInput(row[j-1].getOutput())
+        self.connectAudioMixer()
 
-    def connectAudioMixer(self, audioMixer):
+    def connectAudioMixer(self):
+        audioMixer = QLiveLib.getVar("AudioMixer")
         for but in self.buttonsInputs:
             but.setInput([audioMixer.getInputChannel(i).getOutput() for i in range(NUM_CHNLS)])
         for i, row in enumerate(self.buttonsFxs):
-            for j, button in enumerate(row):
-                if j == len(row)-1:
-                    output = button.getOutput()
-                    [audioMixer.getOutputChannel(k).setInput(output[k]) for k in range(NUM_CHNLS)]
+            output = row[-1].getOutput()
+            [audioMixer.getOutputChannel(k).setInput(output[k]) for k in range(NUM_CHNLS)]
 
     def mouseMotion(self, event):
         pass
@@ -203,7 +200,6 @@ class FxTrack(scrolled.ScrolledPanel):
         
     def setSaveDict(self, saveDict):
         #resize according to dict row col size
-        print saveDict
         self.rows = len(saveDict["fxsValues"])
         self.cols = len(saveDict["fxsValues"][0])
         self.createButtons()

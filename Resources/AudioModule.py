@@ -73,7 +73,7 @@ class PathParameter(ParameterParent):
     def __init__(self, name="empty"):
         ParameterParent.__init__(self, name=name)
         self.type = "path"
-        self.path = None
+        self.path = ""
         self.callback = None
 
     def setCallback(self, function):
@@ -112,6 +112,12 @@ class AudioModule(object):
         
     def addParameter(self, param):
         self.parameters.append(param)
+
+    def setEnable(self, state):
+        if state:
+            self.setOutput(self.process)
+        else:
+            self.setOutput(self.input)
 
     def setInput(self, input):
         self.input.setValue(input)
@@ -194,8 +200,8 @@ class FxLowpass(AudioModule):
         
         #audio
         self.dbValue = DBToA(self.ctrlGain)
-        self.lp = Biquad(self.getInput(), freq=self.ctrlFreq,q = self.ctrlQ, mul = self.dbValue)
-        self.setOutput(self.lp)
+        self.process = Biquad(self.getInput(), freq=self.ctrlFreq,q = self.ctrlQ, mul = self.dbValue)
+        self.setOutput(self.process)
 
 class FxHighpass(AudioModule):
     name = "Highpass"
@@ -212,8 +218,8 @@ class FxHighpass(AudioModule):
         
         #audio
         self.dbValue = DBToA(self.ctrlGain)
-        self.lp = Biquad(self.getInput(), freq=self.ctrlFreq,q = self.ctrlQ, mul = self.dbValue, type = 1)
-        self.setOutput(self.lp)
+        self.process = Biquad(self.getInput(), freq=self.ctrlFreq,q = self.ctrlQ, mul = self.dbValue, type = 1)
+        self.setOutput(self.process)
 
 class FxFreeVerb(AudioModule):
     name = "FreeVerb"
@@ -231,8 +237,8 @@ class FxFreeVerb(AudioModule):
         
         #audio
         self.dbValue = DBToA(self.ctrlGain)
-        self.verb = Freeverb(self.getInput(),self.size, self.damp, 1, mul = self.dbValue)
-        self.setOutput(self.verb)
+        self.process = Freeverb(self.getInput(),self.size, self.damp, 1, mul = self.dbValue)
+        self.setOutput(self.process)
 
 class FxStereoVerb(AudioModule):
     name = "StereoVerb"
@@ -252,8 +258,8 @@ class FxStereoVerb(AudioModule):
         
         #audio
         self.dbValue = DBToA(self.ctrlGain)
-        self.verb = STRev(self.getInput(), inpos=self.inputPosition, revtime=self.time, cutoff=self.cutoff, bal=1, mul=self.dbValue)
-        self.setOutput(self.verb)
+        self.process = STRev(self.getInput(), inpos=self.inputPosition, revtime=self.time, cutoff=self.cutoff, bal=1, mul=self.dbValue)
+        self.setOutput(self.process)
 
 class FxDisto(AudioModule):
     name = "Distortion"
@@ -270,8 +276,8 @@ class FxDisto(AudioModule):
         
         #audio
         self.dbValue = DBToA(self.ctrlGain)
-        self.disto = Disto(self.getInput(), drive=self.drive, slope=self.slope, mul = self.dbValue)
-        self.setOutput(self.disto)
+        self.process = Disto(self.getInput(), drive=self.drive, slope=self.slope, mul = self.dbValue)
+        self.setOutput(self.process)
 
 class FxDelay(AudioModule):
     name = "Delay"
@@ -288,8 +294,8 @@ class FxDelay(AudioModule):
         
         #audio
         self.dbValue = DBToA(self.ctrlGain)
-        self.delay = Delay(self.getInput(), delay=self.time, feedback=self.feedback, maxdelay=3, mul=self.dbValue)
-        self.setOutput(self.delay)
+        self.process = Delay(self.getInput(), delay=self.time, feedback=self.feedback, maxdelay=3, mul=self.dbValue)
+        self.setOutput(self.process)
 
 class FxCompressor(AudioModule):
     name = "Compressor"
@@ -309,8 +315,8 @@ class FxCompressor(AudioModule):
         self.addParameter(self.ctrlGain)
         #audio
         self.dbValue = DBToA(self.ctrlGain)
-        self.comp = Compress(self.getInput(), thresh=self.tresh, ratio=self.ratio, risetime=self.attack, falltime=self.decay, lookahead=5.00, knee=0, mul = self.dbValue)
-        self.setOutput(self.comp)
+        self.process = Compress(self.getInput(), thresh=self.tresh, ratio=self.ratio, risetime=self.attack, falltime=self.decay, lookahead=5.00, knee=0, mul = self.dbValue)
+        self.setOutput(self.process)
 
 class FxFreqShift(AudioModule):
     name = "FreqShift"
@@ -324,8 +330,8 @@ class FxFreqShift(AudioModule):
         self.addParameter(self.ctrlShift)
         #audio
         self.dbValue = DBToA(self.ctrlGain)
-        self.comp = FreqShift(self.getInput(), self.ctrlShift, mul = self.dbValue)
-        self.setOutput(self.comp)
+        self.process = FreqShift(self.getInput(), self.ctrlShift, mul = self.dbValue)
+        self.setOutput(self.process)
 
 class FxHarmonizer(AudioModule):
     name = "Harmonizer"
@@ -342,8 +348,8 @@ class FxHarmonizer(AudioModule):
         
         #audio
         self.dbValue = DBToA(self.ctrlGain)
-        self.comp = Harmonizer(self.getInput(), self.ctrlTranspo, self.ctrlFeed, mul = self.dbValue)
-        self.setOutput(self.comp)
+        self.process = Harmonizer(self.getInput(), self.ctrlTranspo, self.ctrlFeed, mul = self.dbValue)
+        self.setOutput(self.process)
 
 class FxCreator:
     def __init__(self):

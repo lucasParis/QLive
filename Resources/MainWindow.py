@@ -68,9 +68,6 @@ class MainWindow(wx.Frame):
         self.tracks = FxTracks(self.mainPanel)
         QLiveLib.setVar("FxTracks", self.tracks)
 
-        # We need something more dynamic than this...
-        self.tracks.connectAudioMixer(self.audioMixer)
-
         self.controlPanel = ControlPanel(self.mainPanel)
         csize = self.controlPanel.GetSize()
         
@@ -119,7 +116,7 @@ class MainWindow(wx.Frame):
             return
         self.tracks.fxsView.closeAll()
         execfile(path, globals())
-        QLiveLib.PRINT("opening: ", dictSave)
+        # QLiveLib.PRINT("opening: ", dictSave)
         if path == NEW_FILE_PATH:
             self.currentProject = ""
         else:

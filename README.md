@@ -12,7 +12,6 @@ todo list:
 - preferences systeme
 
 fonctionalite:
-- effects bypass
 - empty effect choice
 - soundcard setup menu (on launch?)
 - midi cue triggering 
