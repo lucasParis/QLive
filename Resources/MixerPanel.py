@@ -8,15 +8,26 @@ from constants import *
 class QLiveControlSlider(ControlSlider):
     def __init__(self, parent, minvalue, maxvalue, init=None, pos=(0,0), 
                  size=(200,16), log=False, outFunction=None, integer=False, 
-                 powoftwo=False, backColour=None, orient=wx.HORIZONTAL):
+                 powoftwo=False, backColour=None, orient=wx.HORIZONTAL, 
+                 linkedObject=None):
         ControlSlider.__init__(self, parent, minvalue, maxvalue, init, pos, 
-                               size, log, outFunction, integer, powoftwo, 
+                               size, log, self.localOutFunction, integer, powoftwo, 
                                backColour, orient)
         self.channelobject = None
         self.midiscanning = False
+        self.linkedObject = None
+        self.externalOutFunction = outFunction
         self.midiscan = MidiLearn(self.getMidiScan)
         self.Bind(wx.EVT_RIGHT_DOWN, self.MouseRightDown)
  
+    def localOutFunction(self, value):
+        if self.linkedObject:
+            self.linkedObject.SetValue(value)
+        self.externalOutFunction(value)
+
+    def setLinkedObject(self, obj):
+        self.linkedObject = obj
+
     def setChannelObject(self, obj):
         self.channelobject = obj
 
@@ -45,6 +56,8 @@ class MixerPanel(wx.Panel):
         self.audioMixer = audioMixer
         self.SetBackgroundColour(BACKGROUND_COLOUR)
 
+        self.inputLinked = False
+        self.outputLinked = False
         self.inputSliders = []
         self.outputSliders = []
         self.inputMeters = []
@@ -56,6 +69,9 @@ class MixerPanel(wx.Panel):
         inputBox.AddSpacer((-1,5))
         inputBox.Add(wx.StaticText(self, label="Input Channels"), 0, wx.LEFT|wx.EXPAND, 10)
         inputBox.Add(wx.StaticLine(self, size=(1, -1)), 0, wx.EXPAND|wx.ALL, 5)
+        self.inlinked = wx.CheckBox(self, -1, "linked --->")
+        self.inlinked.Bind(wx.EVT_CHECKBOX, self.linkInputs)
+        inputBox.Add(self.inlinked, 0, wx.EXPAND|wx.LEFT, 10)
         for i in range(NUM_INPUTS):
             channel = self.audioMixer.getInputChannel(i)
             slide = QLiveControlSlider(self, -60, 18, 0, orient=wx.VERTICAL, 
@@ -84,6 +100,9 @@ class MixerPanel(wx.Panel):
         outputBox.AddSpacer((-1,5))
         outputBox.Add(wx.StaticText(self, label = "Output Channels"), 0, wx.LEFT|wx.EXPAND, 10)
         outputBox.Add(wx.StaticLine(self, size=(1, -1)), 0, wx.EXPAND|wx.ALL, 5)
+        self.outlinked = wx.CheckBox(self, -1, "linked --->")
+        self.outlinked.Bind(wx.EVT_CHECKBOX, self.linkOutputs)
+        outputBox.Add(self.outlinked, 0, wx.EXPAND|wx.LEFT, 10)
         for i in range(NUM_OUTPUTS):
             channel = self.audioMixer.getOutputChannel(i)            
             slide = QLiveControlSlider(self, -60, 18, 0, orient=wx.VERTICAL, 
@@ -112,6 +131,40 @@ class MixerPanel(wx.Panel):
         mainSizer.Add(outputBox, 1, wx.EXPAND)
         self.SetSizer(mainSizer)
 
+    def linkInputs(self, evt=None, set=None):
+        if set is not None:
+            if set:
+                self.inputLinked = False
+            else:
+                self.inputLinked = True
+        if self.inputLinked == False:
+            self.inputLinked = True
+            for i, sl in enumerate(self.inputSliders):
+                if i%2 == 0:
+                    sl.setLinkedObject(self.inputSliders[i+1])
+        else:
+            self.inputLinked = False
+            for i, sl in enumerate(self.inputSliders):
+                if i%2 == 0:
+                    sl.setLinkedObject(None)
+
+    def linkOutputs(self, evt=None, set=None):
+        if set is not None:
+            if set:
+                self.outputLinked = False
+            else:
+                self.outputLinked = True
+        if self.outputLinked == False:
+            self.outputLinked = True
+            for i, sl in enumerate(self.outputSliders):
+                if i%2 == 0:
+                    sl.setLinkedObject(self.outputSliders[i+1])
+        else:
+            self.outputLinked = False
+            for i, sl in enumerate(self.outputSliders):
+                if i%2 == 0:
+                    sl.setLinkedObject(None)
+
     def getSaveDict(self):
         dict = {} 
         inputSliderValues = []
@@ -129,6 +182,8 @@ class MixerPanel(wx.Panel):
             outputSliderCtls.append(slide.getMidiCtl())
         dict["outputSliderValues"] = outputSliderValues
         dict["outputSliderCtls"] = outputSliderCtls
+        dict["inputLinked"] = self.inputLinked
+        dict["outputLinked"] = self.outputLinked
 
         return dict
         
@@ -147,7 +202,13 @@ class MixerPanel(wx.Panel):
             slide.setMidiCtl(ctl)
             self.audioMixer.getOutputChannel(i).setMidiCtl(ctl)
             self.audioMixer.getOutputChannel(i).setMidiCtlValue(val)
-            
+        inlink = dict.get("inputLinked", False)
+        outlink = dict.get("outputLinked", False)
+        self.inlinked.SetValue(inlink)
+        self.outlinked.SetValue(outlink)
+        self.linkInputs(set=inlink)
+        self.linkOutputs(set=outlink)
+
 if __name__ == "__main__":
     from pyo import *
     class TestWindow(wx.Frame):
