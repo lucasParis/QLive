@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # encoding: utf-8
 import wx
-from pyo import *
+from pyo64 import *
 from constants import *
 import QLiveLib
 from AudioModule import FxCreator, InputCreator

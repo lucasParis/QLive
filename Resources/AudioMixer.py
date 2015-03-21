@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # encoding: utf-8
-from pyo import *
+from pyo64 import *
 from constants import *
 from AudioServer import MidiLearn
 

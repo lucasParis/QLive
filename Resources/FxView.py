@@ -1,8 +1,8 @@
 #!/usr/bin/python
 # encoding: utf-8
 import wx, os
+from constants import *
 import  wx.lib.filebrowsebutton as filebrowse
-from pyo import *
 from pyolib._wxwidgets import ControlSlider, BACKGROUND_COLOUR
 import  wx.lib.scrolledpanel as scrolled
 from Widgets import *
@@ -37,9 +37,9 @@ class PathWidget(WidgetParent):
         self.callback = parameter.setValue
                 
         self.sizer = wx.BoxSizer(wx.HORIZONTAL)
-        # TODO: need to add wildcard here...
         self.fbb = filebrowse.FileBrowseButton(self, -1, labelText="Path", 
                                                size=(400,-1), fileMode=wx.OPEN, 
+                                               fileMask=AUDIO_FILE_WILDCARD,
                                                initialValue=parameter.getValue(),
                                                changeCallback=self.pathCallback)
         self.fbb.SetBackgroundColour(BACKGROUND_COLOUR)

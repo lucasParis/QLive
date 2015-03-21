@@ -2,7 +2,7 @@
 # encoding: utf-8
 import wx, os
 from constants import *
-from pyo import *
+from pyo64 import *
 
 ######## Types of control parameters available in the FxView window ########
 

@@ -57,6 +57,13 @@ class MainWindow(wx.Frame):
         quitItem = menu1.Append(wx.ID_EXIT, "Quit\tCtrl+Q")
         self.Bind(wx.EVT_MENU, self.OnClose, quitItem)
         menubar.Append(menu1, 'File')
+        menu2 = wx.Menu()
+        menu2.Append(NEW_TRACK_ID, "Add Track\tCtrl+T")
+        self.Bind(wx.EVT_MENU, self.onNewTrack, id=NEW_TRACK_ID)        
+        menu2.Append(DELETE_TRACK_ID, "Delete Track\tShift+Ctrl+D")
+        self.Bind(wx.EVT_MENU, self.onDeleteTrack, id=DELETE_TRACK_ID)        
+        menubar.Append(menu2, 'Tracks')
+
         self.SetMenuBar(menubar)
 
         self.mainPanel = wx.Panel(self, style=wx.SUNKEN_BORDER)
@@ -213,6 +220,13 @@ class MainWindow(wx.Frame):
             self.saveFile(path)
         dlg.Destroy()
         
+    def onNewTrack(self, evt):
+        print "Add track..."
+
+    def onDeleteTrack(self, evt):
+        # TODO: A way to select a track
+        print "Delete selected track..."
+
     def openPrefs(self, evt):
         print "Popup Preferences Windows..."
 

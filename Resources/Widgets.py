@@ -280,7 +280,7 @@ class QLiveControlKnob(wx.Panel):
         evt.Skip()
         
 if __name__ == "__main__":
-    from pyo import *
+    from pyo64 import *
     s = Server().boot()
     class TestFrame(wx.Frame):
         def __init__(self):
