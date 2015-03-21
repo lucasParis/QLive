@@ -68,7 +68,7 @@ class MixerPanel(wx.Panel):
         inputSliderBox = wx.BoxSizer(wx.HORIZONTAL)
         inputBox.AddSpacer((-1,5))
         inputBox.Add(wx.StaticText(self, label="Input Channels"), 0, wx.LEFT|wx.EXPAND, 10)
-        inputBox.Add(wx.StaticLine(self, size=(1, -1)), 0, wx.EXPAND|wx.ALL, 5)
+        inputBox.Add(wx.StaticLine(self, size=(1, -1)), 0, wx.EXPAND|wx.TOP|wx.LEFT|wx.RIGHT, 5)
         self.inlinked = wx.CheckBox(self, -1, "linked --->")
         self.inlinked.Bind(wx.EVT_CHECKBOX, self.linkInputs)
         inputBox.Add(self.inlinked, 0, wx.EXPAND|wx.LEFT, 10)
@@ -90,7 +90,7 @@ class MixerPanel(wx.Panel):
                 inputSliderBox.Add(meter, 0, wx.EXPAND|wx.ALL, 2)
                 inputSliderBox.Add(slide, 0, wx.ALL, 2)
                 inputSliderBox.AddSpacer(15)
-        inputBox.Add(inputSliderBox, 0, wx.EXPAND|wx.ALL, 5)
+        inputBox.Add(inputSliderBox, 0, wx.EXPAND|wx.BOTTOM|wx.LEFT|wx.RIGHT, 5)
         
         separator = wx.StaticLine(self, size=(1, -1), style=wx.LI_VERTICAL)
 
@@ -99,7 +99,7 @@ class MixerPanel(wx.Panel):
         outputSliderBox = wx.BoxSizer(wx.HORIZONTAL)
         outputBox.AddSpacer((-1,5))
         outputBox.Add(wx.StaticText(self, label = "Output Channels"), 0, wx.LEFT|wx.EXPAND, 10)
-        outputBox.Add(wx.StaticLine(self, size=(1, -1)), 0, wx.EXPAND|wx.ALL, 5)
+        outputBox.Add(wx.StaticLine(self, size=(1, -1)), 0, wx.EXPAND|wx.TOP|wx.LEFT|wx.RIGHT, 5)
         self.outlinked = wx.CheckBox(self, -1, "linked --->")
         self.outlinked.Bind(wx.EVT_CHECKBOX, self.linkOutputs)
         outputBox.Add(self.outlinked, 0, wx.EXPAND|wx.LEFT, 10)
@@ -123,7 +123,7 @@ class MixerPanel(wx.Panel):
                 outputSliderBox.Add(slide, 0, wx.ALL, 2)
                 outputSliderBox.AddSpacer(15)
                 
-        outputBox.Add(outputSliderBox, 0, wx.EXPAND|wx.ALL, 5)
+        outputBox.Add(outputSliderBox, 0, wx.EXPAND|wx.BOTTOM|wx.LEFT|wx.RIGHT, 5)
             
         mainSizer = wx.BoxSizer(wx.HORIZONTAL)
         mainSizer.Add(inputBox, 1, wx.EXPAND)

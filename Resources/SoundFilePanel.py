@@ -3,6 +3,9 @@
 import wx
 import wx.grid
 
+### id - filename - loopmode - transpo - playing - directout - startpoint - endpoint
+### i  - str      - i        - f       - check   - check     - f          - f
+
 class ActionMenu(wx.Menu):
     def __init__(self, parent):
         wx.Menu.__init__(self)
