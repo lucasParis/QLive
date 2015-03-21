@@ -60,6 +60,9 @@ class CuesPanel(scrolled.ScrolledPanel):
                 self.cueButtons[self.currentCue].SetBackgroundColour(CUEBUTTON_UNSELECTED_COLOUR)
             self.cueButtons[number].SetBackgroundColour(CUEBUTTON_SELECTED_COLOUR)
             self.currentCue = number
+            self.SetupScrolling(scroll_x=False, scroll_y=True, scrollToTop=False)
+            self.mainSizer.Layout()
+            self.ScrollChildIntoView(self.cueButtons[self.currentCue])
         
     def clearButtons(self):
         for button in self.cueButtons:
@@ -76,9 +79,6 @@ class CuesPanel(scrolled.ScrolledPanel):
         self.mainSizer.Add(but, 0, wx.EXPAND|wx.TOP|wx.LEFT|wx.RIGHT, 5)
         self.cueButtons.append(but)
         self.setSelectedCue(int(number))
-        self.SetupScrolling(scroll_x=False, scroll_y=True, scrollToTop=False)
-        self.mainSizer.Layout()
-        self.ScrollChildIntoView(but)
         
     def onCueSelection(self, event):
         button = event.GetEventObject()

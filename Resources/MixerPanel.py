@@ -170,6 +170,7 @@ class MixerPanel(wx.Panel):
         
         recordingBox.Add(wx.StaticText(self, -1, "Destination"), 0, wx.LEFT, 6)
         recordingBox.Add(rec1Box, 0, wx.BOTTOM  | wx.RIGHT, 5)
+        recordingBox.AddSpacer((-1, 5))
         recordingBox.Add(wx.StaticText(self, -1, "Filename"), 0, wx.LEFT, 6)
         recordingBox.Add(rec2Box, 0, wx.BOTTOM | wx.RIGHT, 5)
 

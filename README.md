@@ -7,17 +7,16 @@ QLive is a cues-based software to help the creation of mixed music
 TODO
 ----
 
-** Short term **
+**Short term**
 
-- Soundfile section: excel style
+- Soundfile section: excel style (with a little triangle to show/hide the grid)
 - Allow multiple tracks
-- Record master output on disk
 - Audio driver setup
 - Parameter interpolation between cues
 - Finalizing cue selection
 - Project repository design (sounds folder, doc folder, etc.)
 
-** Mid term **
+**Mid term**
 
 - Documentation/archive prototype
 - BPF in fx view

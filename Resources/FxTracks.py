@@ -13,7 +13,7 @@ class FxTracks(wx.Panel):
         wx.Panel.__init__(self, parent)
         self.sizer = wx.BoxSizer(wx.VERTICAL)
         
-        self.toolbar = FxTracksToolBar(self)
+        #self.toolbar = FxTracksToolBar(self)
 
         # FX window manager
         self.fxsView = FxViewManager(self)
@@ -21,7 +21,7 @@ class FxTracks(wx.Panel):
         # This should be an  array of FxTrack objects
         self.track = FxTrack(self, self.fxsView)
 
-        self.sizer.Add(self.toolbar, 0, wx.EXPAND)
+        #self.sizer.Add(self.toolbar, 0, wx.EXPAND)
         self.sizer.Add(self.track, 1, wx.EXPAND)
         self.SetSizer(self.sizer)
 

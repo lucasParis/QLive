@@ -137,7 +137,11 @@ class MainWindow(wx.Frame):
     def askForSaving(self):
         state = True
         if self.saveState != self.getCurrentState():
-            msg = 'file %s has been modified. Do you want to save?' % self.currentProject
+            if not self.currentProject:
+                filename = "Untitled"
+            else:
+                filename = self.currentProject
+            msg = 'file "%s" has been modified. Do you want to save?' % filename
             dlg = wx.MessageDialog(None, msg, 'Warning!', wx.YES | wx.NO | wx.CANCEL)
             but = dlg.ShowModal()
             if but == wx.ID_YES:
