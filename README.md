@@ -10,16 +10,19 @@ TODO
 **Short term**
 
 - Soundfile section: excel style (Olivier)
-- Allow multiple tracks (Lucas)
 - Audio driver setup (Olivier)
-- Parameter interpolation between cues (per cue, per parameter) (Lucas)
-- Finalizing cue selection (Lucas)
 - Project repository design (sounds folder, doc folder, etc.) (Olivier)
 - Left-right bindings on knobs (Olivier)
 - Software preferences (fileformat and sampletype in the prefs) (Olivier)
+
+- foldpanelbar (Lucas)
+- Allow multiple tracks (Lucas)
+- Parameter interpolation between cues (per cue, per parameter) (Lucas)
+- Finalizing cue selection (Lucas)
+
 - ControlPanel -> rec/save buttons, remove recording section 
 - Mixer should take less space (Olivier)
-- foldpanelbar (Lucas)
+
 
 **Mid term**
 
