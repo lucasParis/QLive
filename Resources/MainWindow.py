@@ -1,4 +1,4 @@
-import wx, time, os, pprint, copy, codecs
+import wx, time, os, pprint, copy, codecs, shutil
 from constants import *
 import QLiveLib
 from AudioServer import AudioServer
@@ -6,6 +6,7 @@ from AudioMixer import AudioMixer
 from FxTracks import FxTracks
 from CuesPanel import ControlPanel, CuesPanel
 from MixerPanel import MixerPanel
+from IntroDialog import IntroDialog
 
 class MainWindow(wx.Frame):
     def __init__(self, pos, size):
@@ -97,7 +98,28 @@ class MainWindow(wx.Frame):
 
         self.loadFile(NEW_FILE_PATH)
 
+        dlg = IntroDialog(self)
+        if dlg.ShowModal() == wx.ID_OK:
+            filepath = dlg.filepath
+            createDir = dlg.createDir
+            if createDir:
+                self.createProjectFolder(filepath)
+            else:
+                self.loadFile(filepath)
+        dlg.Destroy()
+
         self.Show()
+
+    def createProjectFolder(self, filepath):
+        fil = os.path.basename(filepath)
+        fld = os.path.splitext(fil)[0]
+        dir = os.path.dirname(filepath)
+        os.mkdir(os.path.join(dir, fld))
+        os.mkdir(os.path.join(dir, fld, "doc"))
+        os.mkdir(os.path.join(dir, fld, "sounds"))
+        flpath = os.path.join(dir, fld, fld+".qlp")
+        shutil.copy(NEW_FILE_PATH, flpath)
+        self.loadFile(flpath)
 
     def getCurrentState(self):
         dictSave = {}

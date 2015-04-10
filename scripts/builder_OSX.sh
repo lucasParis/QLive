@@ -5,7 +5,7 @@ cp main.py QLive.py
 cp scripts/info.plist .
 
 rm -rf build dist
-py2applet --make-setup QLive.py Resources/*
+py2applet --make-setup --argv-emulation=0 QLive.py Resources/*
 python setup.py py2app --plist=info.plist
 rm -f setup.py
 rm -rf build
