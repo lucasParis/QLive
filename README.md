@@ -12,7 +12,6 @@ TODO
 - Soundfile section: excel style (Olivier)
 - Audio driver setup (Olivier)
 - Project repository design (sounds folder, doc folder, etc.) (Olivier)
-- Left-right bindings on knobs (Olivier)
 - Software preferences (fileformat and sampletype in the prefs) (Olivier)
 
 - foldpanelbar (Lucas)
@@ -22,7 +21,6 @@ TODO
 
 - ControlPanel -> rec/save buttons, remove recording section 
 - Mixer should take less space (Olivier)
-
 
 **Mid term**
 

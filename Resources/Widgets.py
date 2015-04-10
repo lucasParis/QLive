@@ -196,7 +196,8 @@ class QLiveControlKnob(wx.Panel):
             if evt.Dragging() and evt.LeftIsDown() and self.HasCapture():
                 pos = wx.GetMousePosition()
                 offY = self.clickPos[1] - pos[1]
-                off = offY
+                offX = pos[0] - self.clickPos[0]
+                off = offY + offX
                 off *= 0.005 * (self.maxvalue - self.minvalue)
                 self.value = clamp(self.oldValue + off, self.minvalue, self.maxvalue)    
                 self.selected = False
