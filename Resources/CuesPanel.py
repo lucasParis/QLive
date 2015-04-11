@@ -22,7 +22,7 @@ class ControlPanel(wx.Panel):
                            wx.EXPAND|wx.LEFT|wx.RIGHT|wx.BOTTOM, 5)        
 
         title = wx.StaticText(self, label="-- CUES --")
-        self.mainSizer.Add(title, 0, wx.ALIGN_CENTER|wx.TOP, 5)
+        self.mainSizer.Add(title, 0, wx.ALIGN_CENTER, 5)
 
         bmp = wx.ArtProvider.GetBitmap(wx.ART_ADD_BOOKMARK, wx.ART_TOOLBAR, (24, 24))
         self.newButton = wx.BitmapButton(self, wx.ID_ANY, bmp)

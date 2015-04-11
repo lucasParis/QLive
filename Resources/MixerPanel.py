@@ -65,11 +65,16 @@ class MixerPanel(wx.Panel):
         self.inputMeters = []
         self.outputMeters = []
         
+        font = self.GetFont()
+        font.SetWeight(wx.FONTWEIGHT_BOLD)
+        
         ### INPUT SECTION
         inputBox = wx.BoxSizer(wx.VERTICAL)        
         inputSliderBox = wx.BoxSizer(wx.HORIZONTAL)
         inputBox.AddSpacer((-1,2))
-        inputBox.Add(wx.StaticText(self, label="Input Channels"), 0, wx.LEFT|wx.EXPAND, 10)
+        label = wx.StaticText(self, label="Input Channels")
+        label.SetFont(font)
+        inputBox.Add(label, 0, wx.LEFT|wx.EXPAND, 10)
         inputBox.Add(wx.StaticLine(self, size=(1, -1)), 0, wx.EXPAND|wx.TOP|wx.LEFT|wx.RIGHT, 2)
         for i in range(NUM_INPUTS):
             channel = self.audioMixer.getInputChannel(i)
@@ -97,7 +102,9 @@ class MixerPanel(wx.Panel):
         outputBox = wx.BoxSizer(wx.VERTICAL)
         outputSliderBox = wx.BoxSizer(wx.HORIZONTAL)
         outputBox.AddSpacer((-1,2))
-        outputBox.Add(wx.StaticText(self, label = "Output Channels"), 0, wx.LEFT|wx.EXPAND, 10)
+        label = wx.StaticText(self, label = "Output Channels")
+        label.SetFont(font)
+        outputBox.Add(label, 0, wx.LEFT|wx.EXPAND, 10)
         outputBox.Add(wx.StaticLine(self, size=(1, -1)), 0, wx.EXPAND|wx.TOP|wx.LEFT|wx.RIGHT, 2)
         for i in range(NUM_OUTPUTS):
             channel = self.audioMixer.getOutputChannel(i)            

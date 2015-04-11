@@ -30,12 +30,12 @@ class IntroDialog(wx.Dialog):
 
         box = wx.BoxSizer(wx.HORIZONTAL)
         self.pathtext = wx.StaticText(self, -1, "")
-        box.Add(self.pathtext, 1, wx.EXPAND|wx.ALIGN_LEFT|wx.ALL, 5)
+        box.Add(self.pathtext, 1, wx.EXPAND|wx.ALIGN_LEFT|wx.BOTTOM, 25)
 
-        sizer.Add(box, 0, wx.EXPAND|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 5)
+        sizer.Add(box, 0, wx.EXPAND|wx.ALIGN_CENTER_VERTICAL|wx.ALL, 10)
 
         line = wx.StaticLine(self, -1, size=(20,-1), style=wx.LI_HORIZONTAL)
-        sizer.Add(line, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.RIGHT|wx.TOP, 5)
+        sizer.Add(line, 0, wx.GROW|wx.ALIGN_CENTER_VERTICAL|wx.RIGHT|wx.TOP, 25)
 
         btnsizer = wx.StdDialogButtonSizer()
 
@@ -57,8 +57,9 @@ class IntroDialog(wx.Dialog):
         w, _ = self.GetSize()
         tw, _ = self.GetTextExtent("O")
         n = w / (tw + 1)
+        head = "Selected Project:\n\n"
         path = textwrap.fill(path, n) 
-        self.pathtext.SetLabel(path)
+        self.pathtext.SetLabel(head+path)
 
     def open(self, evt):
         dlg = wx.FileDialog(self, "Open Qlive Projet", os.path.expanduser("~"), "",
