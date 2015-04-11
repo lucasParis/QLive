@@ -4,18 +4,25 @@ import wx
 from constants import *
 from FxBox import *
 import wx.lib.scrolledpanel as scrolled
+import Resources.QLiveLib as QLiveLib
+
 
 class FxTrack(wx.ScrolledWindow):
-    def __init__(self, parent, viewPanelRef):
+    def __init__(self, parent, viewPanelRef, id = 0):
         wx.ScrolledWindow.__init__(self, parent)
         
+        self.trackID = id        
+
         self.buttonWidth = 80
         self.buttonHeight = 25
         self.connectionWidth = self.buttonWidth/10.
         self.connectionHeight = self.buttonHeight-8
         
         self.SetBackgroundStyle(wx.BG_STYLE_CUSTOM)  
-        self.SetBackgroundColour(TRACKS_BACKGROUND_COLOUR)
+        if self.trackID%2:
+            self.SetBackgroundColour(TRACKS_BACKGROUND_COLOUR)
+        else:
+            self.SetBackgroundColour(TRACKS_BACKGROUND_COLOUR2)            
         self.cols = 5
         self.rows = 1
         self.createButtonBitmap()
@@ -40,6 +47,8 @@ class FxTrack(wx.ScrolledWindow):
             self.dcref = wx.BufferedPaintDC
         else:
             self.dcref = wx.PaintDC
+            
+
 
     def createButtonBitmap(self, enable=True):
         w, h = self.buttonWidth, self.buttonHeight
@@ -106,6 +115,7 @@ class FxTrack(wx.ScrolledWindow):
         #id = self.positionToIdFX(pos)
                 
     def leftClicked(self, event):
+        self.trackSelected()
         pos = self.CalcUnscrolledPosition( event.GetPosition() )
         if pos[0] < 100: # inputs
             id = self.positionToIdInput(pos)
@@ -150,7 +160,9 @@ class FxTrack(wx.ScrolledWindow):
         dc.Clear()
         self.PrepareDC(dc)
 
+
         dc.SetTextForeground(FXBOX_FOREGROUND_COLOUR)
+
         for i, row in enumerate(self.buttonsFxs):
             for j, button in enumerate(row):
                 pos = self.idToPositionFX(button.getId())
@@ -170,7 +182,9 @@ class FxTrack(wx.ScrolledWindow):
         dc.DrawLabel("Inputs", wx.Rect(0, 0, 100, 20), wx.ALIGN_CENTER)
         dc.DrawLabel("Fxs", wx.Rect(100, 0, 100, 20), wx.ALIGN_CENTER)
 
-        dc.DrawLine(100, 0, 100, h)
+        dc.DrawLine(100, 0, 100, 1000)
+        dc.DrawLine(0, 0, w, 0)
+
 
     def idToPositionFX(self, id):
         return (10+(id[0]+1)*100, (id[1])*50+20)
@@ -240,6 +254,25 @@ class FxTrack(wx.ScrolledWindow):
                 button.cueEvent(eventDict)
         for i, inputBut in enumerate(self.buttonsInputs):
             inputBut.cueEvent(eventDict)
+            
+    def trackSelected(self):
+        QLiveLib.getVar("FxTracks").setActiveTrack(self.trackID)
+#        self.SetBackgroundColour(TRACKS_BACKGROUND_COLOUR_HIGHLIGHTED)
+#        self.Refresh()
+        
+    def setSelected(self, value):
+        if value:
+            self.SetBackgroundColour(TRACKS_BACKGROUND_COLOUR_HIGHLIGHTED)
+        else:
+            if self.trackID%2:
+                self.SetBackgroundColour(TRACKS_BACKGROUND_COLOUR)
+            else:
+                self.SetBackgroundColour(TRACKS_BACKGROUND_COLOUR2)    
+        self.Refresh()
+
+        
+    def setID(self, id):
+        self.trackID = id
 
 if __name__ == "__main__":
     class TestWindow(wx.Frame):

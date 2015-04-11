@@ -13,17 +13,19 @@ class FxTracks(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent)
         self.sizer = wx.BoxSizer(wx.VERTICAL)
-
+        self.selectedTrack = 0
         #self.toolbar = FxTracksToolBar(self)
 
         # FX window manager
         self.fxsView = FxViewManager(self)
         
         # This should be an  array of FxTrack objects
-        self.track = FxTrack(self, self.fxsView)
+        self.tracks = [FxTrack(self, self.fxsView, i) for i in range(2)]
+        self.tracks[0].setSelected(True)
 
         #self.sizer.Add(self.toolbar, 0, wx.EXPAND)
-        self.sizer.Add(self.track, 1, wx.EXPAND)
+        for track in self.tracks:
+            self.sizer.Add(track, 1, wx.EXPAND)
         self.SetSizer(self.sizer)
 
     def refresh(self):
@@ -31,25 +33,83 @@ class FxTracks(wx.Panel):
 
     def getSaveDict(self):
         # for now simple thru, later compile differents tracks into dict
-        return self.track.getSaveDict()
+        dict = {}
+        dict["tracks"] = [track.getSaveDict() for track in self.tracks]
+        return dict
 
     def setSaveDict(self, saveDict):
-        self.track.setSaveDict(saveDict)
+        for track in self.tracks:
+            print self.sizer.Detach(track)
+        self.sizer.Clear()
+
+        self.tracks = [FxTrack(self, self.fxsView, i) for i in range(len(saveDict["tracks"]))]
+        for i in range(len(self.tracks)):
+            self.tracks[i].setSaveDict(saveDict["tracks"][i])
+            self.sizer.Add(self.tracks[i], 1, wx.EXPAND)
+            
+        self.tracks[0].setSelected(True)
+        self.selectedTrack = 0
+
+        self.sizer.Layout()
+#        self.SetSizer(self.sizer)
+
+#        [track.getSaveDict() for track in self.tracks]
+#        self.track.setSaveDict(saveDict)
         
     def loadCue(self, cue):
-        self.track.loadCue(cue)
+        for track in self.tracks:
+            track.loadCue(cue)
         
-    def copyCue(self, cueToCopy):
-        self.track.copyCue(cueToCopy)
+    def copyCue(self, cueToCopy):        
+        for track in self.tracks:
+            track.copyCue(cueToCopy)
       
     def cueEvent(self, eventDict):
-        self.track.cueEvent(eventDict)
+        for track in self.tracks:
+            track.cueEvent(eventDict)
         self.fxsView.refresh()
         
     # no more used...
     def connectAudioMixer(self, audioMixer):
         self.track.connectAudioMixer(audioMixer)
         
+    def addTrack(self):
+        self.tracks.append(FxTrack(self, self.fxsView, len(self.tracks)))
+        self.sizer.Add(self.tracks[-1], 1, wx.EXPAND)
+            
+#        self.tracks[-1].setSelected(True)
+#        self.selectedTrack = len(self.tracks)-1
+        self.setActiveTrack(len(self.tracks)-1)
+        self.sizer.Layout()
+        pass
+        
+    def removeTrack(self):
+        if len(self.tracks) > 1:
+            self.sizer.Detach(self.tracks[self.selectedTrack])
+            
+            self.tracks[self.selectedTrack].Destroy()            
+            del self.tracks[self.selectedTrack]
+            
+            self.selectedTrack = self.selectedTrack-1
+            if self.selectedTrack < 0:
+                self.selectedTrack = 0
+                
+            [track.setID(i)  for i, track in enumerate(self.tracks)]
+            self.setActiveTrack(self.selectedTrack)
+            self.sizer.Layout()
+
+        
+    def setActiveTrack(self, id):
+        
+        self.selectedTrack = id
+        for i, track in enumerate(self.tracks):
+            if id == i:
+                track.setSelected(True)
+            else:
+                track.setSelected(False)                
+        
+        
+    
 if __name__ == "__main__":
     from CuesPanel import CuesPanel
     class TestWindow(wx.Frame):

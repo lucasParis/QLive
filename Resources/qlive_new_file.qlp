@@ -11,7 +11,16 @@ dictSave = {   'cues': {   'numberOfCues': 1},
                  'outputSliderCtls': [None, None, None, None],
                  'outputSliderValues': [0.0, 0.0, 0.0, 0.0],
                  'sampleType': 0},
-    'tracks': {   'cols': 5,
-                  'fxsValues': [[None, None, None, None, None]],
-                  'inputValues': [None],
-                  'rows': 1}}
+    'tracks': {   'tracks':
+                        [
+                        {'cols': 5,
+                            'fxsValues': [[None, None, None, None, None]],
+                            'inputValues': [None],
+                            'rows': 1},
+                            {'cols': 5,
+                            'fxsValues': [[None, None, None, None, None]],
+                            'inputValues': [None],
+                            'rows': 1},
+                            ]
+                            
+                  }}

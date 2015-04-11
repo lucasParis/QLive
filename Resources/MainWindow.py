@@ -269,11 +269,10 @@ class MainWindow(wx.Frame):
         dlg.Destroy()
         
     def onNewTrack(self, evt):
-        print "Add track..."
+        self.tracks.addTrack()
 
     def onDeleteTrack(self, evt):
-        # TODO: A way to select a track
-        print "Delete selected track..."
+        self.tracks.removeTrack()
 
     def onLinkSliders(self, evt):
         QLiveLib.getVar("MixerPanel").linkInputs(evt.GetInt())
