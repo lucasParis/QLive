@@ -30,6 +30,335 @@ def powOfTwo(x):
 def powOfTwoToInt(x):
     return POWOFTWO[x]
 
+# Temporary, until pyolib.ControlSlider can resize the knob's width dynamically...
+class TempControlSlider(wx.Panel):
+    def __init__(self, parent, minvalue, maxvalue, init=None, pos=(0,0), size=(200,16), log=False,
+                 outFunction=None, integer=False, powoftwo=False, backColour=None, orient=wx.HORIZONTAL):
+        if size == (200,16) and orient == wx.VERTICAL:
+            size = (32, 200)
+        wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY, pos=pos, size=size,
+                            style=wx.NO_BORDER | wx.WANTS_CHARS | wx.EXPAND)
+        self.parent = parent
+        if backColour:
+            self.backgroundColour = backColour
+        else:
+            self.backgroundColour = BACKGROUND_COLOUR
+        self.SetBackgroundStyle(wx.BG_STYLE_CUSTOM)
+        self.SetBackgroundColour(self.backgroundColour)
+        self.orient = orient
+        # self.SetMinSize(self.GetSize())
+        if self.orient == wx.VERTICAL:
+            self.knobSize = 15
+            self.knobHalfSize = 7
+            self.sliderWidth = size[0] - 23
+        else:
+            self.knobSize = 40
+            self.knobHalfSize = 20
+            self.sliderHeight = size[1] - 5
+        self.outFunction = outFunction
+        self.integer = integer
+        self.log = log
+        self.powoftwo = powoftwo
+        if self.powoftwo:
+            self.integer = True
+            self.log = False
+        self.SetRange(minvalue, maxvalue)
+        self.borderWidth = 1
+        self.selected = False
+        self._enable = True
+        self.propagate = True
+        self.midictl = None
+        self.new = ''
+        if init != None:
+            self.SetValue(init)
+            self.init = init
+        else:
+            self.SetValue(minvalue)
+            self.init = minvalue
+        self.clampPos()
+        self.Bind(wx.EVT_LEFT_DOWN, self.MouseDown)
+        self.Bind(wx.EVT_LEFT_UP, self.MouseUp)
+        self.Bind(wx.EVT_LEFT_DCLICK, self.DoubleClick)
+        self.Bind(wx.EVT_MOTION, self.MouseMotion)
+        self.Bind(wx.EVT_PAINT, self.OnPaint)
+        self.Bind(wx.EVT_SIZE, self.OnResize)
+        self.Bind(wx.EVT_KEY_DOWN, self.keyDown)
+        self.Bind(wx.EVT_KILL_FOCUS, self.LooseFocus)
+
+        if sys.platform == "win32":
+            self.dcref = wx.BufferedPaintDC
+        else:
+            self.dcref = wx.PaintDC
+
+    def setMidiCtl(self, x, propagate=True):
+        self.propagate = propagate
+        self.midictl = x
+        self.Refresh()
+
+    def getMidiCtl(self):
+        return self.midictl
+
+    def getMinValue(self):
+        return self.minvalue
+
+    def getMaxValue(self):
+        return self.maxvalue
+
+    def Enable(self):
+        self._enable = True
+        self.Refresh()
+
+    def Disable(self):
+        self._enable = False
+        self.Refresh()
+
+    def setSliderHeight(self, height):
+        self.sliderHeight = height
+        self.Refresh()
+
+    def setSliderWidth(self, width):
+        self.sliderWidth = width
+
+    def getInit(self):
+        return self.init
+
+    def SetRange(self, minvalue, maxvalue):
+        self.minvalue = minvalue
+        self.maxvalue = maxvalue
+
+    def getRange(self):
+        return [self.minvalue, self.maxvalue]
+
+    def scale(self):
+        if self.orient == wx.VERTICAL:
+            h = self.GetSize()[1]
+            inter = tFromValue(h-self.pos, self.knobHalfSize, self.GetSize()[1]-self.knobHalfSize)
+        else:
+            inter = tFromValue(self.pos, self.knobHalfSize, self.GetSize()[0]-self.knobHalfSize)
+        if not self.integer:
+            return interpFloat(inter, self.minvalue, self.maxvalue)
+        elif self.powoftwo:
+            return powOfTwo(int(interpFloat(inter, self.minvalue, self.maxvalue)))
+        else:
+            return int(interpFloat(inter, self.minvalue, self.maxvalue))
+
+    def SetValue(self, value, propagate=True):
+        self.propagate = propagate
+        if self.HasCapture():
+            self.ReleaseMouse()
+        if self.powoftwo:
+            value = powOfTwoToInt(value)
+        value = clamp(value, self.minvalue, self.maxvalue)
+        if self.log:
+            t = toLog(value, self.minvalue, self.maxvalue)
+            self.value = interpFloat(t, self.minvalue, self.maxvalue)
+        else:
+            t = tFromValue(value, self.minvalue, self.maxvalue)
+            self.value = interpFloat(t, self.minvalue, self.maxvalue)
+        if self.integer:
+            self.value = int(self.value)
+        if self.powoftwo:
+            self.value = powOfTwo(self.value)
+        self.clampPos()
+        self.selected = False
+        self.Refresh()
+
+    def GetValue(self):
+        if self.log:
+            t = tFromValue(self.value, self.minvalue, self.maxvalue)
+            val = toExp(t, self.minvalue, self.maxvalue)
+        else:
+            val = self.value
+        if self.integer:
+            val = int(val)
+        return val
+
+    def LooseFocus(self, event):
+        self.selected = False
+        self.Refresh()
+
+    def keyDown(self, event):
+        if self.selected:
+            char = ''
+            if event.GetKeyCode() in range(324, 334):
+                char = str(event.GetKeyCode() - 324)
+            elif event.GetKeyCode() == 390:
+                char = '-'
+            elif event.GetKeyCode() == 391:
+                char = '.'
+            elif event.GetKeyCode() == wx.WXK_BACK:
+                if self.new != '':
+                    self.new = self.new[0:-1]
+            elif event.GetKeyCode() < 256:
+                char = chr(event.GetKeyCode())
+            if char in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '-']:
+                self.new += char
+            elif event.GetKeyCode() in [wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER]:
+                self.SetValue(eval(self.new))
+                self.new = ''
+                self.selected = False
+            self.Refresh()
+        event.Skip()
+
+    def MouseDown(self, evt):
+        if evt.ShiftDown():
+            self.DoubleClick(evt)
+            return
+        if self._enable:
+            size = self.GetSize()
+            if self.orient == wx.VERTICAL:
+                self.pos = clamp(evt.GetPosition()[1], self.knobHalfSize, size[1]-self.knobHalfSize)
+            else:
+                self.pos = clamp(evt.GetPosition()[0], self.knobHalfSize, size[0]-self.knobHalfSize)
+            self.value = self.scale()
+            self.CaptureMouse()
+            self.selected = False
+            self.Refresh()
+        evt.Skip()
+
+    def MouseUp(self, evt):
+        if self.HasCapture():
+            self.ReleaseMouse()
+
+    def DoubleClick(self, event):
+        if self._enable:
+            w, h = self.GetSize()
+            pos = event.GetPosition()
+            if self.orient == wx.VERTICAL:
+                if wx.Rect(0, self.pos-self.knobHalfSize, w, self.knobSize).Contains(pos):
+                    self.selected = True
+            else:
+                if wx.Rect(self.pos-self.knobHalfSize, 0, self.knobSize, h).Contains(pos):
+                    self.selected = True
+            self.Refresh()
+        event.Skip()
+
+    def MouseMotion(self, evt):
+        if self._enable:
+            size = self.GetSize()
+            if self.HasCapture():
+                if self.orient == wx.VERTICAL:
+                    self.pos = clamp(evt.GetPosition()[1], self.knobHalfSize, size[1]-self.knobHalfSize)
+                else:
+                    self.pos = clamp(evt.GetPosition()[0], self.knobHalfSize, size[0]-self.knobHalfSize)
+                self.value = self.scale()
+                self.selected = False
+                self.Refresh()
+
+    def OnResize(self, evt):
+        self.clampPos()
+        self.Refresh()
+
+    def clampPos(self):
+        size = self.GetSize()
+        if self.powoftwo:
+            val = powOfTwoToInt(self.value)
+        else:
+            val = self.value
+        if self.orient == wx.VERTICAL:
+            self.pos = tFromValue(val, self.minvalue, self.maxvalue) * (size[1] - self.knobSize) + self.knobHalfSize
+            self.pos = clamp(size[1]-self.pos, self.knobHalfSize, size[1]-self.knobHalfSize)
+        else:
+            self.pos = tFromValue(val, self.minvalue, self.maxvalue) * (size[0] - self.knobSize) + self.knobHalfSize
+            self.pos = clamp(self.pos, self.knobHalfSize, size[0]-self.knobHalfSize)
+
+    def setBackgroundColour(self, colour):
+        self.backgroundColour = colour
+        self.SetBackgroundColour(self.backgroundColour)
+        self.Refresh()
+
+    def OnPaint(self, evt):
+        w,h = self.GetSize()
+        dc = self.dcref(self)
+        gc = wx.GraphicsContext_Create(dc)
+
+        dc.SetBrush(wx.Brush(self.backgroundColour, wx.SOLID))
+        dc.Clear()
+
+        # Draw background
+        dc.SetPen(wx.Pen(self.backgroundColour, width=self.borderWidth, style=wx.SOLID))
+        dc.DrawRectangle(0, 0, w, h)
+
+        # Draw inner part
+        if self._enable: sliderColour =  "#99A7CC"
+        else: sliderColour = "#BBBBBB"
+        if self.orient == wx.VERTICAL:
+            w2 = (w - self.sliderWidth) / 2
+            rec = wx.Rect(w2, 0, self.sliderWidth, h)
+            brush = gc.CreateLinearGradientBrush(w2, 0, w2+self.sliderWidth, 0, "#646986", sliderColour)
+        else:
+            h2 = self.sliderHeight / 4
+            rec = wx.Rect(0, h2, w, self.sliderHeight)
+            brush = gc.CreateLinearGradientBrush(0, h2, 0, h2+self.sliderHeight, "#646986", sliderColour)
+        gc.SetBrush(brush)
+        gc.DrawRoundedRectangle(rec[0], rec[1], rec[2], rec[3], 2)
+
+        if self.midictl != None:
+            if sys.platform in ['win32', 'linux2']:
+                dc.SetFont(wx.Font(6, wx.ROMAN, wx.NORMAL, wx.NORMAL))
+            else:
+                dc.SetFont(wx.Font(9, wx.ROMAN, wx.NORMAL, wx.NORMAL))
+            dc.SetTextForeground('#FFFFFF')
+            if self.orient == wx.VERTICAL:
+                dc.DrawLabel(str(self.midictl), wx.Rect(w2,2,self.sliderWidth,12), wx.ALIGN_CENTER)
+                dc.DrawLabel(str(self.midictl), wx.Rect(w2,h-12,self.sliderWidth,12), wx.ALIGN_CENTER)
+            else:
+                dc.DrawLabel(str(self.midictl), wx.Rect(2,0,h,h), wx.ALIGN_CENTER)
+                dc.DrawLabel(str(self.midictl), wx.Rect(w-h,0,h,h), wx.ALIGN_CENTER)
+
+        # Draw knob
+        if self._enable: knobColour = '#888888'
+        else: knobColour = "#DDDDDD"
+        if self.orient == wx.VERTICAL:
+            rec = wx.Rect(0, self.pos-self.knobHalfSize, w, self.knobSize-1)
+            if self.selected:
+                brush = wx.Brush('#333333', wx.SOLID)
+            else:
+                brush = gc.CreateLinearGradientBrush(0, 0, w, 0, "#323854", knobColour)
+            gc.SetBrush(brush)
+            gc.DrawRoundedRectangle(rec[0], rec[1], rec[2], rec[3], 3)
+        else:
+            rec = wx.Rect(self.pos-self.knobHalfSize, 0, self.knobSize-1, h)
+            if self.selected:
+                brush = wx.Brush('#333333', wx.SOLID)
+            else:
+                brush = gc.CreateLinearGradientBrush(self.pos-self.knobHalfSize, 0, self.pos+self.knobHalfSize, 0, "#323854", knobColour)
+            gc.SetBrush(brush)
+            gc.DrawRoundedRectangle(rec[0], rec[1], rec[2], rec[3], 3)
+
+        if sys.platform in ['win32', 'linux2']:
+            dc.SetFont(wx.Font(7, wx.ROMAN, wx.NORMAL, wx.NORMAL))
+        else:
+            dc.SetFont(wx.Font(10, wx.ROMAN, wx.NORMAL, wx.NORMAL))
+
+        # Draw text
+        if self.selected and self.new:
+            val = self.new
+        else:
+            if self.integer:
+                val = '%d' % self.GetValue()
+            elif abs(self.GetValue()) >= 1000:
+                val = '%.0f' % self.GetValue()
+            elif abs(self.GetValue()) >= 100:
+                val = '%.0f' % self.GetValue()
+            elif abs(self.GetValue()) >= 10:
+                val = '%.1f' % self.GetValue()
+            elif abs(self.GetValue()) < 10:
+                val = '%.2f' % self.GetValue()
+        if sys.platform == 'linux2':
+            width = len(val) * (dc.GetCharWidth() - 3)
+        else:
+            width = len(val) * dc.GetCharWidth()
+        dc.SetTextForeground('#FFFFFF')
+        dc.DrawLabel(val, rec, wx.ALIGN_CENTER)
+
+        # Send value
+        if self.outFunction and self.propagate:
+            self.outFunction(self.GetValue())
+        self.propagate = True
+
+        evt.Skip()
+
 class QLiveControlKnob(wx.Panel):
     def __init__(self, parent, minvalue, maxvalue, init=None, pos=(0,0), 
                  size=(50,70), log=False, outFunction=None, integer=False, 

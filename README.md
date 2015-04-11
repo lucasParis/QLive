@@ -12,7 +12,6 @@ TODO
 - Soundfile section: excel style (Olivier)
 - Project repository design (sounds folder, doc folder, bounce folder) (Olivier)
 - Recordings will always be in the project's bounce folder (Olivier)
-- ControlPanel -> rec/save buttons (Olivier)
 
 - Documentation/archive prototype
 - BPF in fx view

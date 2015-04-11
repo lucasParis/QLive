@@ -1,17 +1,18 @@
 #!/usr/bin/env python
 # encoding: utf-8
 import wx
-from pyolib._wxwidgets import ControlSlider, BACKGROUND_COLOUR, VuMeter
+from pyolib._wxwidgets import BACKGROUND_COLOUR, VuMeter
+from Widgets import TempControlSlider
 from AudioMixer import *
 from constants import *
 import QLiveLib
 
-class QLiveControlSlider(ControlSlider):
+class QLiveControlSlider(TempControlSlider):
     def __init__(self, parent, minvalue, maxvalue, init=None, pos=(0,0), 
                  size=(200,16), log=False, outFunction=None, integer=False, 
                  powoftwo=False, backColour=None, orient=wx.HORIZONTAL, 
                  linkedObject=None):
-        ControlSlider.__init__(self, parent, minvalue, maxvalue, init, pos, 
+        TempControlSlider.__init__(self, parent, minvalue, maxvalue, init, pos, 
                                size, log, self.localOutFunction, integer, powoftwo, 
                                backColour, orient)
         self.channelobject = None
@@ -53,7 +54,7 @@ class QLiveControlSlider(ControlSlider):
         
 class MixerPanel(wx.Panel):
     def __init__(self, parent, audioMixer):
-        wx.Panel.__init__(self, parent, size=(800,200), style=wx.SUNKEN_BORDER)
+        wx.Panel.__init__(self, parent, size=(800,150), style=wx.SUNKEN_BORDER)
         self.audioMixer = audioMixer
         self.SetBackgroundColour(BACKGROUND_COLOUR)
 
@@ -64,11 +65,16 @@ class MixerPanel(wx.Panel):
         self.inputMeters = []
         self.outputMeters = []
         
+        font = self.GetFont()
+        font.SetWeight(wx.FONTWEIGHT_BOLD)
+        
         ### INPUT SECTION
         inputBox = wx.BoxSizer(wx.VERTICAL)        
         inputSliderBox = wx.BoxSizer(wx.HORIZONTAL)
         inputBox.AddSpacer((-1,2))
-        inputBox.Add(wx.StaticText(self, label="Input Channels"), 0, wx.LEFT|wx.EXPAND, 10)
+        label = wx.StaticText(self, label="Input Channels")
+        label.SetFont(font)
+        inputBox.Add(label, 0, wx.LEFT|wx.EXPAND, 10)
         inputBox.Add(wx.StaticLine(self, size=(1, -1)), 0, wx.EXPAND|wx.TOP|wx.LEFT|wx.RIGHT, 2)
         for i in range(NUM_INPUTS):
             channel = self.audioMixer.getInputChannel(i)
@@ -83,11 +89,11 @@ class MixerPanel(wx.Panel):
             if i % 2 == 0:
                 inputSliderBox.Add(slide, 0, wx.ALL, 2)
                 inputSliderBox.Add(meter, 0, wx.EXPAND|wx.ALL, 2)
-                inputSliderBox.AddSpacer(10)
+                inputSliderBox.AddSpacer(3)
             else:
                 inputSliderBox.Add(meter, 0, wx.EXPAND|wx.ALL, 2)
                 inputSliderBox.Add(slide, 0, wx.ALL, 2)
-                inputSliderBox.AddSpacer(10)
+                inputSliderBox.AddSpacer(5)
         inputBox.Add(inputSliderBox, 0, wx.EXPAND|wx.LEFT|wx.RIGHT, 3)
         
         separator = wx.StaticLine(self, size=(1, -1), style=wx.LI_VERTICAL)
@@ -96,7 +102,9 @@ class MixerPanel(wx.Panel):
         outputBox = wx.BoxSizer(wx.VERTICAL)
         outputSliderBox = wx.BoxSizer(wx.HORIZONTAL)
         outputBox.AddSpacer((-1,2))
-        outputBox.Add(wx.StaticText(self, label = "Output Channels"), 0, wx.LEFT|wx.EXPAND, 10)
+        label = wx.StaticText(self, label = "Output Channels")
+        label.SetFont(font)
+        outputBox.Add(label, 0, wx.LEFT|wx.EXPAND, 10)
         outputBox.Add(wx.StaticLine(self, size=(1, -1)), 0, wx.EXPAND|wx.TOP|wx.LEFT|wx.RIGHT, 2)
         for i in range(NUM_OUTPUTS):
             channel = self.audioMixer.getOutputChannel(i)            
@@ -112,11 +120,11 @@ class MixerPanel(wx.Panel):
             if i % 2 == 0:
                 outputSliderBox.Add(slide, 0, wx.ALL, 2)
                 outputSliderBox.Add(meter, 0, wx.EXPAND|wx.ALL, 2)
-                outputSliderBox.AddSpacer(10)
+                outputSliderBox.AddSpacer(3)
             else:
                 outputSliderBox.Add(meter, 0, wx.EXPAND|wx.ALL, 2)
                 outputSliderBox.Add(slide, 0, wx.ALL, 2)
-                outputSliderBox.AddSpacer(10)
+                outputSliderBox.AddSpacer(5)
                 
         outputBox.Add(outputSliderBox, 0, wx.EXPAND|wx.LEFT|wx.RIGHT, 3)
 

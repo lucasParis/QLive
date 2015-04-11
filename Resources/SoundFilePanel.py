@@ -337,6 +337,7 @@ class SoundFileGrid(gridlib.Grid):
         evt.Skip()
 
     def OnCellLeftClick(self, evt):
+        # TODO: check and warning here...
         sndfolder = os.path.join(QLiveLib.getVar("projectFolder"), "sounds")
         self.snds = sorted([f for f in os.listdir(sndfolder)])
         if self.snds == []:

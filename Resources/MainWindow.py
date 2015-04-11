@@ -82,7 +82,7 @@ class MainWindow(wx.Frame):
         self.controlPanel = ControlPanel(self.mainPanel)
         csize = self.controlPanel.GetSize()
         
-        self.cues = CuesPanel(self.mainPanel, size=(csize[0], 500))
+        self.cues = CuesPanel(self.mainPanel, size=(csize[0], 1000))
         QLiveLib.setVar("CuesPanel", self.cues)
 
         splitter = wx.SplitterWindow(self.mainPanel, 
@@ -95,7 +95,7 @@ class MainWindow(wx.Frame):
         QLiveLib.setVar("Soundfiles", self.soundfiles)
 
         splitter.SetMinimumPaneSize(60)
-        splitter.SplitHorizontally(self.tracks, self.soundfiles, 250)
+        splitter.SplitHorizontally(self.tracks, self.soundfiles, 300)
 
         self.mixer = MixerPanel(self.mainPanel, self.audioMixer)
         QLiveLib.setVar("MixerPanel", self.mixer)
@@ -113,7 +113,7 @@ class MainWindow(wx.Frame):
 
         self.loadFile(NEW_FILE_PATH)
 
-        if False:
+        if True:
             dlg = IntroDialog(self)
             if dlg.ShowModal() == wx.ID_OK:
                 filepath = dlg.filepath
