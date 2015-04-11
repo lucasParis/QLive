@@ -27,6 +27,7 @@ class SliderParameter(ParameterParent, PyoObject):
         self._base_objs = self.audioValue.getBaseObjects()
 
     def setValue(self, value):
+        # INTERP get and set value as pair list [value, interTime]
         self.audioValue.setValue(value)
         self.value = value
 

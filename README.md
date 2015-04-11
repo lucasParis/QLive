@@ -16,8 +16,8 @@ TODO
 - Documentation/archive prototype
 - BPF in fx view
 
-- Allow multiple tracks (Lucas)
-- Parameter interpolation between cues (per cue, per parameter) (Lucas)
+- DONE Allow multiple tracks (Lucas)
+- Parameter interpolation between cues (per cue, per parameter) (Lucas) (AudioModule and FxView)
 - Finalizing cue selection (Lucas)
 
 

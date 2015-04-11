@@ -25,6 +25,8 @@ class SliderWidget(WidgetParent):
                                        parameter.getValue(), label=parameter.name,
                                        outFunction=parameter.setValue)
         self.sizer.Add(self.slider, 0, wx.ALL, 5)
+        
+        # INTERP add another knob for interpolation time, toggle between display of value knob and interp knob
         self.SetSizer(self.sizer)
         
     def setValue(self, value):
@@ -123,7 +125,9 @@ class FxSlidersView(wx.Frame):
         
         self.panel = wx.Panel(self)
         self.panel.SetBackgroundColour(BACKGROUND_COLOUR)
-
+        
+        # INTERP add button for setInterpTime mode, to show only interpKnobs
+        
         self.sizer = wx.BoxSizer(wx.VERTICAL)
         self.headSizer = wx.BoxSizer(wx.HORIZONTAL)
         self.knobSizer = wx.BoxSizer(wx.HORIZONTAL)
