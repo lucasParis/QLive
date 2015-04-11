@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 # encoding: utf-8
-import wx, os
+import wx, os, shutil
 import wx.grid as gridlib
 from pyo import sndinfo
 from constants import *
+import QLiveLib
 
 # add missing types in OscDataReceive
-
-SNDS_FOLDER = "/home/olivier/Dropbox/private/snds/"
 
 ID_COL_FILENAME = 0
 ID_COL_LOOPMODE = 1
@@ -31,7 +30,8 @@ class SoundFileObject:
                  endpoint=-1, crossfade=5, channel=0):
         self.id = id
         self.filename = filename
-        info = sndinfo(SNDS_FOLDER + self.filename)
+        sndfolder = os.path.join(QLiveLib.getVar("projectFolder"), "sounds")        
+        info = sndinfo(os.path.join(sndfolder, self.filename))
         if info is None:
             self.valid = False
             self.duration = -1
@@ -337,10 +337,14 @@ class SoundFileGrid(gridlib.Grid):
         evt.Skip()
 
     def OnCellLeftClick(self, evt):
+        sndfolder = os.path.join(QLiveLib.getVar("projectFolder"), "sounds")
+        self.snds = sorted([f for f in os.listdir(sndfolder)])
+        if self.snds == []:
+            self.OnCellRightClick(evt)
         self.selRow, self.selCol = evt.GetRow(), evt.GetCol()
         if self.selCol == ID_COL_FILENAME:
             menu = wx.Menu("Soundfiles")
-            self.snds = sorted([f for f in os.listdir(SNDS_FOLDER)])
+            self.snds = sorted([f for f in os.listdir(sndfolder)])
             for i, snd in enumerate(self.snds):
                 menu.Append(i, snd)
             menu.Bind(wx.EVT_MENU, self.selectSound, id=0, id2=i)
@@ -374,26 +378,31 @@ class SoundFileGrid(gridlib.Grid):
                                 "", AUDIO_FILE_WILDCARD, style=wx.OPEN)
             if dlg.ShowModal() == wx.ID_OK:
                 path = dlg.GetPath()
-                print "save soundfile in sounds folder and load it..."
+                sndfolder = os.path.join(QLiveLib.getVar("projectFolder"), "sounds")
+                shutil.copy(path, sndfolder)
+                self.loadSound(os.path.basename(path))
             dlg.Destroy()
         evt.Skip()
 
     def selectSound(self, evt):
         sel = self.snds[evt.GetId()]
         if sel is not None:
-            obj = SoundFileObject(self.selRow, sel)
-            if obj.isValid():
-                if self.selRow < len(self.objects):
-                    self.objects[self.selRow] = obj
-                else:
-                    self.objects.append(obj)
-                    self.addRow()
-                self.putObjectAttrOnCells(obj, self.selRow)
-                for id in [ID_COL_TRANSPO, ID_COL_GAIN, ID_COL_STARTPOINT,
-                           ID_COL_ENDPOINT, ID_COL_CROSSFADE, ID_COL_CHANNEL]:
-                    attr = self.GetOrCreateCellAttr(self.selRow, id)
-                    attr.SetReadOnly(False)
+            self.loadSound(sel)
         evt.Skip()
+
+    def loadSound(self, sel):
+        obj = SoundFileObject(self.selRow, sel)
+        if obj.isValid():
+            if self.selRow < len(self.objects):
+                self.objects[self.selRow] = obj
+            else:
+                self.objects.append(obj)
+                self.addRow()
+            self.putObjectAttrOnCells(obj, self.selRow)
+            for id in [ID_COL_TRANSPO, ID_COL_GAIN, ID_COL_STARTPOINT,
+                       ID_COL_ENDPOINT, ID_COL_CROSSFADE, ID_COL_CHANNEL]:
+                attr = self.GetOrCreateCellAttr(self.selRow, id)
+                attr.SetReadOnly(False)
 
     def selectLoopMode(self, evt):
         sel = LOOPMODES[evt.GetId()]

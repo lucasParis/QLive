@@ -24,6 +24,8 @@ else:
 if not os.path.isdir(RESOURCES_PATH) and PLATFORM == "win32":
     RESOURCES_PATH = os.path.join(os.getenv("ProgramFiles"), "QLive", "Resources")
 
+IMAGES_PATH = os.path.join(RESOURCES_PATH, "images")
+
 TEMP_PATH = os.path.join(os.path.expanduser('~'), '.qlive')
 if not os.path.isdir(TEMP_PATH):
     os.mkdir(TEMP_PATH)
@@ -93,6 +95,12 @@ if sys.platform in ['linux2', 'win32']:
     CONTROLSLIDER_FONT = 7
 else:
     CONTROLSLIDER_FONT = 10
+
+# Icons
+ICON_PLAY = os.path.join(IMAGES_PATH, "play-icon.png")
+ICON_PLAY_PRESSED = os.path.join(IMAGES_PATH, "stop-icon.png")
+ICON_RECORD = os.path.join(IMAGES_PATH, "record-icon.png")
+ICON_RECORD_PRESSED = os.path.join(IMAGES_PATH, "record-pressed-icon.png")
 
 # Colours
 BACKGROUND_COLOUR = BACKGROUND_COLOUR

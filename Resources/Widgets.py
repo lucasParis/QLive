@@ -279,7 +279,49 @@ class QLiveControlKnob(wx.Panel):
             self.outFunction(self.GetValue())
 
         evt.Skip()
+       
+class TransportButtons(wx.Panel):
+    def __init__(self, parent):
+        super(TransportButtons, self).__init__(parent)
+
+        self.playmode = self.recordmode = 0
+
+        self.playIcon = wx.Bitmap(ICON_PLAY, wx.BITMAP_TYPE_PNG)
+        self.playPressedIcon = wx.Bitmap(ICON_PLAY_PRESSED, wx.BITMAP_TYPE_PNG)
+        self.recordIcon = wx.Bitmap(ICON_RECORD, wx.BITMAP_TYPE_PNG)
+        self.recordPressedIcon = wx.Bitmap(ICON_RECORD_PRESSED, wx.BITMAP_TYPE_PNG)
         
+        self.play = wx.BitmapButton(self, wx.ID_ANY, self.playIcon)
+        self.play.Bind(wx.EVT_BUTTON, self.onPlay)
+
+        self.record = wx.BitmapButton(self, wx.ID_ANY, self.recordIcon)
+        self.record.Bind(wx.EVT_BUTTON, self.onRecord)
+        
+        box = wx.BoxSizer(wx.HORIZONTAL)
+        box.Add(self.play, 0, wx.ALIGN_CENTER|wx.TOP|wx.BOTTOM, 5)
+        box.Add(self.record, 0, wx.ALIGN_CENTER|wx.TOP|wx.BOTTOM, 5)
+        self.SetSizer(box)
+
+    def onPlay(self, evt):
+        self.playmode = (self.playmode + 1) % 2
+        if self.playmode == 1:
+            self.play.SetBitmapLabel(self.playPressedIcon)
+            self.record.Disable()
+        else:
+            self.play.SetBitmapLabel(self.playIcon)
+            self.record.SetBitmapLabel(self.recordIcon)
+            self.record.Enable()
+            self.recordmode = 0
+
+    def onRecord(self, evt):
+        self.recordmode = self.playmode = (self.recordmode + 1) % 2
+        if self.recordmode == 1:
+            self.record.SetBitmapLabel(self.recordPressedIcon)
+            self.play.SetBitmapLabel(self.playPressedIcon)
+        else:
+            self.record.SetBitmapLabel(self.recordIcon)
+            self.play.SetBitmapLabel(self.playIcon)
+
 if __name__ == "__main__":
     from pyo64 import *
     s = Server().boot()
@@ -288,8 +330,9 @@ if __name__ == "__main__":
             wx.Frame.__init__(self, None)
             panel = wx.Panel(self)
             panel.SetBackgroundColour(BACKGROUND_COLOUR)
-            knob = QLiveControlKnob(panel, 20, 20000, pos=(20,20), label="Freq")
-            knob.setEnable(True)
+            tr = TransportButtons(panel)
+            #knob = QLiveControlKnob(panel, 20, 20000, pos=(20,20), label="Freq")
+            #knob.setEnable(True)
             self.Show()
     app = wx.App()
     f = TestFrame()

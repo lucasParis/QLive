@@ -4,6 +4,7 @@ import wx
 import wx.lib.scrolledpanel as scrolled
 from constants import *
 import QLiveLib
+from Widgets import TransportButtons
 
 class ControlPanel(wx.Panel):
     def __init__(self, parent):
@@ -11,19 +12,25 @@ class ControlPanel(wx.Panel):
         self.mainSizer = wx.BoxSizer(wx.VERTICAL)
         self.buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.startButton = wx.ToggleButton(self, label="Audio off", size=(70, -1))
-        self.mainSizer.Add(self.startButton, 0, wx.EXPAND|wx.TOP|wx.LEFT|wx.RIGHT, 5)
-        self.startButton.Bind(wx.EVT_TOGGLEBUTTON, self.audioStartStop)
+        #self.startButton = wx.ToggleButton(self, label="Audio off", size=(70, -1))
+        #self.mainSizer.Add(self.startButton, 0, wx.EXPAND|wx.TOP|wx.LEFT|wx.RIGHT, 5)
+        #self.startButton.Bind(wx.EVT_TOGGLEBUTTON, self.audioStartStop)
+        self.buttons = TransportButtons(self)
+        self.mainSizer.Add(self.buttons, 0, wx.ALIGN_CENTER_HORIZONTAL)
 
-        self.mainSizer.Add(wx.StaticLine(self, size=(1, 1)), 0, wx.EXPAND|wx.ALL, 5)        
+        self.mainSizer.Add(wx.StaticLine(self, size=(1, 1)), 0, 
+                           wx.EXPAND|wx.LEFT|wx.RIGHT|wx.BOTTOM, 5)        
 
         title = wx.StaticText(self, label="--- CUES ---")
         self.mainSizer.Add(title, 0, wx.ALIGN_CENTER|wx.TOP, 5)
 
-        self.newButton = wx.Button(self, label="New", size=(35, -1))
+        bmp = wx.ArtProvider.GetBitmap(wx.ART_ADD_BOOKMARK, wx.ART_TOOLBAR, (24, 24))
+        self.newButton = wx.BitmapButton(self, wx.ID_ANY, bmp)
         self.newButton.Bind(wx.EVT_BUTTON, self.onNewCue)
         self.buttonSizer.Add(self.newButton, 1)
-        self.delButton = wx.Button(self, label="Del", size=(35, -1))
+
+        bmp = wx.ArtProvider.GetBitmap(wx.ART_DEL_BOOKMARK, wx.ART_TOOLBAR, (24, 24))
+        self.delButton = wx.BitmapButton(self, wx.ID_ANY, bmp)
         self.delButton.Bind(wx.EVT_BUTTON, self.onDelCue)
         self.buttonSizer.Add(self.delButton, 1)
         self.mainSizer.Add(self.buttonSizer, 0, wx.EXPAND|wx.ALL, 5)

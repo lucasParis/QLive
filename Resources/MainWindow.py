@@ -19,7 +19,6 @@ class MainWindow(wx.Frame):
         self.audioServer = AudioServer()
         QLiveLib.setVar("AudioServer", self.audioServer)
 
-        self.currentProject = ""
         self.saveState = None
 
         menubar = wx.MenuBar()
@@ -134,6 +133,7 @@ class MainWindow(wx.Frame):
         os.mkdir(os.path.join(dir, fld))
         os.mkdir(os.path.join(dir, fld, "doc"))
         os.mkdir(os.path.join(dir, fld, "sounds"))
+        os.mkdir(os.path.join(dir, fld, "bounce"))
         flpath = os.path.join(dir, fld, fld+".qlp")
         shutil.copy(NEW_FILE_PATH, flpath)
         self.loadFile(flpath)
@@ -148,7 +148,8 @@ class MainWindow(wx.Frame):
     def saveFile(self, path):
         dictSave = self.getCurrentState()
         self.saveState = copy.deepcopy(dictSave)
-        self.currentProject = path
+        QLiveLib.setVar("currentProject", path)
+        QLiveLib.setVar("projectFolder", os.path.dirname(path))
         with open(path, "w") as f:
             f.write(QLIVE_MAGIC_LINE)
             f.write("### %s ###\n" % APP_VERSION)
@@ -164,9 +165,11 @@ class MainWindow(wx.Frame):
         execfile(path, globals())
         # QLiveLib.PRINT("opening: ", dictSave)
         if path == NEW_FILE_PATH:
-            self.currentProject = ""
+            QLiveLib.setVar("currentProject", "")
+            QLiveLib.setVar("projectFolder", "")
         else:
-            self.currentProject = path
+            QLiveLib.setVar("currentProject", path)
+            QLiveLib.setVar("projectFolder", os.path.dirname(path))
             self.newRecent(path)
         self.saveState = copy.deepcopy(dictSave)
         self.tracks.setSaveDict(dictSave["tracks"])
@@ -178,10 +181,10 @@ class MainWindow(wx.Frame):
     def askForSaving(self):
         state = True
         if self.saveState != self.getCurrentState():
-            if not self.currentProject:
+            if not QLiveLib.getVar("currentProject"):
                 filename = "Untitled"
             else:
-                filename = self.currentProject
+                filename = QLiveLib.getVar("currentProject")
             msg = 'file "%s" has been modified. Do you want to save?' % filename
             dlg = wx.MessageDialog(None, msg, 'Warning!', wx.YES | wx.NO | wx.CANCEL)
             but = dlg.ShowModal()
@@ -199,8 +202,8 @@ class MainWindow(wx.Frame):
     def onLoad(self, evt):
         if not self.askForSaving():
             return
-        if self.currentProject:
-            filepath = os.path.split(self.currentProject)[0]
+        if QLiveLib.getVar("currentProject"):
+            filepath = os.path.split(QLiveLib.getVar("currentProject"))[0]
         else:
             filepath = os.path.expanduser("~")
         dlg = wx.FileDialog(self, "Open Qlive Projet", filepath, "",
@@ -245,14 +248,14 @@ class MainWindow(wx.Frame):
         self.onNew(None)
 
     def onSave(self, evt):
-        if not self.currentProject:
+        if not QLiveLib.getVar("currentProject"):
             self.onSaveAs(None)
         else:
-            self.saveFile(self.currentProject)
+            self.saveFile(QLiveLib.getVar("currentProject"))
 
     def onSaveAs(self, evt):
-        if self.currentProject:
-            filepath = os.path.split(self.currentProject)
+        if QLiveLib.getVar("currentProject"):
+            filepath = os.path.split(QLiveLib.getVar("currentProject"))
         else:
             filepath = os.path.join(os.path.expanduser("~"), "qlive_project.qlp")
             filepath = os.path.split(filepath)
