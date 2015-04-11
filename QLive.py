@@ -9,10 +9,10 @@ class QLiveApp(wx.App):
         wx.App.__init__(self, *args, **kwargs)
         sysx = wx.SystemSettings.GetMetric(wx.SYS_SCREEN_X)
         sysy = wx.SystemSettings.GetMetric(wx.SYS_SCREEN_Y)
-        if sysx < 900:
+        if sysx < 1000:
             sizex = sysx - 40
         else:
-            sizex = 900
+            sizex = 1000
         if sysy < 670:
             sizey = sysy - 40
         else:

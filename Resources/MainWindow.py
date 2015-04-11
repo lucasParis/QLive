@@ -7,6 +7,7 @@ from FxTracks import FxTracks
 from CuesPanel import ControlPanel, CuesPanel
 from MixerPanel import MixerPanel
 from IntroDialog import IntroDialog
+from SoundFilePanel import SoundFilePanel
 
 class MainWindow(wx.Frame):
     def __init__(self, pos, size):
@@ -58,12 +59,18 @@ class MainWindow(wx.Frame):
         quitItem = menu1.Append(wx.ID_EXIT, "Quit\tCtrl+Q")
         self.Bind(wx.EVT_MENU, self.OnClose, quitItem)
         menubar.Append(menu1, 'File')
+
         menu2 = wx.Menu()
         menu2.Append(NEW_TRACK_ID, "Add Track\tCtrl+T")
         self.Bind(wx.EVT_MENU, self.onNewTrack, id=NEW_TRACK_ID)        
         menu2.Append(DELETE_TRACK_ID, "Delete Track\tShift+Ctrl+D")
         self.Bind(wx.EVT_MENU, self.onDeleteTrack, id=DELETE_TRACK_ID)        
         menubar.Append(menu2, 'Tracks')
+
+        menu3 = wx.Menu()
+        menu3.AppendCheckItem(LINK_STEREO_ID, "Link Mixer Sliders\tCtrl+L")
+        self.Bind(wx.EVT_MENU, self.onLinkSliders, id=LINK_STEREO_ID)        
+        menubar.Append(menu3, 'Mixer')
 
         self.SetMenuBar(menubar)
 
@@ -73,40 +80,50 @@ class MainWindow(wx.Frame):
         self.audioMixer = AudioMixer()
         QLiveLib.setVar("AudioMixer", self.audioMixer)
 
-        self.tracks = FxTracks(self.mainPanel)
-        QLiveLib.setVar("FxTracks", self.tracks)
-
         self.controlPanel = ControlPanel(self.mainPanel)
         csize = self.controlPanel.GetSize()
         
         self.cues = CuesPanel(self.mainPanel, size=(csize[0], 500))
         QLiveLib.setVar("CuesPanel", self.cues)
 
+        splitter = wx.SplitterWindow(self.mainPanel, 
+                                     style=wx.SP_LIVE_UPDATE|wx.SP_3DSASH)
+        
+        self.tracks = FxTracks(splitter)
+        QLiveLib.setVar("FxTracks", self.tracks)
+
+        self.soundfiles = SoundFilePanel(splitter)
+        QLiveLib.setVar("Soundfiles", self.soundfiles)
+
+        splitter.SetMinimumPaneSize(60)
+        splitter.SplitHorizontally(self.tracks, self.soundfiles, 250)
+
         self.mixer = MixerPanel(self.mainPanel, self.audioMixer)
         QLiveLib.setVar("MixerPanel", self.mixer)
 
-        self.mainSizer = wx.BoxSizer(wx.VERTICAL)
-        self.topSizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.mainSizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.rightSizer = wx.BoxSizer(wx.VERTICAL)
         self.controlSizer = wx.BoxSizer(wx.VERTICAL)
         self.controlSizer.Add(self.controlPanel, 0)
         self.controlSizer.Add(self.cues, 1, wx.EXPAND)
-        self.topSizer.Add(self.controlSizer, 0)
-        self.topSizer.Add(self.tracks, 1, wx.EXPAND, 5)
-        self.mainSizer.AddSizer(self.topSizer, 2, wx.EXPAND, 5)
-        self.mainSizer.Add(self.mixer, 0, wx.EXPAND, 5)
+        self.rightSizer.Add(splitter, 1, wx.EXPAND, 5)
+        self.rightSizer.Add(self.mixer, 0, wx.EXPAND, 5)
+        self.mainSizer.Add(self.controlSizer, 0)
+        self.mainSizer.AddSizer(self.rightSizer, 2, wx.EXPAND, 5)
         self.mainPanel.SetSizer(self.mainSizer)
 
         self.loadFile(NEW_FILE_PATH)
 
-        dlg = IntroDialog(self)
-        if dlg.ShowModal() == wx.ID_OK:
-            filepath = dlg.filepath
-            createDir = dlg.createDir
-            if createDir:
-                self.createProjectFolder(filepath)
-            else:
-                self.loadFile(filepath)
-        dlg.Destroy()
+        if False:
+            dlg = IntroDialog(self)
+            if dlg.ShowModal() == wx.ID_OK:
+                filepath = dlg.filepath
+                createDir = dlg.createDir
+                if createDir:
+                    self.createProjectFolder(filepath)
+                else:
+                    self.loadFile(filepath)
+            dlg.Destroy()
 
         self.Show()
 
@@ -155,6 +172,8 @@ class MainWindow(wx.Frame):
         self.tracks.setSaveDict(dictSave["tracks"])
         self.cues.setSaveDict(dictSave["cues"])
         self.mixer.setSaveDict(dictSave["mixer"])
+        linkMenuItem = self.GetMenuBar().FindItemById(LINK_STEREO_ID)
+        linkMenuItem.Check(dictSave["mixer"].get("inputLinked", False))
 
     def askForSaving(self):
         state = True
@@ -252,6 +271,10 @@ class MainWindow(wx.Frame):
     def onDeleteTrack(self, evt):
         # TODO: A way to select a track
         print "Delete selected track..."
+
+    def onLinkSliders(self, evt):
+        QLiveLib.getVar("MixerPanel").linkInputs(evt.GetInt())
+        QLiveLib.getVar("MixerPanel").linkOutputs(evt.GetInt())
 
     def openPrefs(self, evt):
         print "Popup Preferences Windows..."

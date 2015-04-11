@@ -5,9 +5,9 @@ from constants import *
 from FxBox import *
 import wx.lib.scrolledpanel as scrolled
 
-class FxTrack(scrolled.ScrolledPanel):
+class FxTrack(wx.ScrolledWindow):
     def __init__(self, parent, viewPanelRef):
-        scrolled.ScrolledPanel.__init__(self, parent)
+        wx.ScrolledWindow.__init__(self, parent)
         
         self.buttonWidth = 80
         self.buttonHeight = 25
@@ -23,11 +23,9 @@ class FxTrack(scrolled.ScrolledPanel):
         self.createButtons()
         self.createConnections()
 
-        # what is 20+30+20 ?
-        self.SetSize((10+self.cols*100+10, 20+30+20))
-        self.SetVirtualSize((10+(self.cols+1)*(self.buttonWidth+20)+10, 20+30+20))
-        self.SetScrollRate(1,1)
-        self.SetupScrolling(self)
+        self.SetVirtualSize((10+(self.cols+1)*(self.buttonWidth+20)+10, 1000))
+        w, h = self.GetVirtualSize()
+        self.SetScrollbars(20, 20, w/20, h/20, 0, 0, False)
 
         self.viewPanelRef = viewPanelRef # to open fxSlidersView
         
@@ -153,8 +151,6 @@ class FxTrack(scrolled.ScrolledPanel):
         self.PrepareDC(dc)
 
         dc.SetTextForeground(FXBOX_FOREGROUND_COLOUR)
-        #gc.SetPen(wx.Pen(FXBOX_OUTLINE_COLOUR, 1, wx.SOLID))
-        #gc.SetBrush(wx.Brush(FXBOX_BACKGROUND_COLOUR, wx.SOLID))
         for i, row in enumerate(self.buttonsFxs):
             for j, button in enumerate(row):
                 pos = self.idToPositionFX(button.getId())
@@ -189,7 +185,7 @@ class FxTrack(scrolled.ScrolledPanel):
         return (int((position[0]-10)/100.), int((position[1]-20)/50.))
                    
     def onSize(self, event):
-        pass
+        event.Skip()
         
     def getSaveDict(self):
         #build dict with values, corresponding effect index, and index in matrix

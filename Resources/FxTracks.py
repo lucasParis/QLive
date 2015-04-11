@@ -5,14 +5,15 @@ from FxView import FxViewManager
 class FxTracksToolBar(wx.ToolBar):
     def __init__(self, parent):
         wx.ToolBar.__init__(self, parent, size = (1000, 40))
-        self.AddControl(wx.StaticText(self, label=" FxTracks Toolbar (what controls go here?)"))
+        self.AddControl(wx.StaticText(self, 
+                        label=" FxTracks Toolbar (what controls go here?)"))
         self.Realize()
 
 class FxTracks(wx.Panel):
-    def __init__(self, parent, size = (-1,800)):
+    def __init__(self, parent):
         wx.Panel.__init__(self, parent)
         self.sizer = wx.BoxSizer(wx.VERTICAL)
-        
+
         #self.toolbar = FxTracksToolBar(self)
 
         # FX window manager

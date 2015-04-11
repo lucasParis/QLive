@@ -56,6 +56,7 @@ NUM_OUTPUTS = 4
 BOX_MENU_ITEM_FIRST_ID = 1000
 NEW_TRACK_ID = 2000
 DELETE_TRACK_ID = 2001
+LINK_STEREO_ID = 3000
 
 # Audio drivers
 if PLATFORM == 'darwin' and '/%s.app' % APP_NAME in os.getcwd():
