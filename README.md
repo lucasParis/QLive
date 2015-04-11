@@ -10,23 +10,23 @@ TODO
 **Short term**
 
 - Soundfile section: excel style (Olivier)
-- Audio driver setup (Olivier)
-- Project repository design (sounds folder, doc folder, etc.) (Olivier)
-- Software preferences (fileformat and sampletype in the prefs) (Olivier)
+- Project repository design (sounds folder, doc folder, bounce folder) (Olivier)
+- Recordings will always be in the project's bounce folder (Olivier)
+- ControlPanel -> rec/save buttons (Olivier)
 
-- foldpanelbar (Lucas)
+- Documentation/archive prototype
+- BPF in fx view
+
 - Allow multiple tracks (Lucas)
 - Parameter interpolation between cues (per cue, per parameter) (Lucas)
 - Finalizing cue selection (Lucas)
 
-- ControlPanel -> rec/save buttons, remove recording section 
-- Mixer should take less space (Olivier)
 
 **Mid term**
 
-- Documentation/archive prototype
-- BPF in fx view
-- Midi cue triggering (une note qui avance, une note qui recule; une note par cue)
-- GUI connections design
+- Midi cue triggering (one key forward, one key backward; one key per cue)
 - Improve effect modules (with categories)
+- Software preferences (fileformat and sampletype in the prefs) (Olivier)
+- Audio driver setup (Olivier)
+- GUI connections design
 - Licensing
