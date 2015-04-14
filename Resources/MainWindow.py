@@ -113,7 +113,7 @@ class MainWindow(wx.Frame):
 
         self.loadFile(NEW_FILE_PATH)
 
-        if False:
+        if True:
             dlg = IntroDialog(self)
             if dlg.ShowModal() == wx.ID_OK:
                 filepath = dlg.filepath
