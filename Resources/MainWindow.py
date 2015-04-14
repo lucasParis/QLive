@@ -145,6 +145,7 @@ class MainWindow(wx.Frame):
         dictSave["tracks"] = self.tracks.getSaveDict()
         dictSave["cues"] = self.cues.getSaveDict()
         dictSave["mixer"] = self.mixer.getSaveDict()
+        dictSave["soundfiles"] = self.soundfiles.getSaveState()
         return dictSave
 
     def saveFile(self, path):
@@ -174,9 +175,11 @@ class MainWindow(wx.Frame):
             QLiveLib.setVar("projectFolder", os.path.dirname(path))
             self.newRecent(path)
         self.saveState = copy.deepcopy(dictSave)
-        self.tracks.setSaveDict(dictSave["tracks"])
-        self.cues.setSaveDict(dictSave["cues"])
-        self.mixer.setSaveDict(dictSave["mixer"])
+        self.tracks.setSaveDict(self.saveState["tracks"])
+        self.cues.setSaveDict(self.saveState["cues"])
+        self.mixer.setSaveDict(self.saveState["mixer"])
+        if "soundfiles" in self.saveState:
+            self.soundfiles.setSaveState(self.saveState["soundfiles"])
         linkMenuItem = self.GetMenuBar().FindItemById(LINK_STEREO_ID)
         linkMenuItem.Check(dictSave["mixer"].get("inputLinked", False))
 

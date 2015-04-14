@@ -85,6 +85,7 @@ class CuesPanel(scrolled.ScrolledPanel):
             dictEvent = {"type": "cueSelect", 
                          "selectedCue": self.currentCue}
             QLiveLib.getVar("MainWindow").tracks.cueEvent(dictEvent)
+            QLiveLib.getVar("Soundfiles").cueEvent(dictEvent)
 
     def onDelCue(self):
         button = self.cueButtons.pop(self.currentCue)
@@ -107,6 +108,7 @@ class CuesPanel(scrolled.ScrolledPanel):
                          "deletedCue" : deletedCue,
                          "totalCues": len(self.cueButtons)}
             QLiveLib.getVar("MainWindow").tracks.cueEvent(dictEvent)
+            QLiveLib.getVar("Soundfiles").cueEvent(dictEvent)
 
     def onNewCue(self):
         self.appendCueButton()
@@ -115,6 +117,7 @@ class CuesPanel(scrolled.ScrolledPanel):
                          "currentCue": self.currentCue, 
                          "totalCues": len(self.cueButtons)}
             QLiveLib.getVar("MainWindow").tracks.cueEvent(dictEvent)
+            QLiveLib.getVar("Soundfiles").cueEvent(dictEvent)
         
     def getNumberOfCues(self):
         return len(self.cueButtons)

@@ -47,6 +47,10 @@ class SoundFileObject:
         self.endpoint = self.duration
         self.crossfade = crossfade
         self.channel = channel
+        
+        self.currentCue = 0
+        self.cues = {}
+        self.saveCue()
 
     def getAttributes(self):
         return {
@@ -62,8 +66,61 @@ class SoundFileObject:
                 ID_COL_CHANNEL: self.channel
                 }
 
+    def setAttributes(self, dict):
+        self.filename = dict[ID_COL_FILENAME]
+        self.loopmode = dict[ID_COL_LOOPMODE]
+        self.transpo = dict[ID_COL_TRANSPO]
+        self.gain = dict[ID_COL_GAIN]
+        self.playing = dict[ID_COL_PLAYING]
+        self.directout = dict[ID_COL_DIRECTOUT]
+        self.startpoint = dict[ID_COL_STARTPOINT]
+        self.endpoint = dict[ID_COL_ENDPOINT]
+        self.crossfade = dict[ID_COL_CROSSFADE]
+        self.channel = dict[ID_COL_CHANNEL]
+
+    def setCurrentCue(self, x):
+        self.currentCue = x
+
+    def loadCue(self, x):
+        if x in self.cues:
+            self.setAttributes(self.cues[x])
+        else:
+            c = x
+            while (c >= 0):
+                if c in self.cues:
+                    self.setAttributes(self.cues[c])
+                    break
+                c -= 1
+        self.currentCue = x
+
+    def delCue(self, x):
+        del self.cues[x]
+        for i in range(x+1, len(self.cues)):
+            if i in self.cues:
+                self.cues[i-1] = self.cues[i]
+                del self.cues[i]
+
+    def saveCue(self):
+        self.cues[self.currentCue] = self.getAttributes()
+
+    def addCue(self, x):
+        self.currentCue = x
+        self.saveCue()
+
+    def getCues(self):
+        return self.cues
+
+    def setCues(self, cues):
+        self.cues = cues
+
     def isValid(self):
         return self.valid
+
+    def getId(self):
+        return self.id
+
+    def getFilename(self):
+        return self.filename
 
     def setLoopMode(self, x):
         self.loopmode = x
@@ -393,6 +450,7 @@ class SoundFileGrid(gridlib.Grid):
 
     def loadSound(self, sel):
         obj = SoundFileObject(self.selRow, sel)
+        obj.setCurrentCue(QLiveLib.getVar("CuesPanel").getCurrentCue())
         if obj.isValid():
             if self.selRow < len(self.objects):
                 self.objects[self.selRow] = obj
@@ -405,11 +463,23 @@ class SoundFileGrid(gridlib.Grid):
                 attr = self.GetOrCreateCellAttr(self.selRow, id)
                 attr.SetReadOnly(False)
 
+    def addObject(self, id ,filename):
+        self.selRow = id
+        self.loadSound(filename)
+
+    def setObjectCues(self, id, cues):
+        obj = self.objects[id]
+        obj.setCues(cues)
+        obj.loadCue(0)
+
     def selectLoopMode(self, evt):
         sel = LOOPMODES[evt.GetId()]
         if sel is not None:
             self.objects[self.selRow].setLoopMode(evt.GetId())
             self.SetCellValue(self.selRow, self.selCol, sel)
+
+    def getSoundFileObjects(self):
+        return self.objects
 
 class SoundFilePanel(wx.Panel):
     def __init__(self, parent):
@@ -418,6 +488,52 @@ class SoundFilePanel(wx.Panel):
         self.sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.sizer.Add(self.grid, 1, wx.EXPAND)
         self.SetSizer(self.sizer)
+
+    def loadCue(self, x):
+        self.saveCue()
+        for obj in self.grid.getSoundFileObjects():
+            obj.loadCue(x)
+            self.grid.putObjectAttrOnCells(obj, obj.getId())
+
+    def saveCue(self):
+        for obj in self.grid.getSoundFileObjects():
+            obj.saveCue()
+
+    def addCue(self, x):
+        self.saveCue()
+        for obj in self.grid.getSoundFileObjects():
+            obj.addCue(x)
+
+    def delCue(self, x, cur):
+        for obj in self.grid.getSoundFileObjects():
+            obj.delCue(x)
+            self.loadCue(cur)
+
+    def cueEvent(self, dict):
+        tp = dict["type"]
+        if tp == "deleteCue":
+            self.delCue(dict["deletedCue"], dict["currentCue"])
+        elif tp == "cueSelect":
+            self.loadCue(dict["selectedCue"])
+        elif tp == "newCue":
+            self.addCue(dict["currentCue"])
+
+    def setSaveState(self, lst):
+        for dict in lst:
+            id = dict["id"]
+            filename = dict["filename"]
+            self.grid.addObject(id, filename)
+            self.grid.setObjectCues(id, dict["cues"])
+            
+    def getSaveState(self):
+        self.saveCue()
+        l = []
+        for obj in self.grid.getSoundFileObjects():
+            dict = {"id": obj.getId(), 
+                    "filename": obj.getFilename(), 
+                    "cues": obj.getCues()}
+            l.append(dict)
+        return l
 
 if __name__ == "__main__":
     class TestWindow(wx.Frame):
