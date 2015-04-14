@@ -76,9 +76,14 @@ class AudioMixer:
             return None
 
     def addToMixer(self, voice, sig):
-        self.mixer.addInput(self.mixerInputCount, sig)
-        self.mixer.setAmp(self.mixerInputCount, voice, 1)
+        mixerInputId = self.mixerInputCount
+        self.mixer.addInput(mixerInputId, sig)
+        self.mixer.setAmp(mixerInputId, voice, 1)
         self.mixerInputCount += 1
+        return mixerInputId
+
+    def delFromMixer(self, id):
+        self.mixer.delInput(id)
 
     def resetMixer(self):
         for key in self.mixer.getKeys():

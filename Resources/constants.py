@@ -60,6 +60,23 @@ NEW_TRACK_ID = 2000
 DELETE_TRACK_ID = 2001
 LINK_STEREO_ID = 3000
 
+# SoundFiles IDs and constants
+ID_COL_FILENAME = 0
+ID_COL_LOOPMODE = 1
+ID_COL_TRANSPO = 2
+ID_COL_GAIN = 3
+ID_COL_PLAYING = 4
+ID_COL_DIRECTOUT = 5
+ID_COL_STARTPOINT = 6
+ID_COL_ENDPOINT = 7
+ID_COL_CROSSFADE = 8
+ID_COL_CHANNEL = 9
+
+LABELS = ["Filename", "Loop Mode", "Transpo", "Gain (dB)", "Playing", 
+          "Output", "Start Sec", "End Sec", "Xfade (%)", "Out Chan"]
+COLSIZES = [150, 100, 70, 70, 70, 70, 80, 80, 80, 80]
+LOOPMODES = ["No Loop", "Forward", "Backward", "Back-and-Forth"]
+
 # Audio drivers
 if PLATFORM == 'darwin' and '/%s.app' % APP_NAME in os.getcwd():
     AUDIO_DRIVERS = ['portaudio']

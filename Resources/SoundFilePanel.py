@@ -1,28 +1,12 @@
 #!/usr/bin/env python
 # encoding: utf-8
-import wx, os, shutil
+import wx, os, shutil, weakref
 import wx.grid as gridlib
 from pyo import sndinfo
 from constants import *
 import QLiveLib
 
 # add missing types in OscDataReceive
-
-ID_COL_FILENAME = 0
-ID_COL_LOOPMODE = 1
-ID_COL_TRANSPO = 2
-ID_COL_GAIN = 3
-ID_COL_PLAYING = 4
-ID_COL_DIRECTOUT = 5
-ID_COL_STARTPOINT = 6
-ID_COL_ENDPOINT = 7
-ID_COL_CROSSFADE = 8
-ID_COL_CHANNEL = 9
-
-LABELS = ["Filename", "Loop Mode", "Transpo", "Gain (dB)", "Playing", 
-          "Output", "Start Sec", "End Sec", "Xfade (%)", "Out Chan"]
-COLSIZES = [150, 100, 70, 70, 70, 70, 80, 80, 80, 80]
-LOOPMODES = ["No Loop", "Forward", "Backward", "Back-and-Forth"]
 
 class SoundFileObject:
     def __init__(self, id, filename, loopmode=0, transpo=1, gain=0,
@@ -48,9 +32,14 @@ class SoundFileObject:
         self.crossfade = crossfade
         self.channel = channel
         
+        self.playerRef = None
+
         self.currentCue = 0
         self.cues = {}
         self.saveCue()
+
+    def setPlayerRef(self, obj):
+        self.playerRef = weakref.ref(obj)
 
     def getAttributes(self):
         return {
@@ -92,6 +81,9 @@ class SoundFileObject:
                     break
                 c -= 1
         self.currentCue = x
+        if self.playerRef != None:
+            player = self.playerRef()
+            player.setAttributes(self.getAttributes())
 
     def delCue(self, x):
         del self.cues[x]
@@ -206,6 +198,7 @@ class SoundFileGrid(gridlib.Grid):
         self.Bind(gridlib.EVT_GRID_CELL_CHANGE, self.OnCellChange)
         self.Bind(gridlib.EVT_GRID_CELL_LEFT_CLICK, self.OnCellLeftClick)
         self.Bind(gridlib.EVT_GRID_CELL_RIGHT_CLICK, self.OnCellRightClick)
+        self.Bind(gridlib.EVT_GRID_LABEL_RIGHT_CLICK, self.OnLabelRightClick)
         self.GetGridWindow().Bind(wx.EVT_LEFT_DOWN, self.OnLeftDown)
         self.GetGridWindow().Bind(wx.EVT_LEFT_UP, self.OnLeftUp)
         self.GetGridWindow().Bind(wx.EVT_MOTION, self.OnMotion)
@@ -304,9 +297,6 @@ class SoundFileGrid(gridlib.Grid):
             else:
                 self.SetCellValue(row, key, str(attrs[key]))
         self.SetCellTextColour(row, ID_COL_FILENAME, self.textColour)
-
-    def createNewObject(self):
-        pass
 
     def OnCellChange(self, evt):
         self.selRow, self.selCol = evt.GetRow(), evt.GetCol()
@@ -442,6 +432,16 @@ class SoundFileGrid(gridlib.Grid):
             dlg.Destroy()
         evt.Skip()
 
+    def OnLabelRightClick(self, evt):
+        # TODO:
+        # popup with "duplicate" and "delete" instead of simply deleting the row
+        # adjust id of remaining sounds if necessary...
+        row = evt.GetRow()
+        if row != -1:
+            del self.objects[row]
+            self.DeleteRows(row, 1, True)
+        evt.Skip()
+
     def selectSound(self, evt):
         sel = self.snds[evt.GetId()]
         if sel is not None:
@@ -534,6 +534,9 @@ class SoundFilePanel(wx.Panel):
                     "cues": obj.getCues()}
             l.append(dict)
         return l
+
+    def getSoundFileObjects(self):
+        return self.grid.getSoundFileObjects()
 
 if __name__ == "__main__":
     class TestWindow(wx.Frame):

@@ -1,8 +1,9 @@
 #!/usr/bin/python
 # encoding: utf-8
 import wx, os
-from constants import *
 from pyo64 import *
+from constants import *
+import QLiveLib
 
 ######## Types of control parameters available in the FxView window ########
 
@@ -489,4 +490,5 @@ class InputCreator(Creator):
     def __init__(self):
         self.classes = [InputIn, Soundfile]
         self.buildNames()
-
+                
+        
