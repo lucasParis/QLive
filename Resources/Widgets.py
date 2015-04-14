@@ -610,10 +610,12 @@ class QLiveControlKnob(wx.Panel):
         evt.Skip()
        
 class TransportButtons(wx.Panel):
-    def __init__(self, parent):
+    def __init__(self, parent, playCallback=None, recordCallback=None):
         super(TransportButtons, self).__init__(parent)
 
         self.playmode = self.recordmode = 0
+        self.playCallback = playCallback
+        self.recordCallback = recordCallback
 
         self.playIcon = wx.Bitmap(ICON_PLAY, wx.BITMAP_TYPE_PNG)
         self.playPressedIcon = wx.Bitmap(ICON_PLAY_PRESSED, wx.BITMAP_TYPE_PNG)
@@ -641,6 +643,8 @@ class TransportButtons(wx.Panel):
             self.record.SetBitmapLabel(self.recordIcon)
             self.record.Enable()
             self.recordmode = 0
+        if self.playCallback is not None:
+            self.playCallback(self.playmode)
 
     def onRecord(self, evt):
         self.recordmode = self.playmode = (self.recordmode + 1) % 2
@@ -650,6 +654,8 @@ class TransportButtons(wx.Panel):
         else:
             self.record.SetBitmapLabel(self.recordIcon)
             self.play.SetBitmapLabel(self.playIcon)
+        if self.recordCallback is not None:
+            self.recordCallback(self.recordmode)
 
 if __name__ == "__main__":
     from pyo64 import *

@@ -363,6 +363,38 @@ class FxHarmonizer(AudioModule):
         self.process = Harmonizer(self.getInput(), self.ctrlTranspo, self.ctrlFeed, mul = self.dbValue)
         self.setOutput(self.process)
 
+class FxMonoOut(AudioModule):
+    name = "MonoOut"
+    def __init__(self):
+        AudioModule.__init__(self)
+        self.setName("MonoOut")
+        self.removeDryWet()
+        #ctrls
+        self.ctrlGain = SliderParameter(name = "gain", value = 0, min = -90, max = 24, unit = "db", exp = 1)
+        self.addParameter(self.ctrlGain)
+        
+        #audio
+        self.dbValue = DBToA(self.ctrlGain)
+        self.process = Sig(self.getInput().mix(1), mul = self.dbValue)
+        self.setOutput(self.process)
+
+class FxStereoOut(AudioModule):
+    name = "StereoOut"
+    def __init__(self):
+        AudioModule.__init__(self)
+        self.setName("StereoOut")
+        self.removeDryWet()
+        #ctrls
+        self.ctrlGain = SliderParameter(name = "gain", value = 0, min = -90, max = 24, unit = "db", exp = 1)
+        self.addParameter(self.ctrlGain)
+        self.ctrlPan = SliderParameter(name = "pan", value = 0.5, min = 0, max = 1, unit = "", exp = 1)
+        self.addParameter(self.ctrlPan)
+        
+        #audio
+        self.dbValue = DBToA(self.ctrlGain)
+        self.process = SPan(self.getInput().mix(2), 2, self.ctrlPan, mul = self.dbValue)
+        self.setOutput(self.process)
+
 ######## Available input modules ########
 class InputIn(AudioModule):
     name = "input"
@@ -449,7 +481,8 @@ class Creator:
 class FxCreator(Creator):
     def __init__(self):
         self.classes = [FxNone, FxLowpass, FxHighpass, FxFreeVerb, FxStereoVerb,
-                        FxDisto, FxDelay, FxCompressor, FxFreqShift, FxHarmonizer]
+                        FxDisto, FxDelay, FxCompressor, FxFreqShift, FxHarmonizer,
+                        FxMonoOut, FxStereoOut]
         self.buildNames()
         
 class InputCreator(Creator):

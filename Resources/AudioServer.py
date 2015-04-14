@@ -9,8 +9,12 @@ class AudioServer:
         self.server.setMidiInputDevice(99)
         self.server.boot()
 
-    def start(self):
-        self.server.start()
+    def start(self, state):
+        if state:
+            QLiveLib.getVar("FxTracks").start()
+            self.server.start()
+        else:
+            self.server.stop()
 
     def stop(self):
         self.server.stop()

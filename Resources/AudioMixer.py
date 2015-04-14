@@ -58,8 +58,10 @@ class AudioChannel:
 
 class AudioMixer:
     def __init__(self):
-        self.inChannels = [AudioChannel(Input(i)) for i in range(NUM_INPUTS)]        
-        self.outChannels = [AudioChannel().out(i) for i in range(NUM_OUTPUTS)]
+        self.mixerInputCount = 0
+        self.inChannels = [AudioChannel(Input(i)) for i in range(NUM_INPUTS)] 
+        self.mixer = Mixer(outs=NUM_OUTPUTS, chnls=1)       
+        self.outChannels = [AudioChannel(self.mixer[i]).out(i) for i in range(NUM_OUTPUTS)]
 
     def getInputChannel(self, index):
         if index < len(self.inChannels):
@@ -72,7 +74,18 @@ class AudioMixer:
             return self.outChannels[index]
         else:
             return None
-                    
+
+    def addToMixer(self, voice, sig):
+        self.mixer.addInput(self.mixerInputCount, sig)
+        self.mixer.setAmp(self.mixerInputCount, voice, 1)
+        self.mixerInputCount += 1
+
+    def resetMixer(self):
+        for key in self.mixer.getKeys():
+            self.mixer.delInput(key)
+        self.mixerInputCount = 0
+        
+        
 if __name__ == "__main__":
     import wx
     from MixerPanel import *

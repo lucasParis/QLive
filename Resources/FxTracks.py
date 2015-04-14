@@ -39,7 +39,7 @@ class FxTracks(wx.Panel):
 
     def setSaveDict(self, saveDict):
         for track in self.tracks:
-            print self.sizer.Detach(track)
+            self.sizer.Detach(track)
         self.sizer.Clear()
 
         self.tracks = [FxTrack(self, self.fxsView, i) for i in range(len(saveDict["tracks"]))]
@@ -68,10 +68,10 @@ class FxTracks(wx.Panel):
         for track in self.tracks:
             track.cueEvent(eventDict)
         self.fxsView.refresh()
-        
-    # no more used...
-    def connectAudioMixer(self, audioMixer):
-        self.track.connectAudioMixer(audioMixer)
+ 
+    def start(self):
+        for track in self.tracks:
+            track.start()
         
     def addTrack(self):
         self.tracks.append(FxTrack(self, self.fxsView, len(self.tracks)))

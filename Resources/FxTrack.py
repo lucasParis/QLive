@@ -28,7 +28,7 @@ class FxTrack(wx.ScrolledWindow):
         self.createButtonBitmap()
         self.createButtonBitmap(False)
         self.createButtons()
-        self.createConnections()
+        #self.createConnections()
 
         self.SetVirtualSize((10+(self.cols+1)*(self.buttonWidth+20)+10, 1000))
         w, h = self.GetVirtualSize()
@@ -47,8 +47,6 @@ class FxTrack(wx.ScrolledWindow):
             self.dcref = wx.BufferedPaintDC
         else:
             self.dcref = wx.PaintDC
-            
-
 
     def createButtonBitmap(self, enable=True):
         w, h = self.buttonWidth, self.buttonHeight
@@ -89,6 +87,9 @@ class FxTrack(wx.ScrolledWindow):
             but.setId((0,i))
             self.buttonsInputs.append(but)
 
+    def start(self):
+        self.createConnections()
+
     def createConnections(self):
         for i, row in enumerate(self.buttonsFxs):
             for j, button in enumerate(row):
@@ -100,11 +101,18 @@ class FxTrack(wx.ScrolledWindow):
 
     def connectAudioMixer(self):
         audioMixer = QLiveLib.getVar("AudioMixer")
+        # not supposed to be called every time
+        # Connections should be handled more dynamically...
+        #audioMixer.resetMixer()
         for but in self.buttonsInputs:
             but.setInput([audioMixer.getInputChannel(i).getOutput() for i in range(NUM_CHNLS)])
         for i, row in enumerate(self.buttonsFxs):
-            output = row[-1].getOutput()
-            [audioMixer.getOutputChannel(k).setInput(output[k]) for k in range(NUM_CHNLS)]
+            for obj in row:
+                if obj.name == "MonoOut":
+                    audioMixer.addToMixer(0, row[-1].getOutput())
+                if obj.name == "StereoOut":
+                    audioMixer.addToMixer(0, row[-1].getOutput()[0])
+                    audioMixer.addToMixer(1, row[-1].getOutput()[1])
 
     def refresh(self):
         wx.CallAfter(self.Refresh)
@@ -132,6 +140,11 @@ class FxTrack(wx.ScrolledWindow):
                     butRect = wx.Rect(buttonPos[0], buttonPos[1], self.buttonWidth, self.buttonHeight)
                     if butRect.Contains(pos):
                         self.buttonsFxs[id[1]][id[0]].openView()
+                else:
+                    but = FxBox(self)
+                    but.setId((len(self.buttonsFxs[0]),0))
+                    self.buttonsFxs[0].append(but)
+                    wx.CallAfter(self.Refresh)
 
     def rightClicked(self, event):
         pos = self.CalcUnscrolledPosition( event.GetPosition() )
@@ -225,12 +238,12 @@ class FxTrack(wx.ScrolledWindow):
         self.rows = len(saveDict["fxsValues"])
         self.cols = len(saveDict["fxsValues"][0])
         self.createButtons()
-        self.createConnections()
         for i, row in enumerate(self.buttonsFxs):
             for j, button in enumerate(row):
                 button.setSaveDict(saveDict["fxsValues"][i][j])
         for i, inputBut in enumerate(self.buttonsInputs):
             inputBut.setSaveDict(saveDict["inputValues"][i])
+        #self.createConnections()
         wx.CallAfter(self.Refresh)
 
     def loadCue(self, cue):

@@ -113,7 +113,7 @@ class MainWindow(wx.Frame):
 
         self.loadFile(NEW_FILE_PATH)
 
-        if True:
+        if False:
             dlg = IntroDialog(self)
             if dlg.ShowModal() == wx.ID_OK:
                 filepath = dlg.filepath
@@ -123,6 +123,8 @@ class MainWindow(wx.Frame):
                 else:
                     self.loadFile(filepath)
             dlg.Destroy()
+        else:
+            self.loadFile("/home/olivier/newproject2/newproject2.qlp")
 
         self.Show()
 
