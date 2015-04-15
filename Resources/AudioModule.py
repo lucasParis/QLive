@@ -27,13 +27,28 @@ class SliderParameter(ParameterParent, PyoObject):
         self.audioValue = SigTo(value, 0.05, init=value)
         self._base_objs = self.audioValue.getBaseObjects()
 
-    def setValue(self, value):
-        # INTERP get and set value as pair list [value, interTime]
+    # add new function for setValueFromUI (temporarly resets interp time to 0.05)
+    def setValue(self, value):# this should only be used for save dict and cues, rename to setSaveValue ?
+        # get and set value as pair list [value, interTime]
+        self.audioValue.time = value[1]
+        self.audioValue.setValue(value[0])
+        self.value = value[0]
+
+    def getValue(self):# this should only be used for save dict and cues, rename to getSaveValue ?
+        return [self.audioValue.value, self.audioValue.time]
+        
+    def getParameterValue(self):
+        return self.value
+
+    def setParameterValue(self, value):
         self.audioValue.setValue(value)
         self.value = value
-
-    def getValue(self):
-        return self.value
+        
+    def getInterpTime(self):
+        return self.audioValue.time
+        
+    def setInterpTime(self, value):
+        self.audioValue.time = value
         
 class ButtonParameter(ParameterParent):
     def __init__(self, name="empty"):

@@ -22,15 +22,38 @@ class SliderWidget(WidgetParent):
         WidgetParent.__init__(self, parameter, parent)
         self.sizer = wx.BoxSizer(wx.VERTICAL)
         self.slider = QLiveControlKnob(self, parameter.min, parameter.max, 
-                                       parameter.getValue(), label=parameter.name,
-                                       outFunction=parameter.setValue)
+                                       parameter.getParameterValue(), label=parameter.name,
+                                       outFunction=parameter.setParameterValue)
         self.sizer.Add(self.slider, 0, wx.ALL, 5)
         
+        self.interpKnob = QLiveControlKnob(self,INTERPTIME_MIN, INTERPTIME_MAX, 
+                                       parameter.getInterpTime(), label=parameter.name,
+                                       outFunction=self.interpolationTimeCallback, backColour = CONTROLSLIDER_BACK_COLOUR_INTERP)
         # INTERP add another knob for interpolation time, toggle between display of value knob and interp knob
+        self.sizer.Add(self.interpKnob, 0, wx.ALL, 5)
+
+        self.interpKnob.Hide()
         self.SetSizer(self.sizer)
         
     def setValue(self, value):
         self.slider.SetValue(value)
+        
+    def setParameterInterpolationTime(self, value):
+        self.interpKnob.SetValue(value)
+
+        
+    def interpolationTimeCallback(self, value):
+        self.parameter.setInterpTime(value)
+        
+    def setShowMorph(self, bool):
+        if bool:
+            self.slider.Hide()
+            self.interpKnob.Show()
+        else:
+            self.slider.Show()
+            self.interpKnob.Hide()
+            
+        self.Layout()
         
 class PathWidget(WidgetParent):
     def __init__(self, parameter, parent):
@@ -133,11 +156,19 @@ class FxSlidersView(wx.Frame):
         self.knobSizer = wx.BoxSizer(wx.HORIZONTAL)
         self.buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
 
+        self.interpButton = wx.ToggleButton(self.panel, -1)
+        self.interpButton.SetLabel("Morph Time")
+        self.interpButton.Bind(wx.EVT_TOGGLEBUTTON, self.showMorphEvent)
+
+        self.headSizer.Add(self.interpButton, 0, wx.TOP|wx.LEFT, 7)
+        
         self.headSizer.AddStretchSpacer(1)
+
         self.enable = wx.CheckBox(self.panel, -1, "Enable FX:", style=wx.ALIGN_RIGHT)
         self.enable.SetValue(1)
         self.enable.Bind(wx.EVT_CHECKBOX, self.enableFx)
         self.headSizer.Add(self.enable, 0, wx.TOP|wx.RIGHT, 7)
+        
 
         self.sizer.Add(self.headSizer, 0, wx.EXPAND)
         self.sizer.Add(self.knobSizer, 0, wx.EXPAND)
@@ -174,6 +205,11 @@ class FxSlidersView(wx.Frame):
         self.Bind(wx.EVT_CLOSE, self.onClose)
         
         self.Show()
+        
+    def showMorphEvent(self, evt):
+        for widget in self.widgets:
+            if isinstance(widget, SliderWidget):
+                widget.setShowMorph(self.interpButton.GetValue())
 
     def enableFx(self, evt):
         self.audio.setEnable(evt.GetInt())
@@ -181,8 +217,13 @@ class FxSlidersView(wx.Frame):
             
     def refresh(self):
         for i, param in enumerate(self.parameters):
-            self.widgets[i].setValue(param.getValue())
+            if param.type == "slider":
+                self.widgets[i].setValue(param.getParameterValue())
+                self.widgets[i].setParameterInterpolationTime(param.getInterpTime())
 
+            else:
+                self.widgets[i].setValue(param.getValue())
+                
     def onClose(self, evt):
         index = self.parent.openViews.index(self)
         self.parent.openViews.pop(index)

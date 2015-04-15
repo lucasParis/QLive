@@ -29,7 +29,8 @@ class FxTracks(wx.Panel):
         self.SetSizer(self.sizer)
 
     def refresh(self):
-        self.track.refresh()
+        for track in self.tracks:
+            track.refresh()
 
     def getSaveDict(self):
         # for now simple thru, later compile differents tracks into dict
