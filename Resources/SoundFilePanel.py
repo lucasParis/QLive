@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
-import wx, os, shutil, weakref
+import wx, os, shutil, weakref, copy
 import wx.grid as gridlib
 from pyo import sndinfo
 from constants import *
@@ -67,8 +67,16 @@ class SoundFileObject:
         self.crossfade = dict[ID_COL_CROSSFADE]
         self.channel = dict[ID_COL_CHANNEL]
 
+    def copy(self, obj):
+        self.setAttributes(copy.deepcopy(obj.getAttributes()))
+        self.currentCue = obj.getCurrentCue()
+        self.setCues(copy.deepcopy(obj.getCues()))
+
     def setCurrentCue(self, x):
         self.currentCue = x
+
+    def getCurrentCue(self):
+        return self.currentCue
 
     def loadCue(self, x):
         if x in self.cues:
@@ -81,9 +89,10 @@ class SoundFileObject:
                     break
                 c -= 1
         self.currentCue = x
-        if self.playerRef != None:
+        if self.playerRef is not None:
             player = self.playerRef()
-            player.setAttributes(self.getAttributes())
+            if player is not None:
+                player.setAttributes(self.getAttributes())
 
     def delCue(self, x):
         del self.cues[x]
@@ -110,6 +119,9 @@ class SoundFileObject:
 
     def getId(self):
         return self.id
+
+    def setId(self, x):
+        self.id = x
 
     def getFilename(self):
         return self.filename
@@ -218,9 +230,13 @@ class SoundFileGrid(gridlib.Grid):
         self.initialStart = self.initialEnd = self.initialFade = None
         self.initialChannel = None
 
-    def addRow(self):
-        self.AppendRows(1, True)
-        row = self.GetNumberRows() - 1
+    def addRow(self, index=None):
+        if index == None:
+            self.AppendRows(1, True)
+            row = self.GetNumberRows() - 1
+        else:
+            self.InsertRows(index, 1, True)
+            row = index
         # Filename
         attr = gridlib.GridCellAttr()
         attr.SetReadOnly(True)
@@ -438,9 +454,35 @@ class SoundFileGrid(gridlib.Grid):
         # adjust id of remaining sounds if necessary...
         row = evt.GetRow()
         if row != -1:
-            del self.objects[row]
-            self.DeleteRows(row, 1, True)
+            self.selRow = row
+            menu = wx.Menu()
+            for i, act in enumerate(["Duplicate", "Delete"]):
+                menu.Append(i, act)
+            menu.Bind(wx.EVT_MENU, self.doLabelAction, id=0, id2=i)
+            self.PopupMenu(menu, evt.GetPosition())
+            menu.Destroy()
         evt.Skip()
+
+    def doLabelAction(self, evt):
+        if evt.GetId() == 0: # Duplicate
+            obj = self.objects[self.selRow]
+            id = obj.getId()
+            filename = obj.getFilename()
+            new = SoundFileObject(id, filename)
+            new.copy(obj)
+            self.selRow += 1
+            self.objects.insert(self.selRow, new)
+            self.addRow(index=self.selRow)
+            self.putObjectAttrOnCells(new, self.selRow)
+            for id in [ID_COL_TRANSPO, ID_COL_GAIN, ID_COL_STARTPOINT,
+                       ID_COL_ENDPOINT, ID_COL_CROSSFADE, ID_COL_CHANNEL]:
+                attr = self.GetOrCreateCellAttr(self.selRow, id)
+                attr.SetReadOnly(False)
+        elif evt.GetId() == 1: # Delete
+            del self.objects[self.selRow]
+            self.DeleteRows(self.selRow, 1, True)
+        for i, obj in enumerate(self.objects):
+            obj.setId(i)
 
     def selectSound(self, evt):
         sel = self.snds[evt.GetId()]
@@ -537,13 +579,3 @@ class SoundFilePanel(wx.Panel):
 
     def getSoundFileObjects(self):
         return self.grid.getSoundFileObjects()
-
-if __name__ == "__main__":
-    class TestWindow(wx.Frame):
-        def __init__(self):
-            wx.Frame.__init__(self, None, pos=(350,500), size=(1000,250))
-            self.panel = SoundFilePanel(self)
-    app = wx.App()
-    frame = TestWindow()
-    frame.Show()
-    app.MainLoop()
