@@ -18,6 +18,7 @@ TODO
 
 - DONE Allow multiple tracks (Lucas)
 - DONE Parameter interpolation between cues (per cue, per parameter) (Lucas)
+    - But the controls now are not real-time...
 - Finalizing cue selection (Lucas)
 
 

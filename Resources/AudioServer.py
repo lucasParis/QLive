@@ -64,6 +64,7 @@ class AudioServer:
         self.server.setMidiInputDevice(99)
         self.server.boot()
         self.soundfiles = []
+        self.recording = False
 
     def createSoundFilePlayers(self):
         objs = QLiveLib.getVar("Soundfiles").getSoundFileObjects()
@@ -86,12 +87,22 @@ class AudioServer:
             QLiveLib.getVar("FxTracks").start()
             self.server.start()
         else:
+            if self.recording:
+                self.recording = False
+                self.recStop()
             self.server.stop()
             self.resetPlayerRefs()
             self.soundfiles = []
 
-    def stop(self):
-        self.server.stop()
+    def record(self, state):
+        if state:
+            self.recording = True
+            self.recStart()
+            self.start(True)
+        else:
+            self.recording = False
+            self.recStop()
+            self.start(False)
 
     def shutdown(self):
         self.server.shutdown()
@@ -102,9 +113,12 @@ class AudioServer:
     def isBooted(self):
         return self.server.getIsBooted()
 
-    def recStart(self, filename, fileformat=0, sampletype=0):
+    def recStart(self, filename="", fileformat=0, sampletype=0):
         self.server.recordOptions(fileformat=fileformat, sampletype=sampletype)
+        if not filename:
+            filename = os.path.basename(QLiveLib.getVar("currentProject"))
         filename, ext = os.path.splitext(filename)
+        filename = os.path.join(QLiveLib.getVar("projectFolder"), "bounce", filename)
         if fileformat >= 0 and fileformat < 8:
             ext = RECORD_EXTENSIONS[fileformat]
         else: 

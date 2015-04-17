@@ -2,8 +2,6 @@ import wx
 from FxTrack import *
 from FxView import FxViewManager
 
-# delete FxBox
-# tab for track traversal 
 # put FxBox at the clicked position
 
 class FxTracks(wx.ScrolledWindow):
@@ -139,7 +137,10 @@ class FxTracks(wx.ScrolledWindow):
                         buttonFounded = but
                         break
         if buttonFounded is not None:
-            buttonFounded.openView()
+            if evt.ShiftDown():
+                trackFounded.deleteButton(buttonFounded)
+            else:
+                buttonFounded.openView()
         evt.Skip()
 
     def leftDClicked(self, evt):
@@ -166,7 +167,7 @@ class FxTracks(wx.ScrolledWindow):
                         buttonFounded = but
                         break
         if buttonFounded is None and selection is None:
-            track.createFx(pos)
+            track.createButton(pos)
             self.drawAndRefresh()
         evt.Skip()
 

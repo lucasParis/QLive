@@ -14,7 +14,7 @@ class ControlPanel(wx.Panel):
 
         self.buttons = TransportButtons(self, 
                                         playCallback=QLiveLib.getVar("AudioServer").start,
-                                        recordCallback=None)
+                                        recordCallback=QLiveLib.getVar("AudioServer").record)
         self.mainSizer.Add(self.buttons, 0, wx.ALIGN_CENTER_HORIZONTAL)
 
         self.mainSizer.Add(wx.StaticLine(self, size=(1, 1)), 0, 

@@ -43,7 +43,7 @@ class ParentBox(object):
         self.name = ""
         self.audio = None
         self.presets = None
-        self.id = (0,0)
+        self.id = [0,0]
         self.audioIn = Sig([0] * NUM_CHNLS)
         self.audioOut = Sig(self.audioIn)    
  

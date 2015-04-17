@@ -48,17 +48,30 @@ class FxTrack:
         for i in range(self.rows):
             for j in range(self.cols):
                 but = FxBox(self)
-                but.setId((j,i))
+                but.setId([j,i])
                 self.buttonsFxs.append(but)
             but = InputBox(self)
-            but.setId((0,i))
+            but.setId([0,i])
             self.buttonsInputs.append(but)
 
-    def createFx(self, pos):
-        but = FxBox(self)
-        # need to retrieve the correct id from the position
-        but.setId((len(self.buttonsFxs), 0))
-        self.buttonsFxs.append(but)
+    def createButton(self, pos):
+        if pos[0] > 25 and pos[0] < 125:
+            but = InputBox(self)
+            but.setId([0, len(self.buttonsInputs)])
+            self.buttonsInputs.append(but)
+        else:
+            # need to retrieve the correct id from the position
+            but = FxBox(self)
+            but.setId([len(self.buttonsFxs), 0])
+            self.buttonsFxs.append(but)
+
+    def deleteButton(self, but):
+        self.buttonsFxs.remove(but)
+        for i, but in enumerate(self.buttonsFxs):
+            id = but.getId()
+            id[0] = i
+            but.setId(id)
+        QLiveLib.getVar("FxTracks").drawAndRefresh()
 
     def start(self):
         self.createConnections()
