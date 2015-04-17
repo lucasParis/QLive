@@ -8,7 +8,6 @@ import Resources.QLiveLib as QLiveLib
 class FxTrack:
     def __init__(self, parent, viewPanelRef, id=0):
         
-        # id and trackPosition redundant...
         self.id = id
         self.trackPosition = 0
         self.trackHeight = TRACK_ROW_SIZE * 2
@@ -88,16 +87,25 @@ class FxTrack:
 
         dc.SetFont(self.font)
 
+        # grid
+        dc.SetPen(wx.Pen("#3F3F3F", 1))
+        for i in range(1, self.rows+1):
+            y = TRACK_ROW_SIZE * i + self.trackPosition
+            dc.DrawLine(27, y, 124, y)
+            dc.DrawLine(127, y, MAX_WIDTH-127, y)
+        for i in range(1, MAX_WIDTH/(TRACK_COL_SIZE-1)):
+            x = i * TRACK_COL_SIZE + 125
+            dc.DrawLine(x, self.trackPosition, x, self.trackPosition+self.trackHeight)
+
         if self.id == selectedTrack:
-            rect = wx.Rect(1, self.trackPosition+1, 4098, self.trackHeight-2)
-            gc.SetPen(wx.Pen("#BBBBBB", 1))
-            gc.SetBrush(wx.Brush(TRACKS_BACKGROUND_COLOUR))
+            rect = wx.Rect(1, self.trackPosition+1, MAX_WIDTH-2, self.trackHeight-2)
+            gc.SetPen(wx.Pen("#BBBBBB", 1.5))
+            gc.SetBrush(wx.Brush(TRACKS_BACKGROUND_COLOUR, style=wx.TRANSPARENT))
             gc.DrawRoundedRectangle(rect[0], rect[1], rect[2], rect[3], 3)
 
         dc.SetTextForeground("#FFFFFF")
         rect = wx.Rect(0, self.trackPosition, 25, self.trackHeight)
         dc.DrawLabel(str(self.id), rect, wx.ALIGN_CENTER)    
-
 
         dc.SetTextForeground(FXBOX_FOREGROUND_COLOUR)
         for i, inputBut in enumerate(self.buttonsInputs):
@@ -113,12 +121,10 @@ class FxTrack:
                 gc.DrawBitmap(disableButtonBitmap, rect[0], rect[1], rect[2], rect[3])
             dc.DrawLabel(button.name, rect, wx.ALIGN_CENTER)    
 
-        dc.SetPen(wx.Pen("#333333", 1))
+        dc.SetPen(wx.Pen("#222222", 1))
         y = self.trackPosition + self.trackHeight
-        dc.DrawLine(2, y, 4098, y)
-        dc.DrawLine(25, 0, 25, 1000)
-        dc.DrawLine(125, 0, 125, 1000)
-
+        dc.DrawLine(0, y, MAX_WIDTH, y)
+ 
     def getSaveDict(self):
         dict = {}
         dict["fxsValues"] = []

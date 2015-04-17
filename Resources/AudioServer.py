@@ -38,6 +38,26 @@ class SoundFilePlayer:
         else:
             self.looper.stop()
 
+    def setAttribute(self, id, value):
+        if id == ID_COL_LOOPMODE:
+            self.looper.mode = value
+        elif id == ID_COL_TRANSPO:
+            self.looper.pitch = value
+        elif id == ID_COL_GAIN:
+            self.dbgain.value = value
+        elif id == ID_COL_STARTPOINT:
+            self.looper.start = value
+        elif id == ID_COL_ENDPOINT:
+            self.looper.dur = value - self.looper.start
+        elif id == ID_COL_CROSSFADE:
+            self.looper.xfade = value
+        elif id == ID_COL_PLAYING:
+            if value:
+                self.looper.play()
+            else:
+                self.looper.stop()
+        # handle ID_COL_PLAYING, ID_COL_DIRECTOUT and ID_COL_CHANNEL
+
 class AudioServer:
     def __init__(self):
         self.server = Server(buffersize=64)

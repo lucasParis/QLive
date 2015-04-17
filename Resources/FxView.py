@@ -213,7 +213,7 @@ class FxSlidersView(wx.Frame):
 
     def enableFx(self, evt):
         self.audio.setEnable(evt.GetInt())
-        QLiveLib.getVar("FxTracks").refresh()
+        QLiveLib.getVar("FxTracks").drawAndRefresh()
             
     def refresh(self):
         for i, param in enumerate(self.parameters):

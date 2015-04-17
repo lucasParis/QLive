@@ -125,59 +125,73 @@ class SoundFileObject:
     def setId(self, x):
         self.id = x
 
+    def setPlayerAttribute(self, id, value):
+        if self.playerRef is not None:
+            player = self.playerRef()
+            player.setAttribute(id, value)
+        
     def getFilename(self):
         return self.filename
 
     def setLoopMode(self, x):
         self.loopmode = x
+        self.setPlayerAttribute(ID_COL_LOOPMODE, x)
 
     def getTranspo(self):
         return self.transpo
         
     def setTranspo(self, x):
         self.transpo = x
+        self.setPlayerAttribute(ID_COL_TRANSPO, x)
 
     def getGain(self):
         return self.gain
 
     def setGain(self, x):
         self.gain = x
+        self.setPlayerAttribute(ID_COL_GAIN, x)
 
     def getPlaying(self):
         return self.playing
 
     def setPlaying(self, x):
         self.playing = x
+        self.setPlayerAttribute(ID_COL_PLAYING, x)
 
     def getDirectOut(self):
         return self.directout
 
     def setDirectOut(self, x):
         self.directout = x
+        self.setPlayerAttribute(ID_COL_DIRECTOUT, x)
 
     def getStartPoint(self):
         return self.startpoint
 
     def setStartPoint(self, x):
         self.startpoint = x
+        self.setPlayerAttribute(ID_COL_STARTPOINT, x)
 
     def getEndPoint(self):
         return self.endpoint
 
     def setEndPoint(self, x):
         self.endpoint = x
+        self.setPlayerAttribute(ID_COL_ENDPOINT, x)
 
     def getCrossfade(self):
         return self.crossfade
 
     def setCrossfade(self, x):
         self.crossfade = x
+        self.setPlayerAttribute(ID_COL_CROSSFADE, x)
 
     def getDuration(self):
         return self.duration
 
     def setChannel(self, x):
         self.channel = x
+        self.setPlayerAttribute(ID_COL_CHANNEL, x)
 
     def getChannel(self):
         return self.channel

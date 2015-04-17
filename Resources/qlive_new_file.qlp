@@ -12,5 +12,5 @@ dictSave = {   'cues': {   'numberOfCues': 1},
                                     'fxsValues': [None],
                                     'inputValues': [None],
                                     'rows': 1,
-                                    'trackHeight': 80,
+                                    'trackHeight': 90,
                                     'trackPosition': 25}]}}

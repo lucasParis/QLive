@@ -2,9 +2,13 @@ import wx
 from FxTrack import *
 from FxView import FxViewManager
 
+# delete FxBox
+# tab for track traversal 
+# put FxBox at the clicked position
+
 class FxTracks(wx.ScrolledWindow):
     def __init__(self, parent):
-        wx.ScrolledWindow.__init__(self, parent)
+        wx.ScrolledWindow.__init__(self, parent, style=wx.SUNKEN_BORDER)
         self.SetBackgroundStyle(wx.BG_STYLE_CUSTOM)  
         self.SetBackgroundColour(TRACKS_BACKGROUND_COLOUR)
 
@@ -15,18 +19,19 @@ class FxTracks(wx.ScrolledWindow):
         
         self.createTracks(2)
 
-        self.SetVirtualSize((5000, 1000))
-        w, h = self.GetVirtualSize()
-        self.SetScrollbars(20, 20, w/20, h/20, 0, 0, False)
+        self.SetVirtualSize((MAX_WIDTH, MAX_HEIGHT))
+        self.SetScrollbars(20, 20, MAX_WIDTH/20, MAX_HEIGHT/20, 0, 0, False)
 
         self.setFont()
         self.createButtonBitmap()
         self.createButtonBitmap(False)
 
-        self.prepareBuffer()
+        self.buffer = wx.EmptyBitmap(MAX_WIDTH, MAX_HEIGHT)
+        self.draw()
 
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         self.Bind(wx.EVT_LEFT_DOWN, self.leftClicked)
+        self.Bind(wx.EVT_LEFT_DCLICK, self.leftDClicked)
         self.Bind(wx.EVT_RIGHT_DOWN, self.rightClicked)
 
     def createTracks(self, num):
@@ -48,7 +53,7 @@ class FxTracks(wx.ScrolledWindow):
         track.setTrackPosition(x)
         track.setTrackHeight(h)
         self.tracks.append(track)
-        self.doDrawAndRefresh()
+        self.drawAndRefresh()
         
     def setFont(self, ptsize=10):
         self.font = wx.Font(ptsize, wx.FONTFAMILY_DEFAULT, wx.NORMAL, 
@@ -68,29 +73,25 @@ class FxTracks(wx.ScrolledWindow):
         else:
             gc.SetBrush(wx.Brush(FXBOX_DISABLE_BACKGROUND_COLOUR, wx.SOLID))
         rect = wx.Rect(0, 0, w, h)
-        rectIn = wx.Rect(0, 4, w/12., h-8)
-        rectOut = wx.Rect(w*11/12., 4, w/12., h-8)
+        rectI = wx.Rect(0, 4, w/12., h-8)
+        rectO = wx.Rect(w*11/12., 4, w/12., h-8)
         gc.DrawRoundedRectangle(rect[0], rect[1], rect[2], rect[3], 5)
-        gc.DrawRoundedRectangle(rectIn[0], rectIn[1], rectIn[2], rectIn[3], 2)
-        gc.DrawRoundedRectangle(rectOut[0], rectOut[1], rectOut[2], rectOut[3], 2)
+        gc.DrawRoundedRectangle(rectI[0], rectI[1], rectI[2], rectI[3], 2)
+        gc.DrawRoundedRectangle(rectO[0], rectO[1], rectO[2], rectO[3], 2)
         dc.SelectObject(wx.NullBitmap)
         if enable:
             self.buttonBitmap = b
         else:
             self.disableButtonBitmap = b
 
-    def prepareBuffer(self):
-        self.buffer = wx.EmptyBitmap(5000, 1000)
+    def draw(self):
         dc = wx.BufferedDC(None, self.buffer)
         dc.SetBackground(wx.Brush(self.GetBackgroundColour()))
         dc.Clear()
         self.DoDrawing(dc)
 
-    def doDrawAndRefresh(self):
-        dc = wx.BufferedDC(None, self.buffer)
-        dc.SetBackground(wx.Brush(self.GetBackgroundColour()))
-        dc.Clear()
-        self.DoDrawing(dc)
+    def drawAndRefresh(self):
+        self.draw()
         wx.CallAfter(self.Refresh)
 
     def OnPaint(self, evt):
@@ -101,11 +102,13 @@ class FxTracks(wx.ScrolledWindow):
 
         dc.SetFont(self.font)
         dc.SetTextForeground("#FFFFFF")
+        dc.DrawLabel("Inputs", wx.Rect(35, 3, 100, 22), wx.ALIGN_LEFT)
+        dc.DrawLabel("Fxs", wx.Rect(135, 3, 100, 22), wx.ALIGN_LEFT)
 
-        dc.DrawLabel("Inputs", wx.Rect(0, 2, 100, 22), wx.ALIGN_CENTER)
-        dc.DrawLabel("Fxs", wx.Rect(100, 2, 100, 22), wx.ALIGN_CENTER)
-        dc.SetPen(wx.Pen("#333333", 1))
-        dc.DrawLine(2, 25, 4098, 25)
+        dc.SetPen(wx.Pen("#222222", 1))
+        dc.DrawLine(0, 25, MAX_WIDTH, 25)
+        dc.DrawLine(25, 0, 25, MAX_HEIGHT)
+        dc.DrawLine(125, 0, 125, MAX_HEIGHT)
 
         for track in self.tracks:
             track.onPaint(dc, self.buttonBitmap, self.disableButtonBitmap,
@@ -114,6 +117,32 @@ class FxTracks(wx.ScrolledWindow):
         dc.EndDrawing()
 
     def leftClicked(self, evt):
+        pos = self.CalcUnscrolledPosition(evt.GetPosition())
+        trackFounded = buttonFounded = None
+        for track in self.tracks:
+            if pos[1] > track.getTrackPosition() and \
+               pos[1] < track.getTrackPosition() + track.getTrackHeight():
+                trackFounded = track
+                break
+        if trackFounded is not None:
+            buttonFounded = None
+            if pos[0] < 25:
+                self.setSelectedTrack(track.getId())
+            elif pos[0] < 125:
+                for but in track.buttonsInputs:
+                    if but.getRect().Contains(pos):
+                        buttonFounded = but
+                        break
+            else:
+                for but in track.buttonsFxs:
+                    if but.getRect().Contains(pos):
+                        buttonFounded = but
+                        break
+        if buttonFounded is not None:
+            buttonFounded.openView()
+        evt.Skip()
+
+    def leftDClicked(self, evt):
         pos = self.CalcUnscrolledPosition(evt.GetPosition())
         trackFounded = buttonFounded = selection = None
         for track in self.tracks:
@@ -136,13 +165,9 @@ class FxTracks(wx.ScrolledWindow):
                     if but.getRect().Contains(pos):
                         buttonFounded = but
                         break
-        if buttonFounded is not None:
-            buttonFounded.openView()
-        elif selection is not None:
-            pass
-        else:
+        if buttonFounded is None and selection is None:
             track.createFx(pos)
-            self.doDrawAndRefresh()
+            self.drawAndRefresh()
         evt.Skip()
 
     def rightClicked(self, evt):
@@ -167,7 +192,7 @@ class FxTracks(wx.ScrolledWindow):
                         break
         if buttonFounded is not None:
             buttonFounded.openMenu(evt)
-            self.doDrawAndRefresh()
+            self.drawAndRefresh()
         evt.Skip()
 
     def getSaveDict(self):
@@ -177,7 +202,7 @@ class FxTracks(wx.ScrolledWindow):
         self.createTracks(len(saveDict["tracks"]))
         for i in range(len(self.tracks)):
             self.tracks[i].setSaveDict(saveDict["tracks"][i])
-        self.doDrawAndRefresh()
+        self.drawAndRefresh()
             
         self.selectedTrack = 0
 
@@ -204,9 +229,10 @@ class FxTracks(wx.ScrolledWindow):
         for track in self.tracks:
             track.setTrackPosition(x)
             x += track.getTrackHeight()
-
-        self.doDrawAndRefresh()
+        self.drawAndRefresh()
         
-    def setSelectedTrack(self, id):        
+    def setSelectedTrack(self, id=-1):
+        if id == -1:
+            id = (self.selectedTrack + 1) % len(self.tracks)        
         self.selectedTrack = id
-        self.doDrawAndRefresh()
+        self.drawAndRefresh()

@@ -73,6 +73,12 @@ class MainWindow(wx.Frame):
 
         self.SetMenuBar(menubar)
 
+        tabId = wx.NewId()
+        accel_tbl = wx.AcceleratorTable([(wx.ACCEL_NORMAL,  wx.WXK_TAB, tabId)])
+        self.SetAcceleratorTable(accel_tbl)
+        
+        self.Bind(wx.EVT_MENU, self.onTabulate, id=tabId)
+
         self.mainPanel = wx.Panel(self, style=wx.SUNKEN_BORDER)
         self.mainPanel.SetBackgroundColour(BACKGROUND_COLOUR)
 
@@ -127,6 +133,9 @@ class MainWindow(wx.Frame):
             self.loadFile("/home/olivier/newproject2/newproject2.qlp")
 
         self.Show()
+
+    def onTabulate(self, evt):
+        QLiveLib.getVar("FxTracks").setSelectedTrack()
 
     def createProjectFolder(self, filepath):
         fil = os.path.basename(filepath)

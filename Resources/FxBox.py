@@ -84,6 +84,8 @@ class ParentBox(object):
         
     def initModule(self, name):
         self.audio = self.creator().createByName(name)
+        if self.audio is None:
+            return False
         self.name = self.audio.name
         self.audio.setInput(self.audioIn)
         self.audioOut.setValue(self.audio.getOutput())
@@ -93,6 +95,7 @@ class ParentBox(object):
         if numberOfCues > 1:
             currentCue = cuesPanel.getCurrentCue()
             self.audio.initCues(numberOfCues, currentCue)
+        return True
 
     def getSaveDict(self):
         if self.audio != None:
@@ -104,8 +107,8 @@ class ParentBox(object):
 
     def setSaveDict(self, saveDict):
         if saveDict != None:
-            self.initModule(saveDict["name"])
-            self.audio.setSaveDict(saveDict)
+            if self.initModule(saveDict["name"]):
+                self.audio.setSaveDict(saveDict)
 
     def cueEvent(self, eventDict):
         if self.audio != None:
