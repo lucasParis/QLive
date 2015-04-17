@@ -39,7 +39,10 @@ class SoundFileObject:
         self.saveCue()
 
     def setPlayerRef(self, obj):
-        self.playerRef = weakref.ref(obj)
+        if obj is None:
+            self.playerRef = None
+        else:
+            self.playerRef = weakref.ref(obj)
 
     def getAttributes(self):
         return {
@@ -91,8 +94,7 @@ class SoundFileObject:
         self.currentCue = x
         if self.playerRef is not None:
             player = self.playerRef()
-            if player is not None:
-                player.setAttributes(self.getAttributes())
+            player.setAttributes(self.getAttributes())
 
     def delCue(self, x):
         del self.cues[x]

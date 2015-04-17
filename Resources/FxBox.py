@@ -59,8 +59,8 @@ class ParentBox(object):
     def getOutput(self):
         return self.audioOut
         
-    def setId(self, Id):
-        self.id = Id
+    def setId(self, id):
+        self.id = id
         
     def getId(self):
         return self.id
@@ -76,7 +76,8 @@ class ParentBox(object):
 
     def openMenu(self, event):
         menu = self.menu(self)
-        if self.parent.PopupMenu(menu, event.GetPosition()):
+        fxTracks = QLiveLib.getVar("FxTracks")
+        if fxTracks.PopupMenu(menu, event.GetPosition()):
             if menu.getSelection() is not None:
                 self.initModule(menu.getSelection())
         menu.Destroy()
@@ -92,7 +93,6 @@ class ParentBox(object):
         if numberOfCues > 1:
             currentCue = cuesPanel.getCurrentCue()
             self.audio.initCues(numberOfCues, currentCue)
-        #self.parent.createConnections()
 
     def getSaveDict(self):
         if self.audio != None:
@@ -106,29 +106,21 @@ class ParentBox(object):
         if saveDict != None:
             self.initModule(saveDict["name"])
             self.audio.setSaveDict(saveDict)
-        else: # use case: empty fx/input, load default/empty
-            pass
-        
-    def loadCue(self, cue):
-        pass
-        
-    def copyCue(self, cueToCopy):
-        pass
-        
+
     def cueEvent(self, eventDict):
         if self.audio != None:
             self.audio.cueEvent(eventDict)
-#        if eventDict["type"] == 'newCue':
-#            print eventDict["currentCue"], eventDict["totalCues"]
-#        elif eventDict["type"] == 'cueSelect':
-#            print eventDict["selectedCue"]
-#            dictEvent = {'type': "cueSelect", "selectedCue": self.currentCue}
 
 class FxBox(ParentBox):
     def __init__(self, parent):
         ParentBox.__init__(self, parent)
         self.menu = FxBoxMenu
         self.creator = FxCreator
+
+    def getRect(self):
+        x = TRACK_COL_SIZE * self.id[0] + 135
+        y = TRACK_ROW_SIZE * self.id[1]  + self.parent.trackPosition + 10
+        return wx.Rect(x, y, BUTTON_WIDTH, BUTTON_HEIGHT)
 
 class InputBox(ParentBox):
     def __init__(self, parent):
@@ -137,21 +129,7 @@ class InputBox(ParentBox):
         self.menu = InputBoxMenu
         self.creator = InputCreator
 
-if __name__ == "__main__":
-    class TestWindow(wx.Frame):
-        def __init__(self):
-            wx.Frame.__init__(self, None)
-            self.s = Server().boot()
-            self.s.start()
-            self.but = InputBox(self)
-            self.but.getOutput().out()
-            self.but.setInput(Input([0,1]))
-            self.Bind(wx.EVT_RIGHT_DOWN, self.rightClicked)
-
-        def rightClicked(self, event):
-            self.but.openMenu(event)
-
-    app = wx.App()
-    frame = TestWindow()
-    frame.Show()
-    app.MainLoop()
+    def getRect(self):
+        x = 35
+        y = TRACK_ROW_SIZE * self.id[1] + self.parent.trackPosition + 10
+        return wx.Rect(x, y, BUTTON_WIDTH, BUTTON_HEIGHT)

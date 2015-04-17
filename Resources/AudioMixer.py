@@ -12,9 +12,9 @@ class AudioChannel:
         self.midictl.setInterpolation(False)
         self.midipat = Pattern(self.midiout, time=0.06)
         self.input = Sig(input)
-        self.inVolume = SigTo(0, init=0)
-        self.inDB = DBToA(self.inVolume)
-        self.output = Sig(self.input, mul=self.inDB)
+        self.dbgain = SigTo(0, init=0)
+        self.gain = DBToA(self.dbgain)
+        self.output = Sig(self.input, mul=self.gain)
         self.ampOut = PeakAmp(self.output)
 
     def midiout(self):
@@ -51,17 +51,17 @@ class AudioChannel:
         return self.output
         
     def setVolume(self, value):
-        self.inVolume.setValue(value)
+        self.dbgain.setValue(value)
         
     def setAmpCallback(self, call):
         self.ampOut.function = call
 
 class AudioMixer:
     def __init__(self):
-        self.mixerInputCount = 0
         self.inChannels = [AudioChannel(Input(i)) for i in range(NUM_INPUTS)] 
         self.mixer = Mixer(outs=NUM_OUTPUTS, chnls=1)       
-        self.outChannels = [AudioChannel(self.mixer[i]).out(i) for i in range(NUM_OUTPUTS)]
+        self.outChannels = [AudioChannel(
+                            self.mixer[i]).out(i) for i in range(NUM_OUTPUTS)]
 
     def getInputChannel(self, index):
         if index < len(self.inChannels):
@@ -76,10 +76,9 @@ class AudioMixer:
             return None
 
     def addToMixer(self, voice, sig):
-        mixerInputId = self.mixerInputCount
+        mixerInputId = len(self.mixer.getKeys())
         self.mixer.addInput(mixerInputId, sig)
         self.mixer.setAmp(mixerInputId, voice, 1)
-        self.mixerInputCount += 1
         return mixerInputId
 
     def delFromMixer(self, id):
@@ -89,23 +88,3 @@ class AudioMixer:
         for key in self.mixer.getKeys():
             self.mixer.delInput(key)
         self.mixerInputCount = 0
-        
-        
-if __name__ == "__main__":
-    import wx
-    from MixerPanel import *
-    class TestWindow(wx.Frame):
-        def __init__(self):
-            wx.Frame.__init__(self, None)
-            self.Bind(wx.EVT_CLOSE, self.onClose)
-            self.server = Server().boot().start()
-            self.mixer = AudioMixer()
-            self.panel = MixerPanel(self, self.mixer)
-            self.SetSize(self.panel.GetBestSize())
-        def onClose(self, evt):
-            self.server.stop()
-            self.Destroy()
-    app = wx.App()
-    frame = TestWindow()
-    frame.Show()
-    app.MainLoop()

@@ -39,9 +39,8 @@ class IntroDialog(wx.Dialog):
 
         btnsizer = wx.StdDialogButtonSizer()
 
-        btn = wx.Button(self, wx.ID_OK)
-        btn.SetDefault()
-        btnsizer.AddButton(btn)
+        self.okbtn = wx.Button(self, wx.ID_OK)
+        btnsizer.AddButton(self.okbtn)
 
         btn = wx.Button(self, wx.ID_CANCEL)
         btnsizer.AddButton(btn)
@@ -69,6 +68,7 @@ class IntroDialog(wx.Dialog):
             self.createDir = False
             self.showPath(self.filepath)
         dlg.Destroy()
+        self.okbtn.SetFocus()
     
     def new(self, evt):
         dlg = wx.FileDialog(self, "Create Qlive Projet Folder", os.path.expanduser("~"), 
@@ -78,6 +78,7 @@ class IntroDialog(wx.Dialog):
             self.createDir = True
             self.showPath(self.filepath)
         dlg.Destroy()
+        self.okbtn.SetFocus()
 
 if __name__ == "__main__":
     class TestWindow(wx.Frame):

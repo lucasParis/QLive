@@ -1,26 +1,16 @@
 ### QLIVE PROJECT FILE ###
 ### 0.1.0 ###
 dictSave = {   'cues': {   'numberOfCues': 1},
-    'mixer': {   'fileFormat': 0,
-                 'inputLinked': False,
+    'mixer': {   'inputLinked': False,
                  'inputSliderCtls': [None, None, None, None],
                  'inputSliderValues': [0.0, 0.0, 0.0, 0.0],
-                 'outputDestination': u'~/Desktop',
-                 'outputFilename': u'qlive_rec',
                  'outputLinked': False,
                  'outputSliderCtls': [None, None, None, None],
-                 'outputSliderValues': [0.0, 0.0, 0.0, 0.0],
-                 'sampleType': 0},
-    'tracks': {   'tracks':
-                        [
-                        {'cols': 5,
-                            'fxsValues': [[None, None, None, None, None]],
-                            'inputValues': [None],
-                            'rows': 1},
-                            {'cols': 5,
-                            'fxsValues': [[None, None, None, None, None]],
-                            'inputValues': [None],
-                            'rows': 1},
-                            ]
-                            
-                  }}
+                 'outputSliderValues': [0.0, 0.0, 0.0, 0.0]},
+    'soundfiles': [],
+    'tracks': {   'tracks': [   {   'cols': 1,
+                                    'fxsValues': [None],
+                                    'inputValues': [None],
+                                    'rows': 1,
+                                    'trackHeight': 80,
+                                    'trackPosition': 25}]}}

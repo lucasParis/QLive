@@ -77,6 +77,12 @@ LABELS = ["Filename", "Loop Mode", "Transpo", "Gain (dB)", "Playing",
 COLSIZES = [150, 100, 70, 70, 70, 70, 80, 80, 80, 80]
 LOOPMODES = ["No Loop", "Forward", "Backward", "Back-and-Forth"]
 
+# GUI Constants
+BUTTON_WIDTH = 80
+BUTTON_HEIGHT = 25
+TRACK_COL_SIZE = 100
+TRACK_ROW_SIZE = 40
+
 # Audio drivers
 if PLATFORM == 'darwin' and '/%s.app' % APP_NAME in os.getcwd():
     AUDIO_DRIVERS = ['portaudio']
@@ -133,7 +139,6 @@ CONTROLSLIDER_SELECTED_COLOUR = '#EAEAEA'
 CONTROLSLIDER_TEXT_COLOUR = '#000000'
 
 TRACKS_BACKGROUND_COLOUR = "#444444"
-TRACKS_BACKGROUND_COLOUR2 = "#555555"
 
 TRACKS_BACKGROUND_COLOUR_HIGHLIGHTED = "#777777"
 FXBOX_OUTLINE_COLOUR = "#222222"

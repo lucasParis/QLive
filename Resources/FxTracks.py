@@ -2,69 +2,185 @@ import wx
 from FxTrack import *
 from FxView import FxViewManager
 
-class FxTracksToolBar(wx.ToolBar):
+class FxTracks(wx.ScrolledWindow):
     def __init__(self, parent):
-        wx.ToolBar.__init__(self, parent, size = (1000, 40))
-        self.AddControl(wx.StaticText(self, 
-                        label=" FxTracks Toolbar (what controls go here?)"))
-        self.Realize()
+        wx.ScrolledWindow.__init__(self, parent)
+        self.SetBackgroundStyle(wx.BG_STYLE_CUSTOM)  
+        self.SetBackgroundColour(TRACKS_BACKGROUND_COLOUR)
 
-class FxTracks(wx.Panel):
-    def __init__(self, parent):
-        wx.Panel.__init__(self, parent)
-        self.sizer = wx.BoxSizer(wx.VERTICAL)
         self.selectedTrack = 0
-        #self.toolbar = FxTracksToolBar(self)
 
         # FX window manager
         self.fxsView = FxViewManager(self)
         
-        # This should be an  array of FxTrack objects
-        self.tracks = [FxTrack(self, self.fxsView, i) for i in range(2)]
-        self.tracks[0].setSelected(True)
+        self.createTracks(2)
 
-        #self.sizer.Add(self.toolbar, 0, wx.EXPAND)
-        for track in self.tracks:
-            self.sizer.Add(track, 1, wx.EXPAND)
-        self.SetSizer(self.sizer)
+        self.SetVirtualSize((5000, 1000))
+        w, h = self.GetVirtualSize()
+        self.SetScrollbars(20, 20, w/20, h/20, 0, 0, False)
 
-    def refresh(self):
+        self.setFont()
+        self.createButtonBitmap()
+        self.createButtonBitmap(False)
+
+        self.prepareBuffer()
+
+        self.Bind(wx.EVT_PAINT, self.OnPaint)
+        self.Bind(wx.EVT_LEFT_DOWN, self.leftClicked)
+        self.Bind(wx.EVT_RIGHT_DOWN, self.rightClicked)
+
+    def createTracks(self, num):
+        self.tracks = []
+        x = 25
+        h = TRACK_ROW_SIZE * 2
+        for i in range(num):
+            track = FxTrack(self, self.fxsView, i)
+            track.setTrackPosition(x)
+            track.setTrackHeight(h)
+            self.tracks.append(track)
+            x += h
+
+    def addTrack(self):
+        prevTrack = self.tracks[-1]
+        x = prevTrack.getTrackPosition() + prevTrack.getTrackHeight()
+        h = TRACK_ROW_SIZE * 2
+        track = FxTrack(self, self.fxsView, len(self.tracks))
+        track.setTrackPosition(x)
+        track.setTrackHeight(h)
+        self.tracks.append(track)
+        self.doDrawAndRefresh()
+        
+    def setFont(self, ptsize=10):
+        self.font = wx.Font(ptsize, wx.FONTFAMILY_DEFAULT, wx.NORMAL, 
+                            wx.FONTWEIGHT_NORMAL, face="Monospace")
+
+    def createButtonBitmap(self, enable=True):
+        w, h = BUTTON_WIDTH, BUTTON_HEIGHT
+        b = wx.EmptyBitmap(w, h)
+        dc = wx.MemoryDC(b)
+        dc.SetPen(wx.Pen(TRACKS_BACKGROUND_COLOUR, 1))
+        dc.SetBrush(wx.Brush(TRACKS_BACKGROUND_COLOUR))
+        dc.DrawRectangle(0, 0, w, h)
+        gc = wx.GraphicsContext_Create(dc)
+        gc.SetPen(wx.Pen(FXBOX_OUTLINE_COLOUR, 1, wx.SOLID))
+        if enable:
+            gc.SetBrush(wx.Brush(FXBOX_ENABLE_BACKGROUND_COLOUR, wx.SOLID))
+        else:
+            gc.SetBrush(wx.Brush(FXBOX_DISABLE_BACKGROUND_COLOUR, wx.SOLID))
+        rect = wx.Rect(0, 0, w, h)
+        rectIn = wx.Rect(0, 4, w/12., h-8)
+        rectOut = wx.Rect(w*11/12., 4, w/12., h-8)
+        gc.DrawRoundedRectangle(rect[0], rect[1], rect[2], rect[3], 5)
+        gc.DrawRoundedRectangle(rectIn[0], rectIn[1], rectIn[2], rectIn[3], 2)
+        gc.DrawRoundedRectangle(rectOut[0], rectOut[1], rectOut[2], rectOut[3], 2)
+        dc.SelectObject(wx.NullBitmap)
+        if enable:
+            self.buttonBitmap = b
+        else:
+            self.disableButtonBitmap = b
+
+    def prepareBuffer(self):
+        self.buffer = wx.EmptyBitmap(5000, 1000)
+        dc = wx.BufferedDC(None, self.buffer)
+        dc.SetBackground(wx.Brush(self.GetBackgroundColour()))
+        dc.Clear()
+        self.DoDrawing(dc)
+
+    def doDrawAndRefresh(self):
+        dc = wx.BufferedDC(None, self.buffer)
+        dc.SetBackground(wx.Brush(self.GetBackgroundColour()))
+        dc.Clear()
+        self.DoDrawing(dc)
+        wx.CallAfter(self.Refresh)
+
+    def OnPaint(self, evt):
+        dc = wx.BufferedPaintDC(self, self.buffer, wx.BUFFER_VIRTUAL_AREA)
+        
+    def DoDrawing(self, dc):
+        dc.BeginDrawing()
+
+        dc.SetFont(self.font)
+        dc.SetTextForeground("#FFFFFF")
+
+        dc.DrawLabel("Inputs", wx.Rect(0, 2, 100, 22), wx.ALIGN_CENTER)
+        dc.DrawLabel("Fxs", wx.Rect(100, 2, 100, 22), wx.ALIGN_CENTER)
+        dc.SetPen(wx.Pen("#333333", 1))
+        dc.DrawLine(2, 25, 4098, 25)
+
         for track in self.tracks:
-            track.refresh()
+            track.onPaint(dc, self.buttonBitmap, self.disableButtonBitmap,
+                            self.selectedTrack)
+
+        dc.EndDrawing()
+
+    def leftClicked(self, evt):
+        pos = self.CalcUnscrolledPosition(evt.GetPosition())
+        trackFounded = buttonFounded = selection = None
+        for track in self.tracks:
+            if pos[1] > track.getTrackPosition() and \
+               pos[1] < track.getTrackPosition() + track.getTrackHeight():
+                trackFounded = track
+                break
+        if trackFounded is not None:
+            buttonFounded = None
+            if pos[0] < 25:
+                self.setSelectedTrack(track.getId())
+                selection = track.getId()
+            elif pos[0] < 125:
+                for but in track.buttonsInputs:
+                    if but.getRect().Contains(pos):
+                        buttonFounded = but
+                        break
+            else:
+                for but in track.buttonsFxs:
+                    if but.getRect().Contains(pos):
+                        buttonFounded = but
+                        break
+        if buttonFounded is not None:
+            buttonFounded.openView()
+        elif selection is not None:
+            pass
+        else:
+            track.createFx(pos)
+            self.doDrawAndRefresh()
+        evt.Skip()
+
+    def rightClicked(self, evt):
+        pos = self.CalcUnscrolledPosition(evt.GetPosition())
+        trackFounded = buttonFounded = None
+        for track in self.tracks:
+            if pos[1] > track.getTrackPosition() and \
+               pos[1] < track.getTrackPosition() + track.getTrackHeight():
+                trackFounded = track
+                break
+        if trackFounded is not None:
+            buttonFounded = None
+            if pos[0] < 100:
+                for but in track.buttonsInputs:
+                    if but.getRect().Contains(pos):
+                        buttonFounded = but
+                        break
+            else:
+                for but in track.buttonsFxs:
+                    if but.getRect().Contains(pos):
+                        buttonFounded = but
+                        break
+        if buttonFounded is not None:
+            buttonFounded.openMenu(evt)
+            self.doDrawAndRefresh()
+        evt.Skip()
 
     def getSaveDict(self):
-        # for now simple thru, later compile differents tracks into dict
-        dict = {}
-        dict["tracks"] = [track.getSaveDict() for track in self.tracks]
-        return dict
+        return {"tracks": [track.getSaveDict() for track in self.tracks]}
 
     def setSaveDict(self, saveDict):
-        for track in self.tracks:
-            self.sizer.Detach(track)
-        self.sizer.Clear()
-
-        self.tracks = [FxTrack(self, self.fxsView, i) for i in range(len(saveDict["tracks"]))]
+        self.createTracks(len(saveDict["tracks"]))
         for i in range(len(self.tracks)):
             self.tracks[i].setSaveDict(saveDict["tracks"][i])
-            self.sizer.Add(self.tracks[i], 1, wx.EXPAND)
+        self.doDrawAndRefresh()
             
-        self.tracks[0].setSelected(True)
         self.selectedTrack = 0
 
-        self.sizer.Layout()
-#        self.SetSizer(self.sizer)
-
-#        [track.getSaveDict() for track in self.tracks]
-#        self.track.setSaveDict(saveDict)
-        
-    def loadCue(self, cue):
-        for track in self.tracks:
-            track.loadCue(cue)
-        
-    def copyCue(self, cueToCopy):        
-        for track in self.tracks:
-            track.copyCue(cueToCopy)
-      
     def cueEvent(self, eventDict):
         for track in self.tracks:
             track.cueEvent(eventDict)
@@ -73,59 +189,24 @@ class FxTracks(wx.Panel):
     def start(self):
         for track in self.tracks:
             track.start()
-        
-    def addTrack(self):
-        self.tracks.append(FxTrack(self, self.fxsView, len(self.tracks)))
-        self.sizer.Add(self.tracks[-1], 1, wx.EXPAND)
-            
-#        self.tracks[-1].setSelected(True)
-#        self.selectedTrack = len(self.tracks)-1
-        self.setActiveTrack(len(self.tracks)-1)
-        self.sizer.Layout()
-        pass
-        
-    def removeTrack(self):
-        if len(self.tracks) > 1:
-            self.sizer.Detach(self.tracks[self.selectedTrack])
-            
-            self.tracks[self.selectedTrack].Destroy()            
-            del self.tracks[self.selectedTrack]
-            
-            self.selectedTrack = self.selectedTrack-1
-            if self.selectedTrack < 0:
-                self.selectedTrack = 0
-                
-            [track.setID(i)  for i, track in enumerate(self.tracks)]
-            self.setActiveTrack(self.selectedTrack)
-            self.sizer.Layout()
 
+    def removeTrack(self):
+        del self.tracks[self.selectedTrack]
+        if not self.tracks:
+            self.createTracks(1)
+
+        self.selectedTrack -= 1
+        if self.selectedTrack < 0:
+            self.selectedTrack = 0
+                
+        [track.setId(i) for i, track in enumerate(self.tracks)]
+        x = 25
+        for track in self.tracks:
+            track.setTrackPosition(x)
+            x += track.getTrackHeight()
+
+        self.doDrawAndRefresh()
         
-    def setActiveTrack(self, id):
-        
+    def setSelectedTrack(self, id):        
         self.selectedTrack = id
-        for i, track in enumerate(self.tracks):
-            if id == i:
-                track.setSelected(True)
-            else:
-                track.setSelected(False)                
-        
-        
-    
-if __name__ == "__main__":
-    from CuesPanel import CuesPanel
-    class TestWindow(wx.Frame):
-        def __init__(self):
-            wx.Frame.__init__(self, None)
-            self.server = Server().boot()
-            panel = wx.Panel(self)
-            self.cues = CuesPanel(panel)
-            QLiveLib.setVar("CuesPanel", self.cues)
-            self.tracks = FxTracks(panel)
-            self.sizer = wx.BoxSizer(wx.HORIZONTAL)
-            self.sizer.Add(self.cues,0, wx.EXPAND)
-            self.sizer.Add(self.tracks,1, wx.EXPAND)
-            panel.SetSizer(self.sizer)
-    app = wx.App()
-    frame = TestWindow()
-    frame.Show()
-    app.MainLoop()
+        self.doDrawAndRefresh()

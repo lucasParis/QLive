@@ -48,9 +48,11 @@ class CuesPanel(scrolled.ScrolledPanel):
 
         self.currentCue = 0
         self.cueButtons = []
-        
+
         self.mainSizer = wx.BoxSizer(wx.VERTICAL)
         self.SetSizer(self.mainSizer)
+
+        self.appendCueButton()
 
     def setSelectedCue(self, number):
         if number < len(self.cueButtons):

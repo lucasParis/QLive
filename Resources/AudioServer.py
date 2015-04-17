@@ -46,7 +46,6 @@ class AudioServer:
         self.soundfiles = []
 
     def createSoundFilePlayers(self):
-        # Create soundfile players
         objs = QLiveLib.getVar("Soundfiles").getSoundFileObjects()
         for obj in objs:
             id = obj.getId()
@@ -56,6 +55,11 @@ class AudioServer:
             self.soundfiles.append(player)
             obj.setPlayerRef(player)
 
+    def resetPlayerRefs(self):
+        objs = QLiveLib.getVar("Soundfiles").getSoundFileObjects()
+        for obj in objs:
+            obj.setPlayerRef(None)
+
     def start(self, state):
         if state:
             self.createSoundFilePlayers()
@@ -63,6 +67,7 @@ class AudioServer:
             self.server.start()
         else:
             self.server.stop()
+            self.resetPlayerRefs()
             self.soundfiles = []
 
     def stop(self):
