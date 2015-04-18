@@ -23,12 +23,12 @@ class ControlPanel(wx.Panel):
         title = wx.StaticText(self, label="-- CUES --")
         self.mainSizer.Add(title, 0, wx.ALIGN_CENTER, 5)
 
-        bmp = wx.ArtProvider.GetBitmap(wx.ART_ADD_BOOKMARK, wx.ART_TOOLBAR, (24, 24))
+        bmp = wx.Bitmap(ICON_ADD, wx.BITMAP_TYPE_PNG)
         self.newButton = wx.BitmapButton(self, wx.ID_ANY, bmp)
         self.newButton.Bind(wx.EVT_BUTTON, self.onNewCue)
         self.buttonSizer.Add(self.newButton, 1)
 
-        bmp = wx.ArtProvider.GetBitmap(wx.ART_DEL_BOOKMARK, wx.ART_TOOLBAR, (24, 24))
+        bmp = wx.Bitmap(ICON_DELETE, wx.BITMAP_TYPE_PNG)
         self.delButton = wx.BitmapButton(self, wx.ID_ANY, bmp)
         self.delButton.Bind(wx.EVT_BUTTON, self.onDelCue)
         self.buttonSizer.Add(self.delButton, 1)
