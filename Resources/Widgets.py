@@ -720,6 +720,7 @@ class CueButton(wx.Panel):
             self.SetBackgroundColour(CUEBUTTON_SELECTED_COLOUR)
         else:
             self.SetBackgroundColour(CUEBUTTON_UNSELECTED_COLOUR)
+        self.Refresh()
             
 if __name__ == "__main__":
     from pyo64 import *

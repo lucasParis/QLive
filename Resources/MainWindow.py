@@ -152,7 +152,6 @@ class MainWindow(wx.Frame):
             elif evt.GetId() == self.nextId:
                 if cues.setSelectedCue(current + 1):
                     cues.sendCueEvent()
-        evt.Skip()
 
     def createProjectFolder(self, filepath):
         fil = os.path.basename(filepath)
