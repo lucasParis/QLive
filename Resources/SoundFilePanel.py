@@ -196,6 +196,22 @@ class SoundFileObject:
     def getChannel(self):
         return self.channel
 
+class GridFileDropTarget(wx.FileDropTarget):
+    def __init__(self, grid):
+        wx.FileDropTarget.__init__(self)
+        self.grid = grid
+
+    def OnDropFiles(self, x, y, filenames):
+        x, y = self.grid.CalcUnscrolledPosition(x, y)
+        col = self.grid.XToCol(x)
+        row = self.grid.YToRow(y)
+        if row > -1 and col == ID_COL_FILENAME:
+            filename = filenames[0]
+            if sndinfo(filename) is not None:
+                self.grid.copyToSoundsFolder(filename)
+                self.grid.setSelRow(row)
+                self.grid.loadSound(os.path.basename(filename))
+
 class SoundFileGrid(gridlib.Grid):
     def __init__(self, parent):
         super(SoundFileGrid, self).__init__(parent, style=wx.SUNKEN_BORDER)
@@ -216,6 +232,9 @@ class SoundFileGrid(gridlib.Grid):
                             wx.FONTWEIGHT_NORMAL, face="Monospace")
         self.SetRowLabelSize(50)
 
+        dropTarget = GridFileDropTarget(self)
+        self.SetDropTarget(dropTarget)
+
         self.CreateGrid(0, 10)
 
         for i, label in enumerate(LABELS):
@@ -233,6 +252,13 @@ class SoundFileGrid(gridlib.Grid):
         self.GetGridWindow().Bind(wx.EVT_SIZE, self.OnSize)
 
         self.addRow()
+
+    def setSelRow(self, row):
+        self.selRow = row
+
+    def copyToSoundsFolder(self, path):
+        sndfolder = os.path.join(QLiveLib.getVar("projectFolder"), "sounds")
+        shutil.copy(path, sndfolder)
 
     def OnSize(self, evt):
         w, _ = self.GetGridWindow().GetClientSize()
@@ -458,16 +484,12 @@ class SoundFileGrid(gridlib.Grid):
                                 "", AUDIO_FILE_WILDCARD, style=wx.OPEN)
             if dlg.ShowModal() == wx.ID_OK:
                 path = dlg.GetPath()
-                sndfolder = os.path.join(QLiveLib.getVar("projectFolder"), "sounds")
-                shutil.copy(path, sndfolder)
+                self.copyToSoundsFolder(path)
                 self.loadSound(os.path.basename(path))
             dlg.Destroy()
         evt.Skip()
 
     def OnLabelRightClick(self, evt):
-        # TODO:
-        # popup with "duplicate" and "delete" instead of simply deleting the row
-        # adjust id of remaining sounds if necessary...
         row = evt.GetRow()
         if row != -1:
             self.selRow = row

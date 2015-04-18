@@ -74,7 +74,7 @@ class MeterControlSlider(wx.Panel):
             self.SetValue(minvalue)
             self.init = minvalue
         self.clampPos()
-        self.amplitude = [0]
+        self.amplitude = self.last_amplitude = 0.0
         self.createBitmaps()
         self.Bind(wx.EVT_LEFT_DOWN, self.MouseDown)
         self.Bind(wx.EVT_LEFT_UP, self.MouseUp)
@@ -140,10 +140,12 @@ class MeterControlSlider(wx.Panel):
         if args[0] < 0:
             return
         if not args:
-            self.amplitude = [0]
+            self.amplitude = 0.0
         else:
-            self.amplitude = args
-        wx.CallAfter(self.Refresh)
+            self.amplitude = args[0]
+        if self.amplitude != self.last_amplitude:
+            self.last_amplitude = self.amplitude
+            wx.CallAfter(self.Refresh)
 
     def setMidiCtl(self, x, propagate=True):
         self.propagate = propagate
@@ -332,7 +334,7 @@ class MeterControlSlider(wx.Panel):
 
         # Draw meter
         width = 6
-        db = math.log10(self.amplitude[0]+0.00001) * 0.2 + 1.
+        db = math.log10(self.amplitude+0.00001) * 0.2 + 1.
         height = int(db*h)
         dc.DrawBitmap(self.backBitmap, 9, 0)
         if height > 0:

@@ -54,7 +54,7 @@ class QLiveControlSlider(MeterControlSlider):
         
 class MixerPanel(wx.Panel):
     def __init__(self, parent, audioMixer):
-        wx.Panel.__init__(self, parent, size=(800,150), style=wx.SUNKEN_BORDER)
+        wx.Panel.__init__(self, parent, size=(800,125), style=wx.SUNKEN_BORDER)
         self.audioMixer = audioMixer
         self.SetBackgroundColour(BACKGROUND_COLOUR)
 
@@ -76,7 +76,7 @@ class MixerPanel(wx.Panel):
         inputBox.Add(wx.StaticLine(self, size=(1, -1)), 0, wx.EXPAND|wx.TOP|wx.LEFT|wx.RIGHT, 2)
         for i in range(NUM_INPUTS):
             channel = self.audioMixer.getInputChannel(i)
-            slide = QLiveControlSlider(self, -60, 18, 0, orient=wx.VERTICAL, 
+            slide = QLiveControlSlider(self, -60, 18, 0, size=(24,100), orient=wx.VERTICAL, 
                                        outFunction=channel.setVolume)
             slide.setChannelObject(channel)
             channel.setMidiCallback(slide.SetValue)
@@ -97,7 +97,7 @@ class MixerPanel(wx.Panel):
         outputBox.Add(wx.StaticLine(self, size=(1, -1)), 0, wx.EXPAND|wx.TOP|wx.LEFT|wx.RIGHT, 2)
         for i in range(NUM_OUTPUTS):
             channel = self.audioMixer.getOutputChannel(i)            
-            slide = QLiveControlSlider(self, -60, 18, 0, orient=wx.VERTICAL, 
+            slide = QLiveControlSlider(self, -60, 18, 0, size=(24,100), orient=wx.VERTICAL, 
                                        outFunction=channel.setVolume)
             slide.setChannelObject(channel)
             channel.setMidiCallback(slide.SetValue)

@@ -132,9 +132,10 @@ class FxSlidersView(wx.Frame):
     """
     take the audioprocess object (FxParent) and shows all that should be controlled 
     """
-    def __init__(self, parent, audioProcess):
-        wx.Frame.__init__(self, None)
+    def __init__(self, parent, manager, audioProcess):
+        wx.Frame.__init__(self, parent, style=wx.DEFAULT_FRAME_STYLE|wx.FRAME_FLOAT_ON_PARENT)
         self.parent = parent
+        self.manager = manager
         self.menuBar = wx.MenuBar()
 
         menu1 = wx.Menu()
@@ -225,12 +226,13 @@ class FxSlidersView(wx.Frame):
                 self.widgets[i].setValue(param.getValue())
                 
     def onClose(self, evt):
-        index = self.parent.openViews.index(self)
-        self.parent.openViews.pop(index)
+        index = self.manager.openViews.index(self)
+        self.manager.openViews.pop(index)
         self.Destroy()
 
 class FxViewManager(object):
     def __init__(self, parent):
+        self.parent = parent
         self.openViews = []
         
     def openViewForAudioProcess(self, audioProcess):
@@ -238,7 +240,7 @@ class FxViewManager(object):
             if view.audio == audioProcess:
                 view.Raise()
                 return
-        view = FxSlidersView(self, audioProcess)
+        view = FxSlidersView(self.parent, self, audioProcess)
         self.openViews.append(view)
         
     def refresh(self):

@@ -101,7 +101,7 @@ class MainWindow(wx.Frame):
         QLiveLib.setVar("Soundfiles", self.soundfiles)
 
         splitter.SetMinimumPaneSize(60)
-        splitter.SplitHorizontally(self.tracks, self.soundfiles, 300)
+        splitter.SplitHorizontally(self.tracks, self.soundfiles, 350)
 
         self.mixer = MixerPanel(self.mainPanel, self.audioMixer)
         QLiveLib.setVar("MixerPanel", self.mixer)
