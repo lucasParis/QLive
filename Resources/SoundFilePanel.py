@@ -460,8 +460,8 @@ class SoundFileGrid(gridlib.Grid):
             menu = wx.Menu("Soundfiles")
             self.snds = sorted([f for f in os.listdir(sndfolder)])
             for i, snd in enumerate(self.snds):
-                menu.Append(i, snd)
-            menu.Bind(wx.EVT_MENU, self.selectSound, id=0, id2=i)
+                menu.Append(i+1, snd)
+            menu.Bind(wx.EVT_MENU, self.selectSound, id=1, id2=i+1)
             self.PopupMenu(menu, evt.GetPosition())
             menu.Destroy()
         if self.selRow != self.GetNumberRows() - 1:
@@ -531,7 +531,7 @@ class SoundFileGrid(gridlib.Grid):
             obj.setId(i)
 
     def selectSound(self, evt):
-        sel = self.snds[evt.GetId()]
+        sel = self.snds[evt.GetId() - 1]
         if sel is not None:
             self.loadSound(sel)
         evt.Skip()

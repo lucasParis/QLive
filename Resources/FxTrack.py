@@ -38,6 +38,8 @@ class FxTrack:
         return self.trackHeight
 
     def setFont(self, ptsize=8):
+        if PLATFORM == "darwin":
+            ptsize += 3
         self.font = wx.Font(ptsize, wx.FONTFAMILY_DEFAULT, wx.NORMAL, 
                             wx.FONTWEIGHT_NORMAL, face="Monospace")
 

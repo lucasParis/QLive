@@ -1,5 +1,6 @@
 #!/usr/bin/python
 import wx
+from types import ListType
 from Resources.constants import *
 import Resources.QLiveLib as QLiveLib
 from Resources.MainWindow import MainWindow
@@ -17,13 +18,16 @@ class QLiveApp(wx.App):
             sizey = sysy - 40
         else:
             sizey = 670
+        self.filenames = []
         self.frame = MainWindow(pos=(20, 20), size=(sizex, sizey))
         QLiveLib.setVar("MainWindow", self.frame)
-
+        if self.filenames:
+            self.frame.loadFile(QLiveLib.ensureNFD(self.filenames[0]))
+            
     def MacOpenFiles(self, filenames):
         if type(filenames) != ListType:
             filenames = [filenames]
-        self.frame.loadFile(QLiveLib.ensureNFD(filenames[0]))
+        self.filenames = filenames
 
     def MacReopenApp(self):
         try:
