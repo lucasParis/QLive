@@ -117,7 +117,7 @@ class MainWindow(wx.Frame):
         self.mainSizer.AddSizer(self.rightSizer, 2, wx.EXPAND, 5)
         self.mainPanel.SetSizer(self.mainSizer)
 
-        self.loadFile(NEW_FILE_PATH)
+        #self.loadFile(NEW_FILE_PATH)
 
         if True:
             dlg = IntroDialog(self)

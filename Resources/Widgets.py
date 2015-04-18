@@ -30,12 +30,11 @@ def powOfTwo(x):
 def powOfTwoToInt(x):
     return POWOFTWO[x]
 
-# Temporary, until pyolib.ControlSlider can resize the knob's width dynamically...
-class TempControlSlider(wx.Panel):
+class MeterControlSlider(wx.Panel):
     def __init__(self, parent, minvalue, maxvalue, init=None, pos=(0,0), size=(200,16), log=False,
                  outFunction=None, integer=False, powoftwo=False, backColour=None, orient=wx.HORIZONTAL):
         if size == (200,16) and orient == wx.VERTICAL:
-            size = (32, 200)
+            size = (24, 200)
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY, pos=pos, size=size,
                             style=wx.NO_BORDER | wx.WANTS_CHARS | wx.EXPAND)
         self.parent = parent
@@ -46,7 +45,6 @@ class TempControlSlider(wx.Panel):
         self.SetBackgroundStyle(wx.BG_STYLE_CUSTOM)
         self.SetBackgroundColour(self.backgroundColour)
         self.orient = orient
-        # self.SetMinSize(self.GetSize())
         if self.orient == wx.VERTICAL:
             self.knobSize = 15
             self.knobHalfSize = 7
@@ -76,6 +74,8 @@ class TempControlSlider(wx.Panel):
             self.SetValue(minvalue)
             self.init = minvalue
         self.clampPos()
+        self.amplitude = [0]
+        self.createBitmaps()
         self.Bind(wx.EVT_LEFT_DOWN, self.MouseDown)
         self.Bind(wx.EVT_LEFT_UP, self.MouseUp)
         self.Bind(wx.EVT_LEFT_DCLICK, self.DoubleClick)
@@ -89,6 +89,61 @@ class TempControlSlider(wx.Panel):
             self.dcref = wx.BufferedPaintDC
         else:
             self.dcref = wx.PaintDC
+
+    def createBitmaps(self):
+        w, h = 6, self.GetSize()[1]
+        b = wx.EmptyBitmap(w,h)
+        f = wx.EmptyBitmap(w,h)
+        dcb = wx.MemoryDC(b)
+        dcf = wx.MemoryDC(f)
+        dcb.SetPen(wx.Pen("#000000", width=1))
+        dcf.SetPen(wx.Pen("#000000", width=1))
+        if self.orient == wx.HORIZONTAL:
+            height = 6
+            steps = int(w / 10.0 + 0.5)
+        else:
+            width = 6
+            steps = int(h / 10.0 + 0.5)
+        bounds = int(steps / 6.0)
+        for i in range(steps):
+            if i == (steps - 1):
+                dcb.SetBrush(wx.Brush("#770000"))
+                dcf.SetBrush(wx.Brush("#FF0000"))
+            elif i >= (steps - bounds):
+                dcb.SetBrush(wx.Brush("#440000"))
+                dcf.SetBrush(wx.Brush("#CC0000"))
+            elif i >= (steps - (bounds*2)):
+                dcb.SetBrush(wx.Brush("#444400"))
+                dcf.SetBrush(wx.Brush("#CCCC00"))
+            else:
+                dcb.SetBrush(wx.Brush("#004400"))
+                dcf.SetBrush(wx.Brush("#00CC00"))
+            if self.orient == wx.HORIZONTAL:
+                dcb.DrawRectangle(i*10, 0, 11, height)
+                dcf.DrawRectangle(i*10, 0, 11, height)
+            else:
+                ii = steps - 1 - i
+                dcb.DrawRectangle(0, ii*10, width, 11)
+                dcf.DrawRectangle(0, ii*10, width, 11)
+        if self.orient == wx.HORIZONTAL:
+            dcb.DrawLine(w-1, 0, w-1, height)
+            dcf.DrawLine(w-1, 0, w-1, height)
+        else:
+            dcb.DrawLine(0, 0, width, 0)
+            dcf.DrawLine(0, 0, width, 0)
+        dcb.SelectObject(wx.NullBitmap)
+        dcf.SelectObject(wx.NullBitmap)
+        self.backBitmap = b
+        self.bitmap = f
+
+    def setRms(self, *args):
+        if args[0] < 0:
+            return
+        if not args:
+            self.amplitude = [0]
+        else:
+            self.amplitude = args
+        wx.CallAfter(self.Refresh)
 
     def setMidiCtl(self, x, propagate=True):
         self.propagate = propagate
@@ -272,39 +327,18 @@ class TempControlSlider(wx.Panel):
         dc = self.dcref(self)
         gc = wx.GraphicsContext_Create(dc)
 
-        dc.SetBrush(wx.Brush(self.backgroundColour, wx.SOLID))
+        dc.SetBackground(wx.Brush(self.backgroundColour, wx.SOLID))
         dc.Clear()
 
-        # Draw background
-        dc.SetPen(wx.Pen(self.backgroundColour, width=self.borderWidth, style=wx.SOLID))
-        dc.DrawRectangle(0, 0, w, h)
-
-        # Draw inner part
-        if self._enable: sliderColour =  "#99A7CC"
-        else: sliderColour = "#BBBBBB"
-        if self.orient == wx.VERTICAL:
-            w2 = (w - self.sliderWidth) / 2
-            rec = wx.Rect(w2, 0, self.sliderWidth, h)
-            brush = gc.CreateLinearGradientBrush(w2, 0, w2+self.sliderWidth, 0, "#646986", sliderColour)
-        else:
-            h2 = self.sliderHeight / 4
-            rec = wx.Rect(0, h2, w, self.sliderHeight)
-            brush = gc.CreateLinearGradientBrush(0, h2, 0, h2+self.sliderHeight, "#646986", sliderColour)
-        gc.SetBrush(brush)
-        gc.DrawRoundedRectangle(rec[0], rec[1], rec[2], rec[3], 2)
-
-        if self.midictl != None:
-            if sys.platform in ['win32', 'linux2']:
-                dc.SetFont(wx.Font(6, wx.ROMAN, wx.NORMAL, wx.NORMAL))
-            else:
-                dc.SetFont(wx.Font(9, wx.ROMAN, wx.NORMAL, wx.NORMAL))
-            dc.SetTextForeground('#FFFFFF')
-            if self.orient == wx.VERTICAL:
-                dc.DrawLabel(str(self.midictl), wx.Rect(w2,2,self.sliderWidth,12), wx.ALIGN_CENTER)
-                dc.DrawLabel(str(self.midictl), wx.Rect(w2,h-12,self.sliderWidth,12), wx.ALIGN_CENTER)
-            else:
-                dc.DrawLabel(str(self.midictl), wx.Rect(2,0,h,h), wx.ALIGN_CENTER)
-                dc.DrawLabel(str(self.midictl), wx.Rect(w-h,0,h,h), wx.ALIGN_CENTER)
+        # Draw meter
+        width = 6
+        db = math.log10(self.amplitude[0]+0.00001) * 0.2 + 1.
+        height = int(db*h)
+        dc.DrawBitmap(self.backBitmap, 9, 0)
+        if height > 0:
+            dc.SetClippingRegion(9, h-height, width, height)
+            dc.DrawBitmap(self.bitmap, 9, 0)
+            dc.DestroyClippingRegion()
 
         # Draw knob
         if self._enable: knobColour = '#888888'
@@ -312,9 +346,9 @@ class TempControlSlider(wx.Panel):
         if self.orient == wx.VERTICAL:
             rec = wx.Rect(0, self.pos-self.knobHalfSize, w, self.knobSize-1)
             if self.selected:
-                brush = wx.Brush('#333333', wx.SOLID)
+                brush = wx.Brush(wx.Colour(64, 64, 64, 128))
             else:
-                brush = gc.CreateLinearGradientBrush(0, 0, w, 0, "#323854", knobColour)
+                brush = wx.Brush(wx.Colour(64, 64, 64, 192))
             gc.SetBrush(brush)
             gc.DrawRoundedRectangle(rec[0], rec[1], rec[2], rec[3], 3)
         else:
@@ -342,9 +376,9 @@ class TempControlSlider(wx.Panel):
             elif abs(self.GetValue()) >= 100:
                 val = '%.0f' % self.GetValue()
             elif abs(self.GetValue()) >= 10:
-                val = '%.1f' % self.GetValue()
+                val = '%.0f' % self.GetValue()
             elif abs(self.GetValue()) < 10:
-                val = '%.2f' % self.GetValue()
+                val = '%.1f' % self.GetValue()
         if sys.platform == 'linux2':
             width = len(val) * (dc.GetCharWidth() - 3)
         else:
@@ -665,7 +699,7 @@ if __name__ == "__main__":
             wx.Frame.__init__(self, None)
             panel = wx.Panel(self)
             panel.SetBackgroundColour(BACKGROUND_COLOUR)
-            tr = TransportButtons(panel)
+            #tr = TransportButtons(panel)
             #knob = QLiveControlKnob(panel, 20, 20000, pos=(20,20), label="Freq")
             #knob.setEnable(True)
             self.Show()

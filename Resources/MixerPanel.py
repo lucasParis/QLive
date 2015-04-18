@@ -2,17 +2,17 @@
 # encoding: utf-8
 import wx
 from pyolib._wxwidgets import BACKGROUND_COLOUR, VuMeter
-from Widgets import TempControlSlider
+from Widgets import MeterControlSlider
 from AudioMixer import *
 from constants import *
 import QLiveLib
 
-class QLiveControlSlider(TempControlSlider):
+class QLiveControlSlider(MeterControlSlider):
     def __init__(self, parent, minvalue, maxvalue, init=None, pos=(0,0), 
                  size=(200,16), log=False, outFunction=None, integer=False, 
                  powoftwo=False, backColour=None, orient=wx.HORIZONTAL, 
                  linkedObject=None):
-        TempControlSlider.__init__(self, parent, minvalue, maxvalue, init, pos, 
+        MeterControlSlider.__init__(self, parent, minvalue, maxvalue, init, pos, 
                                size, log, self.localOutFunction, integer, powoftwo, 
                                backColour, orient)
         self.channelobject = None
@@ -62,8 +62,6 @@ class MixerPanel(wx.Panel):
         self.outputLinked = False
         self.inputSliders = []
         self.outputSliders = []
-        self.inputMeters = []
-        self.outputMeters = []
         
         font = self.GetFont()
         font.SetWeight(wx.FONTWEIGHT_BOLD)
@@ -83,17 +81,8 @@ class MixerPanel(wx.Panel):
             slide.setChannelObject(channel)
             channel.setMidiCallback(slide.SetValue)
             self.inputSliders.append(slide)
-            meter = VuMeter(self, size=(200,200), numSliders=1, orient=wx.VERTICAL)
-            channel.setAmpCallback(meter.setRms)
-            self.inputMeters.append(meter)
-            if i % 2 == 0:
-                inputSliderBox.Add(slide, 0, wx.ALL, 2)
-                inputSliderBox.Add(meter, 0, wx.EXPAND|wx.ALL, 2)
-                inputSliderBox.AddSpacer(3)
-            else:
-                inputSliderBox.Add(meter, 0, wx.EXPAND|wx.ALL, 2)
-                inputSliderBox.Add(slide, 0, wx.ALL, 2)
-                inputSliderBox.AddSpacer(5)
+            channel.setAmpCallback(slide.setRms)
+            inputSliderBox.Add(slide, 0, wx.ALL, 2)
         inputBox.Add(inputSliderBox, 0, wx.EXPAND|wx.LEFT|wx.RIGHT, 3)
         
         separator = wx.StaticLine(self, size=(1, -1), style=wx.LI_VERTICAL)
@@ -113,19 +102,8 @@ class MixerPanel(wx.Panel):
             slide.setChannelObject(channel)
             channel.setMidiCallback(slide.SetValue)
             self.outputSliders.append(slide)
-            meter = VuMeter(self, size=(200,200), numSliders=1, orient=wx.VERTICAL)
-            channel.setAmpCallback(meter.setRms)
-
-            self.outputMeters.append(meter)
-            if i % 2 == 0:
-                outputSliderBox.Add(slide, 0, wx.ALL, 2)
-                outputSliderBox.Add(meter, 0, wx.EXPAND|wx.ALL, 2)
-                outputSliderBox.AddSpacer(3)
-            else:
-                outputSliderBox.Add(meter, 0, wx.EXPAND|wx.ALL, 2)
-                outputSliderBox.Add(slide, 0, wx.ALL, 2)
-                outputSliderBox.AddSpacer(5)
-                
+            channel.setAmpCallback(slide.setRms)
+            outputSliderBox.Add(slide, 0, wx.ALL, 2)
         outputBox.Add(outputSliderBox, 0, wx.EXPAND|wx.LEFT|wx.RIGHT, 3)
 
         mainSizer = wx.BoxSizer(wx.HORIZONTAL)

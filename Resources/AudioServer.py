@@ -104,6 +104,9 @@ class AudioServer:
             self.recStop()
             self.start(False)
 
+    def stop(self):
+        self.server.stop()
+
     def shutdown(self):
         self.server.shutdown()
 
