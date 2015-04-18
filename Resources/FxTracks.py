@@ -3,6 +3,7 @@ from FxTrack import *
 from FxView import FxViewManager
 
 # put FxBox at the clicked position
+# ScrollWindow should not scroll on arrow keys...
 
 class FxTracks(wx.ScrolledWindow):
     def __init__(self, parent):
@@ -31,6 +32,10 @@ class FxTracks(wx.ScrolledWindow):
         self.Bind(wx.EVT_LEFT_DOWN, self.leftClicked)
         self.Bind(wx.EVT_LEFT_DCLICK, self.leftDClicked)
         self.Bind(wx.EVT_RIGHT_DOWN, self.rightClicked)
+        self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
+
+    def OnKeyDown(self, evt):
+        evt.StopPropagation()
 
     def createTracks(self, num):
         self.tracks = []

@@ -74,10 +74,15 @@ class MainWindow(wx.Frame):
         self.SetMenuBar(menubar)
 
         tabId = wx.NewId()
-        accel_tbl = wx.AcceleratorTable([(wx.ACCEL_NORMAL,  wx.WXK_TAB, tabId)])
+        self.prevId = wx.NewId()
+        self.nextId = wx.NewId()
+        accel_tbl = wx.AcceleratorTable([(wx.ACCEL_NORMAL,  wx.WXK_TAB, tabId),
+                                        (wx.ACCEL_NORMAL,  wx.WXK_LEFT, self.prevId),
+                                        (wx.ACCEL_NORMAL,  wx.WXK_RIGHT, self.nextId)])
         self.SetAcceleratorTable(accel_tbl)
         
         self.Bind(wx.EVT_MENU, self.onTabulate, id=tabId)
+        self.Bind(wx.EVT_MENU, self.onMoveCue, id=self.prevId, id2=self.nextId)
 
         self.mainPanel = wx.Panel(self, style=wx.SUNKEN_BORDER)
         self.mainPanel.SetBackgroundColour(BACKGROUND_COLOUR)
@@ -136,6 +141,18 @@ class MainWindow(wx.Frame):
 
     def onTabulate(self, evt):
         QLiveLib.getVar("FxTracks").setSelectedTrack()
+
+    def onMoveCue(self, evt):
+        if QLiveLib.getVar("CanProcessCueKeys"):
+            cues = QLiveLib.getVar("CuesPanel")
+            current = cues.getCurrentCue()
+            if evt.GetId() == self.prevId:
+                if cues.setSelectedCue(current - 1):
+                    cues.sendCueEvent()
+            elif evt.GetId() == self.nextId:
+                if cues.setSelectedCue(current + 1):
+                    cues.sendCueEvent()
+        evt.Skip()
 
     def createProjectFolder(self, filepath):
         fil = os.path.basename(filepath)

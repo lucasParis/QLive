@@ -243,6 +243,8 @@ class SoundFileGrid(gridlib.Grid):
             self.SetColLabelValue(i, label)
 
         self.Bind(gridlib.EVT_GRID_CELL_CHANGE, self.OnCellChange)
+        self.Bind(gridlib.EVT_GRID_EDITOR_HIDDEN, self.OnCellEditorHidden)
+        self.Bind(gridlib.EVT_GRID_EDITOR_SHOWN, self.OnCellEditorShown)
         self.Bind(gridlib.EVT_GRID_CELL_LEFT_CLICK, self.OnCellLeftClick)
         self.Bind(gridlib.EVT_GRID_CELL_RIGHT_CLICK, self.OnCellRightClick)
         self.Bind(gridlib.EVT_GRID_LABEL_RIGHT_CLICK, self.OnLabelRightClick)
@@ -440,6 +442,12 @@ class SoundFileGrid(gridlib.Grid):
                 self.objects[self.selRow].setChannel(val)
             self.SetCellValue(self.selRow, self.selCol, str(val))
         evt.Skip()
+
+    def OnCellEditorHidden(self, evt):
+        QLiveLib.setVar("CanProcessCueKeys", True)
+
+    def OnCellEditorShown(self, evt):
+        QLiveLib.setVar("CanProcessCueKeys", False)
 
     def OnCellLeftClick(self, evt):
         # TODO: check and warning here...

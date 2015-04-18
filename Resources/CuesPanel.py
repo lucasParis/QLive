@@ -55,7 +55,7 @@ class CuesPanel(scrolled.ScrolledPanel):
         self.appendCueButton()
 
     def setSelectedCue(self, number):
-        if number < len(self.cueButtons):
+        if number >= 0 and number < len(self.cueButtons):
             if self.currentCue < len(self.cueButtons):
                 self.cueButtons[self.currentCue].SetBackgroundColour(CUEBUTTON_UNSELECTED_COLOUR)
             self.cueButtons[number].SetBackgroundColour(CUEBUTTON_SELECTED_COLOUR)
@@ -63,6 +63,9 @@ class CuesPanel(scrolled.ScrolledPanel):
             self.SetupScrolling(scroll_x=False, scroll_y=True, scrollToTop=False)
             self.mainSizer.Layout()
             self.ScrollChildIntoView(self.cueButtons[self.currentCue])
+            return True
+        else:
+            return False
         
     def clearButtons(self):
         for button in self.cueButtons:
@@ -83,6 +86,9 @@ class CuesPanel(scrolled.ScrolledPanel):
     def onCueSelection(self, event):
         button = event.GetEventObject()
         self.setSelectedCue(int(button.GetName())) 
+        self.sendCueEvent()
+
+    def sendCueEvent(self):
         if QLiveLib.getVar("MainWindow") != None:
             dictEvent = {"type": "cueSelect", 
                          "selectedCue": self.currentCue}
