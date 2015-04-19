@@ -1,10 +1,13 @@
-mkdir Resources
-cp *.py Resources/
-rm Resources/main.py
-cp main.py QLive.py
-cp scripts/info.plist .
+##################################
+# QLive OSX standalone application
+# builder script.
+#
+# Olivier Belanger, 2015
+##################################
 
-rm -rf build dist
+export DMG_DIR="QLive 0.1.0"
+export DMG_NAME="QLive_0.1.0.dmg"
+
 py2applet --make-setup --argv-emulation=0 QLive.py Resources/*
 python setup.py py2app --plist=info.plist
 rm -f setup.py
@@ -29,7 +32,16 @@ mv QLive-x86_64.app QLive.app
 cd ..
 cp -R QLive_OSX/QLive.app .
 
+echo "assembling DMG..."
+mkdir "$DMG_DIR"
+cd "$DMG_DIR"
+cp -R ../QLive.app .
+ln -s /Applications .
+
+cd ..
+
+hdiutil create "$DMG_NAME" -srcfolder "$DMG_DIR"
+
+rm -rf "$DMG_DIR"
 rm -rf QLive_OSX
-rm -rf Resources
-rm QLive.py
-rm info.plist
+rm -rf QLive.app
