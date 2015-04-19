@@ -4,7 +4,7 @@ import wx
 import wx.lib.scrolledpanel as scrolled
 from constants import *
 import QLiveLib
-from Widgets import TransportButtons
+from Widgets import TransportButtons, CueButton
 
 class ControlPanel(wx.Panel):
     def __init__(self, parent):
@@ -57,8 +57,8 @@ class CuesPanel(scrolled.ScrolledPanel):
     def setSelectedCue(self, number):
         if number >= 0 and number < len(self.cueButtons):
             if self.currentCue < len(self.cueButtons):
-                self.cueButtons[self.currentCue].SetBackgroundColour(CUEBUTTON_UNSELECTED_COLOUR)
-            self.cueButtons[number].SetBackgroundColour(CUEBUTTON_SELECTED_COLOUR)
+                self.cueButtons[self.currentCue].select(False)
+            self.cueButtons[number].select(True)
             self.currentCue = number
             self.SetupScrolling(scroll_x=False, scroll_y=True, scrollToTop=False)
             self.mainSizer.Layout()
@@ -75,24 +75,24 @@ class CuesPanel(scrolled.ScrolledPanel):
         self.mainSizer.Layout()
 
     def appendCueButton(self):
-        number = str(len(self.cueButtons))
+        number = len(self.cueButtons)
         butHeight = self.GetTextExtent("9")[1] + 8
-        but = wx.Button(self, size=(50, butHeight), label=number, name=number)
-        but.Bind(wx.EVT_BUTTON, self.onCueSelection)
+        but = CueButton(self, size=(50, butHeight), number=number)
+        but.Bind(wx.EVT_LEFT_DOWN, self.onCueSelection)
         self.mainSizer.Add(but, 0, wx.EXPAND|wx.TOP|wx.LEFT|wx.RIGHT, 5)
         self.cueButtons.append(but)
-        self.setSelectedCue(int(number))
+        self.setSelectedCue(number)
         
     def onCueSelection(self, event):
         button = event.GetEventObject()
-        self.setSelectedCue(int(button.GetName())) 
+        self.setSelectedCue(button.getNumber()) 
         self.sendCueEvent()
 
     def sendCueEvent(self):
         if QLiveLib.getVar("MainWindow") != None:
             dictEvent = {"type": "cueSelect", 
                          "selectedCue": self.currentCue}
-            QLiveLib.getVar("MainWindow").tracks.cueEvent(dictEvent)
+            QLiveLib.getVar("FxTracks").cueEvent(dictEvent)
             QLiveLib.getVar("Soundfiles").cueEvent(dictEvent)
 
     def onDelCue(self):
@@ -102,8 +102,7 @@ class CuesPanel(scrolled.ScrolledPanel):
         if len(self.cueButtons) == 0:
             self.appendCueButton()
         for i, but in enumerate(self.cueButtons):
-            but.SetLabel(str(i))
-            but.SetName(str(i))
+            but.setNumber(i)
         deletedCue = self.currentCue
         if self.currentCue > 0:
             selection = self.currentCue - 1

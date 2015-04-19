@@ -693,6 +693,34 @@ class TransportButtons(wx.Panel):
         if self.recordCallback is not None:
             self.recordCallback(self.recordmode)
 
+class CueButton(wx.Panel):
+    def __init__(self, parent, size, number):
+        super(CueButton, self).__init__(parent, size=size, style=wx.SUNKEN_BORDER)
+        self.SetBackgroundColour(CUEBUTTON_UNSELECTED_COLOUR)
+        self.labtext = wx.StaticText(self, -1, label="", style=wx.ALIGN_CENTER)
+        self.Bind(wx.EVT_SIZE, self.OnSize)
+        wx.CallAfter(self.setNumber, number)
+
+    def OnSize(self, evt):
+        self.labtext.Center()
+        
+    def setNumber(self, x):
+        try:
+            self.number = x
+            self.labtext.SetLabel(str(self.number))
+            self.labtext.Center()
+        except:
+            pass
+
+    def getNumber(self):
+        return self.number
+
+    def select(self, state):
+        if state:
+            self.SetBackgroundColour(CUEBUTTON_SELECTED_COLOUR)
+        else:
+            self.SetBackgroundColour(CUEBUTTON_UNSELECTED_COLOUR)
+            
 if __name__ == "__main__":
     from pyo64 import *
     s = Server().boot()

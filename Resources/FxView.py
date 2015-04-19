@@ -144,6 +144,14 @@ class FxSlidersView(wx.Frame):
         self.menuBar.Append(menu1, 'File')
         self.SetMenuBar(self.menuBar)
 
+        accel_tbl = wx.AcceleratorTable([(wx.ACCEL_NORMAL,  wx.WXK_TAB, TABULATE_ID),
+                                        (wx.ACCEL_NORMAL,  wx.WXK_LEFT, PREVIOUS_CUE_ID),
+                                        (wx.ACCEL_NORMAL,  wx.WXK_RIGHT, NEXT_CUE_ID)])
+        self.SetAcceleratorTable(accel_tbl)
+        
+        self.Bind(wx.EVT_MENU, self.onTabulate, id=TABULATE_ID)
+        self.Bind(wx.EVT_MENU, self.onMoveCue, id=PREVIOUS_CUE_ID, id2=NEXT_CUE_ID)
+
         self.audio = audioProcess
         self.parameters = audioProcess.parameters
         
@@ -206,7 +214,13 @@ class FxSlidersView(wx.Frame):
         self.Bind(wx.EVT_CLOSE, self.onClose)
         
         self.Show()
-        
+    
+    def onTabulate(self, evt):
+        QLiveLib.getVar("MainWindow").onTabulate(evt)
+
+    def onMoveCue(self, evt):
+        QLiveLib.getVar("MainWindow").onMoveCue(evt)
+
     def showMorphEvent(self, evt):
         for widget in self.widgets:
             if isinstance(widget, SliderWidget):
