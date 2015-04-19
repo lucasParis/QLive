@@ -231,7 +231,6 @@ class FxSlidersView(wx.Frame):
             elif evt.GetId() == self.nextId:
                 if cues.setSelectedCue(current + 1):
                     cues.sendCueEvent()
-        evt.Skip()
 
     def showMorphEvent(self, evt):
         for widget in self.widgets:
