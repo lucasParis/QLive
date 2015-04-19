@@ -144,13 +144,16 @@ class FxSlidersView(wx.Frame):
         self.menuBar.Append(menu1, 'File')
         self.SetMenuBar(self.menuBar)
 
-        accel_tbl = wx.AcceleratorTable([(wx.ACCEL_NORMAL,  wx.WXK_TAB, TABULATE_ID),
-                                        (wx.ACCEL_NORMAL,  wx.WXK_LEFT, PREVIOUS_CUE_ID),
-                                        (wx.ACCEL_NORMAL,  wx.WXK_RIGHT, NEXT_CUE_ID)])
+        tabId = wx.NewId()
+        self.prevId = wx.NewId()
+        self.nextId = wx.NewId()
+        accel_tbl = wx.AcceleratorTable([(wx.ACCEL_NORMAL,  wx.WXK_TAB, tabId),
+                                        (wx.ACCEL_NORMAL,  wx.WXK_LEFT, self.prevId),
+                                        (wx.ACCEL_NORMAL,  wx.WXK_RIGHT, self.nextId)])
         self.SetAcceleratorTable(accel_tbl)
         
-        self.Bind(wx.EVT_MENU, self.onTabulate, id=TABULATE_ID)
-        self.Bind(wx.EVT_MENU, self.onMoveCue, id=PREVIOUS_CUE_ID, id2=NEXT_CUE_ID)
+        self.Bind(wx.EVT_MENU, self.onTabulate, id=tabId)
+        self.Bind(wx.EVT_MENU, self.onMoveCue, id=self.prevId, id2=self.nextId)
 
         self.audio = audioProcess
         self.parameters = audioProcess.parameters
@@ -216,10 +219,19 @@ class FxSlidersView(wx.Frame):
         self.Show()
     
     def onTabulate(self, evt):
-        QLiveLib.getVar("MainWindow").onTabulate(evt)
+        QLiveLib.getVar("FxTracks").setSelectedTrack()
 
     def onMoveCue(self, evt):
-        QLiveLib.getVar("MainWindow").onMoveCue(evt)
+        if QLiveLib.getVar("CanProcessCueKeys"):
+            cues = QLiveLib.getVar("CuesPanel")
+            current = cues.getCurrentCue()
+            if evt.GetId() == self.prevId:
+                if cues.setSelectedCue(current - 1):
+                    cues.sendCueEvent()
+            elif evt.GetId() == self.nextId:
+                if cues.setSelectedCue(current + 1):
+                    cues.sendCueEvent()
+        evt.Skip()
 
     def showMorphEvent(self, evt):
         for widget in self.widgets:
