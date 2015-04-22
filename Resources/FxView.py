@@ -28,7 +28,8 @@ class SliderWidget(WidgetParent):
         
         self.interpKnob = QLiveControlKnob(self,INTERPTIME_MIN, INTERPTIME_MAX, 
                                        parameter.getInterpTime(), label=parameter.name,
-                                       outFunction=self.interpolationTimeCallback, backColour = CONTROLSLIDER_BACK_COLOUR_INTERP)
+                                       outFunction=self.interpolationTimeCallback, 
+                                       backColour = CONTROLSLIDER_BACK_COLOUR_INTERP)
         # INTERP add another knob for interpolation time, toggle between display of value knob and interp knob
         self.sizer.Add(self.interpKnob, 0, wx.ALL, 5)
 
@@ -78,7 +79,7 @@ class PathWidget(WidgetParent):
             self.callback(path)
 
     def setValue(self, value):
-        self.ffb.SetValue(value, callBack=1)
+        self.fbb.SetValue(value, callBack=1)
                
 class ButtonWidget(WidgetParent):
     def __init__(self, parameter, parent):

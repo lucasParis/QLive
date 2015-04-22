@@ -23,7 +23,6 @@ class SoundFilePlayer:
         self.looper.start = dict[ID_COL_STARTPOINT]
         self.looper.dur = dict[ID_COL_ENDPOINT] - dict[ID_COL_STARTPOINT]
         self.looper.xfade = dict[ID_COL_CROSSFADE]
-        print dict[ID_COL_PLAYING]
         if dict[ID_COL_PLAYING] == 1:
             self.looper.reset()
             self.looper.play()

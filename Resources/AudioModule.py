@@ -24,7 +24,7 @@ class SliderParameter(ParameterParent, PyoObject):
         self.unit = unit
         self.exp = exp
         self.value = value
-        self.audioValue = SigTo(value, 0.05, init=value)
+        self.audioValue = SigTo(value, 0.01, init=value)
         self._base_objs = self.audioValue.getBaseObjects()
 
     # add new function for setValueFromUI (temporarly resets interp time to 0.05)
@@ -466,7 +466,8 @@ class Soundfile(AudioModule):
         self.setOutput(self.amp)
 
     def loadPath(self, path):
-        self.sfPlayer.setPath(path)
+        if path:
+            self.sfPlayer.setPath(path)
 
     def setPlay(self, state):
         if state:
