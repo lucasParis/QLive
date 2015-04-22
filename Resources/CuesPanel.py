@@ -77,16 +77,15 @@ class CuesPanel(scrolled.ScrolledPanel):
     def appendCueButton(self):
         number = len(self.cueButtons)
         butHeight = self.GetTextExtent("9")[1] + 8
-        but = CueButton(self, size=(50, butHeight), number=number)
-        but.Bind(wx.EVT_LEFT_DOWN, self.onCueSelection)
+        but = CueButton(self, size=(50, butHeight), number=number, 
+                        evtHandler=self.onCueSelection)
         self.mainSizer.Add(but, 0, wx.EXPAND|wx.TOP|wx.LEFT|wx.RIGHT, 5)
         self.cueButtons.append(but)
         self.setSelectedCue(number)
         
-    def onCueSelection(self, event):
-        button = event.GetEventObject()
-        self.setSelectedCue(button.getNumber()) 
-        self.sendCueEvent()
+    def onCueSelection(self, button):
+        if self.setSelectedCue(button.getNumber()):
+            self.sendCueEvent()
 
     def sendCueEvent(self):
         if QLiveLib.getVar("MainWindow") != None:

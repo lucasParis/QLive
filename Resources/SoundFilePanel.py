@@ -6,11 +6,9 @@ from pyo import sndinfo
 from constants import *
 import QLiveLib
 
-# add missing types in OscDataReceive
-
 class SoundFileObject:
     def __init__(self, id, filename, loopmode=0, transpo=1, gain=0,
-                 playing=False, directout=True, startpoint=0,
+                 playing=0, directout=True, startpoint=0,
                  endpoint=-1, crossfade=5, channel=0):
         self.id = id
         self.filename = filename
@@ -354,6 +352,8 @@ class SoundFileGrid(gridlib.Grid):
                 self.SetCellValue(row, key, attrs[key])
             elif key == ID_COL_LOOPMODE:
                 self.SetCellValue(row, key, LOOPMODES[attrs[key]])
+            elif key == ID_COL_PLAYING:
+                self.SetCellValue(row, key, PLAYING[attrs[key]])
             else:
                 self.SetCellValue(row, key, str(attrs[key]))
         self.SetCellTextColour(row, ID_COL_FILENAME, self.textColour)
@@ -473,10 +473,12 @@ class SoundFileGrid(gridlib.Grid):
                 self.PopupMenu(menu, evt.GetPosition())
                 menu.Destroy()
             elif self.selCol == ID_COL_PLAYING:
-                val = self.objects[self.selRow].getPlaying()
-                val = not val
-                self.objects[self.selRow].setPlaying(val)
-                self.SetCellValue(self.selRow, self.selCol, str(val))
+                menu = wx.Menu("Playing Modes")
+                for i, md in enumerate(PLAYING):
+                    menu.Append(i, md)
+                menu.Bind(wx.EVT_MENU, self.selectPlayingMode, id=0, id2=i)
+                self.PopupMenu(menu, evt.GetPosition())
+                menu.Destroy()
             elif self.selCol == ID_COL_DIRECTOUT:
                 val = self.objects[self.selRow].getDirectOut()
                 val = not val
@@ -564,6 +566,12 @@ class SoundFileGrid(gridlib.Grid):
         sel = LOOPMODES[evt.GetId()]
         if sel is not None:
             self.objects[self.selRow].setLoopMode(evt.GetId())
+            self.SetCellValue(self.selRow, self.selCol, sel)
+
+    def selectPlayingMode(self, evt):
+        sel = PLAYING[evt.GetId()]
+        if sel is not None:
+            self.objects[self.selRow].setPlaying(evt.GetId())
             self.SetCellValue(self.selRow, self.selCol, sel)
 
     def getSoundFileObjects(self):

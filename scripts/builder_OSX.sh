@@ -9,7 +9,7 @@ export DMG_DIR="QLive 0.1.0"
 export DMG_NAME="QLive_0.1.0.dmg"
 
 py2applet --make-setup --argv-emulation=0 QLive.py Resources/*
-python setup.py py2app --plist=info.plist
+python setup.py py2app --plist=scripts/info.plist
 rm -f setup.py
 rm -rf build
 mv dist QLive_OSX

@@ -23,7 +23,8 @@ class SoundFilePlayer:
         self.looper.start = dict[ID_COL_STARTPOINT]
         self.looper.dur = dict[ID_COL_ENDPOINT] - dict[ID_COL_STARTPOINT]
         self.looper.xfade = dict[ID_COL_CROSSFADE]
-        if dict[ID_COL_PLAYING]:
+        print dict[ID_COL_PLAYING]
+        if dict[ID_COL_PLAYING] == 1:
             self.looper.reset()
             self.looper.play()
             if dict[ID_COL_DIRECTOUT] and not self.directout:
@@ -35,7 +36,7 @@ class SoundFilePlayer:
             elif not dict[ID_COL_DIRECTOUT] and self.directout:
                 self.directout = False
                 audioMixer = QLiveLib.getVar("AudioMixer").delFromMixer(self,mixerInputId)
-        else:
+        elif dict[ID_COL_PLAYING] == 0:
             self.looper.stop()
 
     def setAttribute(self, id, value):
@@ -52,11 +53,11 @@ class SoundFilePlayer:
         elif id == ID_COL_CROSSFADE:
             self.looper.xfade = value
         elif id == ID_COL_PLAYING:
-            if value:
+            if value == "Play":
                 self.looper.play()
-            else:
+            elif value == "Stop":
                 self.looper.stop()
-        # handle ID_COL_PLAYING, ID_COL_DIRECTOUT and ID_COL_CHANNEL
+        # handle ID_COL_DIRECTOUT and ID_COL_CHANNEL
 
 class AudioServer:
     def __init__(self):

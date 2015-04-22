@@ -1,4 +1,5 @@
 import wx, math
+import wx.lib.stattext as stattext
 from pyolib._wxwidgets import ControlSlider, BACKGROUND_COLOUR
 from AudioMixer import *
 from constants import *
@@ -694,12 +695,19 @@ class TransportButtons(wx.Panel):
             self.recordCallback(self.recordmode)
 
 class CueButton(wx.Panel):
-    def __init__(self, parent, size, number):
-        super(CueButton, self).__init__(parent, size=size, style=wx.SUNKEN_BORDER)
+    def __init__(self, parent, size, number, evtHandler):
+        wx.Panel.__init__(self, parent, -1, size=size, style=wx.SUNKEN_BORDER)
         self.SetBackgroundColour(CUEBUTTON_UNSELECTED_COLOUR)
-        self.labtext = wx.StaticText(self, -1, label="", style=wx.ALIGN_CENTER)
+        self.labtext = stattext.GenStaticText(self, -1, label="", style=wx.ALIGN_CENTER)
+        self.labtext.SetBackgroundColour(CUEBUTTON_UNSELECTED_COLOUR)
+        self.evtHandler = evtHandler
         self.Bind(wx.EVT_SIZE, self.OnSize)
+        self.Bind(wx.EVT_LEFT_DOWN, self.OnLeftDown)
+        self.labtext.Bind(wx.EVT_LEFT_DOWN, self.OnLeftDown)
         wx.CallAfter(self.setNumber, number)
+
+    def OnLeftDown(self, evt):
+        self.evtHandler(self)
 
     def OnSize(self, evt):
         self.labtext.Center()
@@ -718,9 +726,11 @@ class CueButton(wx.Panel):
     def select(self, state):
         if state:
             self.SetBackgroundColour(CUEBUTTON_SELECTED_COLOUR)
+            self.labtext.SetBackgroundColour(CUEBUTTON_SELECTED_COLOUR)
         else:
             self.SetBackgroundColour(CUEBUTTON_UNSELECTED_COLOUR)
-        self.Refresh()
+            self.labtext.SetBackgroundColour(CUEBUTTON_UNSELECTED_COLOUR)
+        wx.CallAfter(self.Refresh)
             
 if __name__ == "__main__":
     from pyo64 import *

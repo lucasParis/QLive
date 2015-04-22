@@ -76,6 +76,7 @@ LABELS = ["Filename", "Loop Mode", "Transpo", "Gain (dB)", "Playing",
           "Output", "Start Sec", "End Sec", "Xfade (%)", "Out Chan"]
 COLSIZES = [150, 100, 70, 70, 70, 70, 80, 80, 80, 80]
 LOOPMODES = ["No Loop", "Forward", "Backward", "Back-and-Forth"]
+PLAYING = ["Stop", "Play", "Through"]
 
 # GUI Constants
 BUTTON_WIDTH = 80
