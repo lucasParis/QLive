@@ -12,8 +12,7 @@ class AudioChannel:
         self.midictl.setInterpolation(False)
         self.midipat = Pattern(self.midiout, time=0.06)
         self.input = Sig(input)
-        self.dbgain = SigTo(0, init=0)
-        self.gain = DBToA(self.dbgain)
+        self.gain = SigTo(0, init=0)
         self.output = Sig(self.input, mul=self.gain)
         self.ampOut = PeakAmp(self.output)
 
@@ -51,7 +50,7 @@ class AudioChannel:
         return self.output
         
     def setVolume(self, value):
-        self.dbgain.setValue(value)
+        self.gain.setValue(value)
         
     def setAmpCallback(self, call):
         self.ampOut.function = call

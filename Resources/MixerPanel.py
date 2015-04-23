@@ -13,8 +13,7 @@ class QLiveControlSlider(MeterControlSlider):
                  powoftwo=False, backColour=None, orient=wx.HORIZONTAL, 
                  linkedObject=None):
         MeterControlSlider.__init__(self, parent, minvalue, maxvalue, init, pos, 
-                               size, log, self.localOutFunction, integer, powoftwo, 
-                               backColour, orient)
+                               size, self.localOutFunction, True, backColour)
         self.channelobject = None
         self.midiscanning = False
         self.linkedObject = None
@@ -41,16 +40,16 @@ class QLiveControlSlider(MeterControlSlider):
         if not self.midiscanning:
             self.midiscanning = True
             self.midiscan.scan()
-            self.setBackgroundColour(MIDILEARN_COLOUR)
+            self.setMidiBackgroundColour(MIDILEARN_COLOUR)
         else:
             self.midiscanning = False
             self.midiscan.stop()
-            self.setBackgroundColour(BACKGROUND_COLOUR)
+            self.revertMidiBackgroundColour()
             
     def getMidiScan(self, ctlnum, midichnl):
         self.setMidiCtl(ctlnum)
         self.channelobject.setMidiCtl(ctlnum)
-        self.setBackgroundColour(BACKGROUND_COLOUR)
+        self.revertMidiBackgroundColour()
         
 class MixerPanel(wx.Panel):
     def __init__(self, parent, audioMixer):
@@ -76,7 +75,7 @@ class MixerPanel(wx.Panel):
         inputBox.Add(wx.StaticLine(self, size=(1, -1)), 0, wx.EXPAND|wx.TOP|wx.LEFT|wx.RIGHT, 2)
         for i in range(NUM_INPUTS):
             channel = self.audioMixer.getInputChannel(i)
-            slide = QLiveControlSlider(self, -60, 18, 0, size=(24,100), orient=wx.VERTICAL, 
+            slide = QLiveControlSlider(self, -60, 18, 0, size=(28,100), orient=wx.VERTICAL, 
                                        outFunction=channel.setVolume)
             slide.setChannelObject(channel)
             channel.setMidiCallback(slide.SetValue)
@@ -97,7 +96,7 @@ class MixerPanel(wx.Panel):
         outputBox.Add(wx.StaticLine(self, size=(1, -1)), 0, wx.EXPAND|wx.TOP|wx.LEFT|wx.RIGHT, 2)
         for i in range(NUM_OUTPUTS):
             channel = self.audioMixer.getOutputChannel(i)            
-            slide = QLiveControlSlider(self, -60, 18, 0, size=(24,100), orient=wx.VERTICAL, 
+            slide = QLiveControlSlider(self, -60, 18, 0, size=(28,100), orient=wx.VERTICAL, 
                                        outFunction=channel.setVolume)
             slide.setChannelObject(channel)
             channel.setMidiCallback(slide.SetValue)
