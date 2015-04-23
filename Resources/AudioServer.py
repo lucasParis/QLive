@@ -26,15 +26,15 @@ class SoundFilePlayer:
         if dict[ID_COL_PLAYING] == 1:
             self.looper.reset()
             self.looper.play()
+            audioMixer = QLiveLib.getVar("AudioMixer")
             if dict[ID_COL_DIRECTOUT] and not self.directout:
                 self.directout = True
-                audioMixer = QLiveLib.getVar("AudioMixer")
                 for i in range(len(self.looper)):
                     chnl = (i + dict[ID_COL_CHANNEL]) % NUM_CHNLS
                     self.mixerInputId = audioMixer.addToMixer(chnl, self.looper[i])
             elif not dict[ID_COL_DIRECTOUT] and self.directout:
                 self.directout = False
-                audioMixer = QLiveLib.getVar("AudioMixer").delFromMixer(self,mixerInputId)
+                audioMixer.delFromMixer(self.mixerInputId)
         elif dict[ID_COL_PLAYING] == 0:
             self.looper.stop()
 
@@ -83,6 +83,7 @@ class AudioServer:
 
     def start(self, state):
         if state:
+            QLiveLib.getVar("AudioMixer").resetMixer()
             self.createSoundFilePlayers()
             QLiveLib.getVar("FxTracks").start()
             self.server.start()
@@ -106,7 +107,6 @@ class AudioServer:
             self.start(False)
 
     def stop(self):
-        print "stup"
         self.server.stop()
 
     def shutdown(self):

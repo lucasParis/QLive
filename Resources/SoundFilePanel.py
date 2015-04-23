@@ -468,15 +468,15 @@ class SoundFileGrid(gridlib.Grid):
             if self.selCol == ID_COL_LOOPMODE:
                 menu = wx.Menu("Loop Modes")
                 for i, md in enumerate(LOOPMODES):
-                    menu.Append(i+1, md) # id offset by 1, 0 doesnt work on mac
-                menu.Bind(wx.EVT_MENU, self.selectLoopMode, id=0, id2=i)
+                    menu.Append(i+1, md)
+                menu.Bind(wx.EVT_MENU, self.selectLoopMode, id=1, id2=i+1)
                 self.PopupMenu(menu, evt.GetPosition())
                 menu.Destroy()
             elif self.selCol == ID_COL_PLAYING:
                 menu = wx.Menu("Playing Modes")
                 for i, md in enumerate(PLAYING):
-                    menu.Append(i+1, md)#changed
-                menu.Bind(wx.EVT_MENU, self.selectPlayingMode, id=0, id2=i)
+                    menu.Append(i+1, md)
+                menu.Bind(wx.EVT_MENU, self.selectPlayingMode, id=1, id2=i+1)
                 self.PopupMenu(menu, evt.GetPosition())
                 menu.Destroy()
             elif self.selCol == ID_COL_DIRECTOUT:
@@ -505,14 +505,14 @@ class SoundFileGrid(gridlib.Grid):
             self.selRow = row
             menu = wx.Menu()
             for i, act in enumerate(["Duplicate", "Delete"]):
-                menu.Append(i, act)
-            menu.Bind(wx.EVT_MENU, self.doLabelAction, id=0, id2=i)
+                menu.Append(i+1, act)
+            menu.Bind(wx.EVT_MENU, self.doLabelAction, id=1, id2=i+1)
             self.PopupMenu(menu, evt.GetPosition())
             menu.Destroy()
         evt.Skip()
 
     def doLabelAction(self, evt):
-        if evt.GetId() == 0: # Duplicate
+        if evt.GetId() == 1: # Duplicate
             obj = self.objects[self.selRow]
             id = obj.getId()
             filename = obj.getFilename()
@@ -526,7 +526,7 @@ class SoundFileGrid(gridlib.Grid):
                        ID_COL_ENDPOINT, ID_COL_CROSSFADE, ID_COL_CHANNEL]:
                 attr = self.GetOrCreateCellAttr(self.selRow, id)
                 attr.SetReadOnly(False)
-        elif evt.GetId() == 1: # Delete
+        elif evt.GetId() == 2: # Delete
             del self.objects[self.selRow]
             self.DeleteRows(self.selRow, 1, True)
         for i, obj in enumerate(self.objects):
@@ -563,15 +563,15 @@ class SoundFileGrid(gridlib.Grid):
         obj.loadCue(0)
 
     def selectLoopMode(self, evt):
-        sel = LOOPMODES[evt.GetId()-1]# id offset by 1, 0 doesnt work on mac
+        sel = LOOPMODES[evt.GetId() - 1]
         if sel is not None:
-            self.objects[self.selRow].setLoopMode(evt.GetId()-1)# id offset by 1, 0 doesnt work on mac
+            self.objects[self.selRow].setLoopMode(evt.GetId() - 1)
             self.SetCellValue(self.selRow, self.selCol, sel)
 
     def selectPlayingMode(self, evt):
-        sel = PLAYING[evt.GetId()-1]#offset by 1, index 0 doesn't work on mac
+        sel = PLAYING[evt.GetId() - 1]
         if sel is not None:
-            self.objects[self.selRow].setPlaying(evt.GetId()-1)
+            self.objects[self.selRow].setPlaying(evt.GetId() - 1)
             self.SetCellValue(self.selRow, self.selCol, sel)
 
     def getSoundFileObjects(self):

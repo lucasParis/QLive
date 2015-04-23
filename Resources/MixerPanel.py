@@ -53,7 +53,7 @@ class QLiveControlSlider(MeterControlSlider):
         
 class MixerPanel(wx.Panel):
     def __init__(self, parent, audioMixer):
-        wx.Panel.__init__(self, parent, size=(800,125), style=wx.SUNKEN_BORDER)
+        wx.Panel.__init__(self, parent, size=(800,129), style=wx.SUNKEN_BORDER)
         self.audioMixer = audioMixer
         self.SetBackgroundColour(BACKGROUND_COLOUR)
 
