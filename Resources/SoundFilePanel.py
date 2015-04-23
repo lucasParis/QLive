@@ -468,14 +468,14 @@ class SoundFileGrid(gridlib.Grid):
             if self.selCol == ID_COL_LOOPMODE:
                 menu = wx.Menu("Loop Modes")
                 for i, md in enumerate(LOOPMODES):
-                    menu.Append(i, md)
+                    menu.Append(i+1, md) # id offset by 1, 0 doesnt work on mac
                 menu.Bind(wx.EVT_MENU, self.selectLoopMode, id=0, id2=i)
                 self.PopupMenu(menu, evt.GetPosition())
                 menu.Destroy()
             elif self.selCol == ID_COL_PLAYING:
                 menu = wx.Menu("Playing Modes")
                 for i, md in enumerate(PLAYING):
-                    menu.Append(i, md)
+                    menu.Append(i+1, md)#changed
                 menu.Bind(wx.EVT_MENU, self.selectPlayingMode, id=0, id2=i)
                 self.PopupMenu(menu, evt.GetPosition())
                 menu.Destroy()
@@ -563,15 +563,15 @@ class SoundFileGrid(gridlib.Grid):
         obj.loadCue(0)
 
     def selectLoopMode(self, evt):
-        sel = LOOPMODES[evt.GetId()]
+        sel = LOOPMODES[evt.GetId()-1]# id offset by 1, 0 doesnt work on mac
         if sel is not None:
-            self.objects[self.selRow].setLoopMode(evt.GetId())
+            self.objects[self.selRow].setLoopMode(evt.GetId()-1)# id offset by 1, 0 doesnt work on mac
             self.SetCellValue(self.selRow, self.selCol, sel)
 
     def selectPlayingMode(self, evt):
-        sel = PLAYING[evt.GetId()]
+        sel = PLAYING[evt.GetId()-1]#offset by 1, index 0 doesn't work on mac
         if sel is not None:
-            self.objects[self.selRow].setPlaying(evt.GetId())
+            self.objects[self.selRow].setPlaying(evt.GetId()-1)
             self.SetCellValue(self.selRow, self.selCol, sel)
 
     def getSoundFileObjects(self):

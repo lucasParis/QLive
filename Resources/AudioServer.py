@@ -92,7 +92,10 @@ class AudioServer:
                 self.recStop()
             self.server.stop()
             self.resetPlayerRefs()
+#            for i in range(len(self.soundfiles)):
+#                del self.soundfiles[i]
             self.soundfiles = []
+
 
     def record(self, state):
         if state:
