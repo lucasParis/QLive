@@ -139,7 +139,7 @@ class AudioServer:
 class MidiLearn:
     def __init__(self, callback):
         self.callback = callback
-        self.scanner = CtlScan2(self.scanned, False).stop()
+        self.scanner = CtlScan2(self.scanned, True).stop()
     
     def scan(self):
         self.scanner.reset()
