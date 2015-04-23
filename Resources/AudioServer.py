@@ -92,8 +92,6 @@ class AudioServer:
                 self.recStop()
             self.server.stop()
             self.resetPlayerRefs()
-#            for i in range(len(self.soundfiles)):
-#                del self.soundfiles[i]
             self.soundfiles = []
 
 
@@ -108,6 +106,7 @@ class AudioServer:
             self.start(False)
 
     def stop(self):
+        print "stup"
         self.server.stop()
 
     def shutdown(self):

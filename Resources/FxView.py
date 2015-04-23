@@ -37,6 +37,7 @@ class SliderWidget(WidgetParent):
         self.SetSizer(self.sizer)
         
     def setValue(self, value):
+        print "got called"
         self.slider.SetValue(value)
         
     def setParameterInterpolationTime(self, value):
@@ -55,6 +56,7 @@ class SliderWidget(WidgetParent):
             self.interpKnob.Hide()
             
         self.Layout()
+        
         
 class PathWidget(WidgetParent):
     def __init__(self, parameter, parent):

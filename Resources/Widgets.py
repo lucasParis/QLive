@@ -156,6 +156,9 @@ class QLiveControlKnob(wx.Panel):
             elif event.GetKeyCode() in [wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER]:
                 if self.new != '':
                     self.SetValue(eval(self.new))
+                    # Send value
+                    if self.outFunction:
+                        self.outFunction(self.GetValue())
                     self.new = ''
                 self.selected = False
         wx.CallAfter(self.Refresh)
@@ -200,7 +203,10 @@ class QLiveControlKnob(wx.Panel):
                 offX = pos[0] - self.clickPos[0]
                 off = offY + offX
                 off *= 0.005 * (self.maxvalue - self.minvalue)
-                self.value = clamp(self.oldValue + off, self.minvalue, self.maxvalue)    
+                self.value = clamp(self.oldValue + off, self.minvalue, self.maxvalue)
+                # Send value
+                if self.outFunction:
+                    self.outFunction(self.GetValue())
                 self.selected = False
                 wx.CallAfter(self.Refresh)
 
@@ -275,9 +281,7 @@ class QLiveControlKnob(wx.Panel):
         dc.SetTextForeground(CONTROLSLIDER_TEXT_COLOUR)
         dc.DrawLabel(val, recval, wx.ALIGN_CENTER)
 
-        # Send value
-        if self.outFunction:
-            self.outFunction(self.GetValue())
+
 
         evt.Skip()
        
@@ -718,17 +722,22 @@ if __name__ == "__main__":
             wx.Frame.__init__(self, None)
             panel = wx.Panel(self)
             panel.SetBackgroundColour(BACKGROUND_COLOUR)
-            m = MeterControlSlider(panel, -90, 18, 0, pos=(40,40), size=(30, 100), 
-                                    outFunction=self.callback, outLinValue=True)
-            self.am = Sig(1, mul=Randi(0.3, 1.4, 8))
-            self.si = Noise(self.am)
-            self.pe = PeakAmp(self.si, m.setRms)
+#            m = MeterControlSlider(panel, -90, 18, 0, pos=(40,40), size=(30, 100), 
+#                                    outFunction=self.callback, outLinValue=True)
+#            self.am = Sig(1, mul=Randi(0.3, 1.4, 8))
+#            self.si = Noise(self.am)
+#            self.pe = PeakAmp(self.si, m.setRms)
+
+
             #tr = TransportButtons(panel)
-            #knob = QLiveControlKnob(panel, 20, 20000, pos=(20,20), label="Freq")
-            #knob.setEnable(True)
+            knob = QLiveControlKnob(panel, 20, 20000, pos=(20,20), label="Freq", outFunction = self.callback)
+            knob.setEnable(True)
+            
+            knob.SetValue(1000)
             self.Show()
         def callback(self, value):
-            self.am.value = value
+            print "callback"
+            pass#self.am.value = value
 
     app = wx.App()
     f = TestFrame()

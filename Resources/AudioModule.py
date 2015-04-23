@@ -24,25 +24,39 @@ class SliderParameter(ParameterParent, PyoObject):
         self.unit = unit
         self.exp = exp
         self.value = value
-        self.audioValue = SigTo(value, 0.01, init=value)
+        self.time = 0.01
+        self.audioValue = SigTo(value, self.time, init=value)
+        self.call = None
         self._base_objs = self.audioValue.getBaseObjects()
 
     # add new function for setValueFromUI (temporarly resets interp time to 0.05)
     def setValue(self, value):# this should only be used for save dict and cues, rename to setSaveValue ?
         # get and set value as pair list [value, interTime]
         self.audioValue.time = value[1]
+        self.time = value[1]
         self.audioValue.setValue(value[0])
         self.value = value[0]
 
     def getValue(self):# this should only be used for save dict and cues, rename to getSaveValue ?
-        return [self.audioValue.value, self.audioValue.time]
+        return [self.audioValue.value, self.time]
         
     def getParameterValue(self):
         return self.value
 
     def setParameterValue(self, value):
+        if not self.call == None:
+            self.call.stop()
+        time = self.audioValue.time
+        self.audioValue.time = 0.01
         self.audioValue.setValue(value)
         self.value = value
+        self.call = CallAfter(self.postTimeSet, 0.005)
+#        self.call.play()
+#        
+    def postTimeSet(self):#used when interp time is temporarly reset to 0.01 for gui
+        print "after"
+        self.audioValue.time = self.time
+
         
     def getInterpTime(self):
         return self.audioValue.time
