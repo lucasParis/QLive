@@ -6,17 +6,26 @@ QLive is a cues-based software to help the creation of mixed music
   
 TODO
 ----
+** JIM **
+- interpolation pour arriver au cue, global per track, per FX
+- BPF
+- access to specific inputs in input module
+- midi triggering of cues
+- sauvegarder bypass dans cues
+
+
+** bugs **
+
+- midi learn sur les slider ne fonctionne pas ?
+- pas d'interpolation dans les effets ?
 
 **Short term**
 
-- Soundfile section: excel style (Olivier)
-- Project repository design (sounds folder, doc folder, bounce folder) (Olivier)
-- Recordings will always be in the project's bounce folder (Olivier)
 
+- numero de sliders mixer
 - Documentation/archive prototype
 - BPF in fx view
 
-- DONE Allow multiple tracks (Lucas)
 - DONE Parameter interpolation between cues (per cue, per parameter) (Lucas)
     - But the controls now are not real-time...
 - Finalizing cue selection (Lucas)
@@ -30,3 +39,7 @@ TODO
 - Audio driver setup (Olivier)
 - GUI connections design
 - Licensing
+- master FX (in and out)
+
+
+
