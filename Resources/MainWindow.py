@@ -122,21 +122,21 @@ class MainWindow(wx.Frame):
         self.mainSizer.AddSizer(self.rightSizer, 2, wx.EXPAND, 5)
         self.mainPanel.SetSizer(self.mainSizer)
 
-        self.loadFile(NEW_FILE_PATH)
+        wx.CallAfter(self.showIntro)
 
-        if True:
-            dlg = IntroDialog(self)
-            if dlg.ShowModal() == wx.ID_OK:
-                filepath = dlg.filepath
-                createDir = dlg.createDir
-                if createDir:
-                    self.createProjectFolder(filepath)
-                else:
-                    self.loadFile(filepath)
-            dlg.Destroy()
+    def showIntro(self):
+        dlg = IntroDialog(self)
+        if dlg.ShowModal() == wx.ID_OK:
+            filepath = dlg.filepath
+            createDir = dlg.createDir
+            if createDir:
+                self.createProjectFolder(filepath)
+            else:
+                self.loadFile(filepath)
         else:
-            self.loadFile("/home/olivier/newproject2/newproject2.qlp")
+            self.loadFile(NEW_FILE_PATH)
 
+        dlg.Destroy()
         self.Show()
 
     def onTabulate(self, evt):
