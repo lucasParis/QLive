@@ -1,4 +1,4 @@
-import wx, time, os, pprint, copy, codecs, shutil
+import wx, time, os, pprint, copy, codecs, shutil, psutil
 from constants import *
 import QLiveLib
 from AudioServer import AudioServer
@@ -15,7 +15,21 @@ class MainWindow(wx.Frame):
         
         self.SetMinSize((600, 400))
         self.SetTitle("QLive Session")
-    
+
+        # Status bar, the third filed is unused yet.
+        self.status = self.CreateStatusBar(3)
+        self.status.SetStatusWidths([100, 100, -1])
+        self.status.SetStatusText("CPU: 0.0 %", 0)
+        self.status.SetStatusText("MEM: 0.00 Mb", 1)
+
+        # Retrieve the current process
+        self.process = psutil.Process()
+
+        # Start a timer to update CPU and memory usage
+        self.timer = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self.updateUsage, self.timer)
+        self.timer.Start(1000)
+
         self.audioServer = AudioServer()
         QLiveLib.setVar("AudioServer", self.audioServer)
 
@@ -123,6 +137,12 @@ class MainWindow(wx.Frame):
         self.mainPanel.SetSizer(self.mainSizer)
 
         wx.CallAfter(self.showIntro)
+
+    def updateUsage(self, evt):
+        cpu = self.process.cpu_percent()
+        self.status.SetStatusText("CPU: %.1f %%" % cpu, 0)
+        mem = self.process.get_memory_info()[0] / float(2 ** 20)
+        self.status.SetStatusText("MEM: %.2f Mb" % mem, 1)
 
     def showIntro(self):
         dlg = IntroDialog(self)
@@ -312,6 +332,7 @@ class MainWindow(wx.Frame):
         print "Popup Preferences Windows..."
 
     def OnClose(self, evt):
+        self.timer.Stop()
         if not self.askForSaving():
             return
         if self.audioServer.isStarted():
