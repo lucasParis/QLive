@@ -2,6 +2,7 @@
 # encoding: utf-8
 import wx, weakref
 from constants import *
+from fxbox_def import *
 import QLiveLib
 from FxView import FxSlidersView
 

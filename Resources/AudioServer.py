@@ -1,6 +1,7 @@
 import time
 from pyo64 import *
 from constants import *
+from fxbox_def import *
 import QLiveLib
 
 class SoundFilePlayer:
