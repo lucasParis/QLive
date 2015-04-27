@@ -1,6 +1,5 @@
 import wx
 from FxTrack import *
-from FxView import FxViewManager
 
 # put FxBox at the clicked position
 # ScrollWindow should not scroll on arrow keys...
@@ -12,9 +11,6 @@ class FxTracks(wx.ScrolledWindow):
         self.SetBackgroundColour(TRACKS_BACKGROUND_COLOUR)
 
         self.selectedTrack = 0
-
-        # FX window manager
-        self.fxsView = FxViewManager(self)
         
         self.createTracks(2)
 
@@ -42,7 +38,7 @@ class FxTracks(wx.ScrolledWindow):
         x = 25
         h = TRACK_ROW_SIZE * 2
         for i in range(num):
-            track = FxTrack(self, self.fxsView, i)
+            track = FxTrack(self, i)
             track.setTrackPosition(x)
             track.setTrackHeight(h)
             self.tracks.append(track)
@@ -52,7 +48,7 @@ class FxTracks(wx.ScrolledWindow):
         prevTrack = self.tracks[-1]
         x = prevTrack.getTrackPosition() + prevTrack.getTrackHeight()
         h = TRACK_ROW_SIZE * 2
-        track = FxTrack(self, self.fxsView, len(self.tracks))
+        track = FxTrack(self, len(self.tracks))
         track.setTrackPosition(x)
         track.setTrackHeight(h)
         self.tracks.append(track)
@@ -202,26 +198,27 @@ class FxTracks(wx.ScrolledWindow):
         evt.Skip()
 
     def getSaveDict(self):
-        return {"tracks": [track.getSaveDict() for track in self.tracks]}
+        return [track.getSaveDict() for track in self.tracks]
 
     def setSaveDict(self, saveDict):
-        self.createTracks(len(saveDict["tracks"]))
+        # it's a list, not a dict
+        self.createTracks(len(saveDict))
         for i in range(len(self.tracks)):
-            self.tracks[i].setSaveDict(saveDict["tracks"][i])
+            self.tracks[i].setSaveDict(saveDict[i])
         self.drawAndRefresh()
             
         self.selectedTrack = 0
 
-    def cueEvent(self, eventDict):
+    def cueEvent(self, evt):
         for track in self.tracks:
-            track.cueEvent(eventDict)
-        self.fxsView.refresh()
+            track.cueEvent(evt)
  
     def start(self):
         for track in self.tracks:
             track.start()
 
     def removeTrack(self):
+        self.tracks[self.selectedTrack].close()
         del self.tracks[self.selectedTrack]
         if not self.tracks:
             self.createTracks(1)
@@ -242,3 +239,10 @@ class FxTracks(wx.ScrolledWindow):
             id = (self.selectedTrack + 1) % len(self.tracks)        
         self.selectedTrack = id
         self.drawAndRefresh()
+
+    def getTracks(self):
+        return self.tracks
+
+    def close(self):
+        for track in self.tracks:
+            track.close()

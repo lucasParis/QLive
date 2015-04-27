@@ -6,7 +6,7 @@ def getVar(var):
 
 def setVar(var, value):
     vars.QLiveVariables[var] = value
-
+    
 def PRINT(*args):
     if DEBUG:
         for arg in args:

@@ -11,7 +11,6 @@ TODO
 - BPF
 - access to specific inputs in input module
 - midi triggering of cues
-- sauvegarder bypass dans cues _ Lucas
 
 
 ** bugs **

@@ -12,7 +12,7 @@ class AudioChannel:
         self.midictl.setInterpolation(False)
         self.midipat = Pattern(self.midiout, time=0.06)
         self.input = Sig(input)
-        self.gain = SigTo(0, init=0)
+        self.gain = SigTo(1, init=1)
         self.output = Sig(self.input, mul=self.gain)
         self.ampOut = PeakAmp(self.output)
 

@@ -1,63 +1,62 @@
 #!/usr/bin/python
 # encoding: utf-8
-import wx
-from pyo64 import *
+import wx, weakref
 from constants import *
 import QLiveLib
-from AudioModule import FxCreator, InputCreator
+from FxView import FxSlidersView
 
-class BoxMenu(wx.Menu):
-    def __init__(self, parent):
-        wx.Menu.__init__(self)
-        self.result = None
-
-    def prepareMenu(self, names):
-        id = BOX_MENU_ITEM_FIRST_ID
-        for name in names:
-            self.Append(id, name)
-            id += 1
-        self.Bind(wx.EVT_MENU, self.fxSelected, id=BOX_MENU_ITEM_FIRST_ID, id2=id)
-
-    def fxSelected(self, evt):
-        self.result = self.GetLabel(evt.GetId())
-        
-    def getSelection(self):
-        return self.result
-
-class FxBoxMenu(BoxMenu):
-    def __init__(self, parent):
-        BoxMenu.__init__(self, parent)
-        self.prepareMenu(FxCreator().getNames())
-
-class InputBoxMenu(BoxMenu):
-    def __init__(self, parent):
-        BoxMenu.__init__(self, parent)
-        self.prepareMenu(InputCreator().getNames())
-
-class ParentBox(object):
+class BaseFxBox(object):
     def __init__(self, parent):
         self.parent = parent
-        self.initialize()
-
-    def initialize(self):
         self.name = ""
-        self.audio = None
-        self.presets = None
+        self.audioRef = None
         self.id = [0,0]
-        self.audioIn = Sig([0] * NUM_CHNLS)
-        self.audioOut = Sig(self.audioIn)    
- 
-    def isEnable(self):
-        if self.audio == None:
-            return True
+        self.enable = 1
+        self.view = None
+        self.cues = {}
+        self.currentCue = 0
+
+    def setAudioRef(self, obj):
+        if obj is None:
+            self.audioRef = None
         else:
-            return self.audio.enable
+            self.audioRef = weakref.ref(obj)
+
+    def getEnable(self):
+        return self.enable
 
     def setInput(self, input):
-        self.audioIn.setValue(input)
+        if self.audioRef is not None:
+            audio = self.audioRef()
+            audio.setInput(input)
         
     def getOutput(self):
-        return self.audioOut
+        if self.audioRef is not None:
+            audio = self.audioRef()
+            return audio.getOutput()
+        return None
+
+    def setParamValue(self, name, value, fromUser):
+        if self.audioRef is not None:
+            audio = self.audioRef()
+            if name == "gain":
+                value = pow(10, value * 0.05)
+            if fromUser:
+                getattr(audio, name).time = 0.01
+            getattr(audio, name).value = value
+
+    def setInterpValue(self, name, value):
+        if self.audioRef is not None:
+            audio = self.audioRef()
+            getattr(audio, name).time = value
+
+    def setEnable(self, x, fromUser=False):
+        self.enable = x
+        if self.audioRef is not None:
+            audio = self.audioRef()
+            audio.setEnable(x)
+        if not fromUser and self.view is not None:
+            self.view.setEnableState(x)
         
     def setId(self, id):
         self.id = id
@@ -69,68 +68,127 @@ class ParentBox(object):
         self.name = name
 
     def openView(self):
-        if self.parent.viewPanelRef != None:
-            if self.audio != None:
-                if self.audio.name:
-                    self.parent.viewPanelRef.openViewForAudioProcess(self.audio)
+        if self.view is not None:
+            self.view.Show()
 
     def openMenu(self, event):
-        menu = self.menu(self)
         fxTracks = QLiveLib.getVar("FxTracks")
-        if fxTracks.PopupMenu(menu, event.GetPosition()):
-            if menu.getSelection() is not None:
-                self.initModule(menu.getSelection())
+        menu = wx.Menu()
+        id = BOX_MENU_ITEM_FIRST_ID
+        for name in self.choices:
+            menu.Append(id, name)
+            id += 1
+        fxTracks.Bind(wx.EVT_MENU, self.select, id=BOX_MENU_ITEM_FIRST_ID, id2=id)
+        fxTracks.PopupMenu(menu, event.GetPosition())
         menu.Destroy()
+
+    def select(self, evt):
+        sel = self.choices[evt.GetId() - BOX_MENU_ITEM_FIRST_ID]
+        self.initModule(sel)
         
     def initModule(self, name):
-        self.audio = self.creator().createByName(name)
-        if self.audio is None:
-            return False
-        self.name = self.audio.name
-        self.audio.setInput(self.audioIn)
-        self.audioOut.setValue(self.audio.getOutput())
-        # setup empty cues
-        cuesPanel = QLiveLib.getVar("CuesPanel")
-        numberOfCues = cuesPanel.getNumberOfCues()
-        if numberOfCues > 1:
-            currentCue = cuesPanel.getCurrentCue()
-            self.audio.initCues(numberOfCues, currentCue)
-        return True
+        self.name = name
+        self.createView()
+        currentCue = QLiveLib.getVar("CuesPanel").getCurrentCue()
+        self.addCue(currentCue)
 
-    def getSaveDict(self):
-        if self.audio != None:
-            dict = self.audio.getSaveDict()
-            dict["name"] = self.name
-            return dict
+    def createView(self):
+        if self.name:
+            parameters = self.module_dict[self.name]
+            self.view = FxSlidersView(QLiveLib.getVar("MainWindow"), self, parameters)
+
+    def delete(self):
+        if self.view is not None:
+            self.view.Destroy()
+
+    def getParams(self):
+        if self.view is not None:
+            widgets = self.view.getWidgets()
+            params = [widget.getValue() for widget in widgets]
+            inters = [widget.getInterpValue() for widget in widgets]
+            return (params, inters, self.enable)
         else:
             return None
 
+    def setParams(self, params):
+        if self.view is not None:
+            widgets = self.view.getWidgets()
+            for i, widget in enumerate(widgets):
+                widget.setInterpValue(params[1][i], propagate=True)
+                widget.setValue(params[0][i], propagate=True)
+            if len(params) > 2:
+                self.setEnable(params[2])
+
+    def saveCue(self):
+        self.cues[self.currentCue] = self.getParams()
+
+    def addCue(self, x):
+        self.currentCue = x
+        self.saveCue()
+
+    def delCue(self, old, new):
+        del self.cues[old]
+        for i in range(old+1, len(self.cues)):
+            if i in self.cues:
+                self.cues[i-1] = self.cues[i]
+                del self.cues[i]
+        self.loadCue(new)
+
+    def getCues(self):
+        return self.cues
+
+    def loadCue(self, x):
+        if x in self.cues:
+            self.setParams(self.cues[x])
+        else:
+            c = x
+            while (c >= 0):
+                if c in self.cues:
+                    self.setParams(self.cues[c])
+                    break
+                c -= 1
+        self.currentCue = x
+
+    def cueEvent(self, evt):
+        tp = evt.getType()
+        if tp == CUE_TYPE_DELETE:
+            self.delCue(evt.getOld(), evt.getCurrent())
+        elif tp == CUE_TYPE_SELECT:
+            self.saveCue()
+            self.loadCue(evt.getCurrent())
+        elif tp == CUE_TYPE_NEW:
+            self.saveCue()
+            self.addCue(evt.getCurrent())
+
+    def getSaveDict(self):
+        self.saveCue()
+        return {'name': self.name,
+                'id': self.id,
+                'cues': self.cues}
+
     def setSaveDict(self, saveDict):
-        if saveDict != None:
-            if self.initModule(saveDict["name"]):
-                self.audio.setSaveDict(saveDict)
+        self.name = saveDict["name"]
+        self.id = saveDict["id"]
+        self.cues = saveDict["cues"]
+        self.createView()
+        self.loadCue(0)
 
-    def cueEvent(self, eventDict):
-        if self.audio != None:
-            self.audio.cueEvent(eventDict)
-
-class FxBox(ParentBox):
+class FxBox(BaseFxBox):
     def __init__(self, parent):
-        ParentBox.__init__(self, parent)
-        self.menu = FxBoxMenu
-        self.creator = FxCreator
+        BaseFxBox.__init__(self, parent)
+        self.module_dict = FX_DICT
+        self.choices = FX_LIST
 
     def getRect(self):
         x = TRACK_COL_SIZE * self.id[0] + 135
         y = TRACK_ROW_SIZE * self.id[1]  + self.parent.trackPosition + 10
         return wx.Rect(x, y, BUTTON_WIDTH, BUTTON_HEIGHT)
 
-class InputBox(ParentBox):
+class InputBox(BaseFxBox):
     def __init__(self, parent):
-        ParentBox.__init__(self, parent)
-        self.audioOut.value = Sig([0]*NUM_CHNLS)
-        self.menu = InputBoxMenu
-        self.creator = InputCreator
+        BaseFxBox.__init__(self, parent)
+        self.module_dict = INPUT_DICT
+        self.choices = INPUT_LIST
 
     def getRect(self):
         x = 35

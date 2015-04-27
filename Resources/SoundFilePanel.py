@@ -587,32 +587,32 @@ class SoundFilePanel(wx.Panel):
 
     def loadCue(self, x):
         self.saveCue()
-        for obj in self.grid.getSoundFileObjects():
+        for obj in self.getSoundFileObjects():
             obj.loadCue(x)
             self.grid.putObjectAttrOnCells(obj, obj.getId())
 
     def saveCue(self):
-        for obj in self.grid.getSoundFileObjects():
+        for obj in self.getSoundFileObjects():
             obj.saveCue()
 
     def addCue(self, x):
         self.saveCue()
-        for obj in self.grid.getSoundFileObjects():
+        for obj in self.getSoundFileObjects():
             obj.addCue(x)
 
     def delCue(self, x, cur):
-        for obj in self.grid.getSoundFileObjects():
+        for obj in self.getSoundFileObjects():
             obj.delCue(x)
             self.loadCue(cur)
 
-    def cueEvent(self, dict):
-        tp = dict["type"]
-        if tp == "deleteCue":
-            self.delCue(dict["deletedCue"], dict["currentCue"])
-        elif tp == "cueSelect":
-            self.loadCue(dict["selectedCue"])
-        elif tp == "newCue":
-            self.addCue(dict["currentCue"])
+    def cueEvent(self, evt):
+        tp = evt.getType()
+        if tp == CUE_TYPE_DELETE:
+            self.delCue(evt.getOld(), evt.getCurrent())
+        elif tp == CUE_TYPE_SELECT:
+            self.loadCue(evt.getCurrent())
+        elif tp == CUE_TYPE_NEW:
+            self.addCue(evt.getCurrent())
 
     def setSaveState(self, lst):
         for dict in lst:
@@ -624,7 +624,7 @@ class SoundFilePanel(wx.Panel):
     def getSaveState(self):
         self.saveCue()
         l = []
-        for obj in self.grid.getSoundFileObjects():
+        for obj in self.getSoundFileObjects():
             dict = {"id": obj.getId(), 
                     "filename": obj.getFilename(), 
                     "cues": obj.getCues()}

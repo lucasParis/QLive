@@ -10,8 +10,7 @@ class SoundFilePlayer:
         sndfolder = os.path.join(QLiveLib.getVar("projectFolder"), "sounds")        
         path = os.path.join(sndfolder, self.filename)
         self.table = SndTable(path)
-        self.dbgain = SigTo(0, time=0.02, init=0)
-        self.gain = DBToA(self.dbgain)
+        self.gain = SigTo(0, time=0.02, init=0)
         self.looper = Looper(self.table, mul=self.gain).stop()
         self.directout = False
         self.mixerInputId = -1
@@ -19,7 +18,7 @@ class SoundFilePlayer:
     def setAttributes(self, dict):
         self.looper.mode = dict[ID_COL_LOOPMODE]
         self.looper.pitch = dict[ID_COL_TRANSPO]
-        self.dbgain.value = dict[ID_COL_GAIN]
+        self.gain.value = pow(10, dict[ID_COL_GAIN] * 0.05)
         self.looper.start = dict[ID_COL_STARTPOINT]
         self.looper.dur = dict[ID_COL_ENDPOINT] - dict[ID_COL_STARTPOINT]
         self.looper.xfade = dict[ID_COL_CROSSFADE]
@@ -44,7 +43,7 @@ class SoundFilePlayer:
         elif id == ID_COL_TRANSPO:
             self.looper.pitch = value
         elif id == ID_COL_GAIN:
-            self.dbgain.value = value
+            self.gain.value = pow(10, value * 0.05)
         elif id == ID_COL_STARTPOINT:
             self.looper.start = value
         elif id == ID_COL_ENDPOINT:
@@ -58,12 +57,127 @@ class SoundFilePlayer:
                 self.looper.stop()
         # handle ID_COL_DIRECTOUT and ID_COL_CHANNEL
 
+class BaseAudioObject:
+    def __init__(self, ctrls):
+        self.chnls = 2
+        for ctrl in ctrls:
+            name = ctrl[0]
+            if name == "gain":
+                val = pow(10, ctrl[1] * 0.05)
+            else:
+                val = ctrl[1]
+            setattr(self, name, SigTo(val, time=0.01, init=val))
+
+        self.input = Sig([0] * self.chnls)
+
+    def setInput(self, sig):
+        self.input.value = sig
+
+    def getOutput(self):
+        return self.output
+
+    def setEnable(self, x):
+        self.output.value = [self.input, self.process][x]
+
+class AudioNone(BaseAudioObject):
+    def __init__(self, ctrls):
+        BaseAudioObject.__init__(self, ctrls)
+        self.output = Sig(self.input)
+
+    def setEnable(self, x):
+        self.output.value = [[0.0] * self.chnls, self.input][x]
+    
+class AudioIn(BaseAudioObject):
+    def __init__(self, ctrls):
+        BaseAudioObject.__init__(self, ctrls)
+        self.output = Sig(self.input, mul=self.gain)
+
+    def setEnable(self, x):
+        self.output.value = [[0.0] * self.chnls, self.input][x]
+
+class FxLowpass(BaseAudioObject):
+    def __init__(self, ctrls):
+        BaseAudioObject.__init__(self, ctrls)
+        self.filter = Biquad(self.input, freq=self.freq, q=self.Q, mul=self.gain)
+        self.process = Interp(self.input, self.filter, self.dryWet)
+        self.output = Sig(self.process)
+
+class FxHighpass(BaseAudioObject):
+    def __init__(self, ctrls):
+        BaseAudioObject.__init__(self, ctrls)        
+        self.filter = Biquad(self.input, freq=self.freq, q=self.Q, type=1, mul=self.gain)
+        self.process = Interp(self.input, self.filter, self.dryWet)
+        self.output = Sig(self.process)
+
+class FxFreeverb(BaseAudioObject):
+    def __init__(self, ctrls):
+        BaseAudioObject.__init__(self, ctrls)        
+        self.reverb = Freeverb(self.input, self.size, self.damp, 1, mul=self.gain)
+        self.process = Interp(self.input, self.reverb, self.dryWet)
+        self.output = Sig(self.process)
+
+class FxStereoVerb(BaseAudioObject):
+    def __init__(self, ctrls):
+        BaseAudioObject.__init__(self, ctrls)        
+        self.reverb = STRev(self.input, self.pan, self.revtime, self.cutoff, 1, mul=self.gain)
+        self.process = Interp(self.input, self.reverb, self.dryWet)
+        self.output = Sig(self.process)
+
+class FxDisto(BaseAudioObject):
+    def __init__(self, ctrls):
+        BaseAudioObject.__init__(self, ctrls)        
+        self.disto = Disto(self.input, self.drive, self.slope, mul=self.gain)
+        self.process = Interp(self.input, self.disto, self.dryWet)
+        self.output = Sig(self.process)
+
+class FxDelay(BaseAudioObject):
+    def __init__(self, ctrls):
+        BaseAudioObject.__init__(self, ctrls)        
+        self.delay = Delay(self.input, self.deltime, self.feed, 5, mul=self.gain)
+        self.process = Interp(self.input, self.delay, self.dryWet)
+        self.output = Sig(self.process)
+
+class FxCompressor(BaseAudioObject):
+    def __init__(self, ctrls):
+        BaseAudioObject.__init__(self, ctrls)        
+        self.comp = Compress(self.input, self.thresh, self.ratio, self.attack,
+                             self.decay, 5, knee=0.5, mul=self.gain)
+        self.process = Interp(self.input, self.comp, self.dryWet)
+        self.output = Sig(self.process)
+
+class FxFreqShift(BaseAudioObject):
+    def __init__(self, ctrls):
+        BaseAudioObject.__init__(self, ctrls)        
+        self.shifter = FreqShift(self.input, self.shift, mul=self.gain)
+        self.process = Interp(self.input, self.shifter, self.dryWet)
+        self.output = Sig(self.process)
+
+class FxHarmonizer(BaseAudioObject):
+    def __init__(self, ctrls):
+        BaseAudioObject.__init__(self, ctrls)        
+        self.harmon = Harmonizer(self.input, self.transpo, self.feed, mul=self.gain)
+        self.process = Interp(self.input, self.harmon, self.dryWet)
+        self.output = Sig(self.process)
+
+class FxStereoOut(BaseAudioObject):
+    def __init__(self, ctrls):
+        BaseAudioObject.__init__(self, ctrls)
+        self.process = self.input
+        self.output = Sig(self.process, mul=self.gain)
+
+AUDIO_OBJECTS = {"None": AudioNone, "AudioIn": AudioIn, "Lowpass": FxLowpass,
+                "Highpass": FxHighpass, "Freeverb": FxFreeverb, 
+                "StereoVerb": FxStereoVerb, "Disto": FxDisto, "Delay": FxDelay, 
+                "Compressor": FxCompressor, "FreqShift": FxFreqShift,
+                "Harmonizer": FxHarmonizer, "StereoOut": FxStereoOut}
+
 class AudioServer:
     def __init__(self):
         self.server = Server(buffersize=64)
         self.server.setMidiInputDevice(99)
         self.server.boot()
         self.soundfiles = []
+        self.audioObjects = []
         self.recording = False
 
     def createSoundFilePlayers(self):
@@ -76,15 +190,42 @@ class AudioServer:
             self.soundfiles.append(player)
             obj.setPlayerRef(player)
 
+    def createBoxObjects(self):
+        tracks = QLiveLib.getVar("FxTracks").getTracks()
+        for track in tracks:
+            for but in track.getButtonInputs():
+                name = but.name
+                if not name: name = "None"
+                ctrls = INPUT_DICT[name]["ctrls"]
+                obj = AUDIO_OBJECTS[name](ctrls)
+                but.setAudioRef(obj)
+                self.audioObjects.append(obj)
+            for but in track.getButtonFxs():
+                name = but.name
+                if not name: name = "None"
+                ctrls = FX_DICT[name]["ctrls"]
+                obj = AUDIO_OBJECTS[name](ctrls)
+                but.setAudioRef(obj)
+                self.audioObjects.append(obj)
+            
     def resetPlayerRefs(self):
         objs = QLiveLib.getVar("Soundfiles").getSoundFileObjects()
         for obj in objs:
             obj.setPlayerRef(None)
 
+    def resetObjectRefs(self):
+        tracks = QLiveLib.getVar("FxTracks").getTracks()
+        for track in tracks:
+            for but in track.getButtonInputs():
+                but.setAudioRef(None)
+            for but in track.getButtonFxs():
+                but.setAudioRef(None)
+
     def start(self, state):
         if state:
             QLiveLib.getVar("AudioMixer").resetMixer()
             self.createSoundFilePlayers()
+            self.createBoxObjects()
             QLiveLib.getVar("FxTracks").start()
             self.server.start()
         else:
@@ -93,8 +234,9 @@ class AudioServer:
                 self.recStop()
             self.server.stop()
             self.resetPlayerRefs()
+            self.resetObjectRefs()
             self.soundfiles = []
-
+            self.audioObjects = []
 
     def record(self, state):
         if state:

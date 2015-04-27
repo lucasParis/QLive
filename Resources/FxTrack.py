@@ -3,11 +3,10 @@
 import wx
 from constants import *
 from FxBox import *
-import Resources.QLiveLib as QLiveLib
+import QLiveLib
 
 class FxTrack:
-    def __init__(self, parent, viewPanelRef, id=0):
-        
+    def __init__(self, parent, id=0):
         self.id = id
         self.trackPosition = 0
         self.trackHeight = TRACK_ROW_SIZE * 2
@@ -16,8 +15,6 @@ class FxTrack:
 
         self.setFont()
         self.createButtons()
-
-        self.viewPanelRef = viewPanelRef
 
     def setId(self, id):
         self.id = id
@@ -68,6 +65,8 @@ class FxTrack:
             self.buttonsFxs.append(but)
 
     def deleteButton(self, but):
+        # work only for fxs, not for inputs
+        but.delete()
         self.buttonsFxs.remove(but)
         for i, but in enumerate(self.buttonsFxs):
             id = but.getId()
@@ -75,8 +74,20 @@ class FxTrack:
             but.setId(id)
         QLiveLib.getVar("FxTracks").drawAndRefresh()
 
+    def close(self):
+        for but in self.buttonsFxs:
+            but.delete()
+        for but in self.buttonsInputs:
+            but.delete()
+
     def start(self):
         self.createConnections()
+
+    def getButtonInputs(self):
+        return self.buttonsInputs
+
+    def getButtonFxs(self):
+        return self.buttonsFxs
 
     def createConnections(self):
         for i, button in enumerate(self.buttonsFxs):
@@ -130,7 +141,7 @@ class FxTrack:
 
         for i, button in enumerate(self.buttonsFxs):
             rect = button.getRect()
-            if button.isEnable():
+            if button.getEnable():
                 gc.DrawBitmap(buttonBitmap, rect[0], rect[1], rect[2], rect[3])
             else:
                 gc.DrawBitmap(disableButtonBitmap, rect[0], rect[1], rect[2], rect[3])
@@ -167,8 +178,8 @@ class FxTrack:
         for i, inputBut in enumerate(self.buttonsInputs):
             inputBut.setSaveDict(saveDict["inputValues"][i])
             
-    def cueEvent(self, eventDict):
+    def cueEvent(self, evt):
         for i, button in enumerate(self.buttonsFxs):
-            button.cueEvent(eventDict)
+            button.cueEvent(evt)
         for i, inputBut in enumerate(self.buttonsInputs):
-            inputBut.cueEvent(eventDict)
+            inputBut.cueEvent(evt)

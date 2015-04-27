@@ -2,51 +2,54 @@
 # encoding: utf-8
 import wx, os
 from constants import *
-import  wx.lib.filebrowsebutton as filebrowse
-from pyolib._wxwidgets import ControlSlider, BACKGROUND_COLOUR
-import  wx.lib.scrolledpanel as scrolled
+from pyolib._wxwidgets import BACKGROUND_COLOUR
 from Widgets import *
 import QLiveLib
 
-class WidgetParent(wx.Panel):
-    def __init__(self, parameter, parent):
+class SliderWidget(wx.Panel):
+    def __init__(self, parent, parameters, fxbox):
         wx.Panel.__init__(self, parent)
         self.SetBackgroundColour(BACKGROUND_COLOUR)
-        self.parameter = parameter
-        
-    def setValue(self, value):
-        pass
-        
-class SliderWidget(WidgetParent):
-    def __init__(self, parameter, parent):
-        WidgetParent.__init__(self, parameter, parent)
+        self.fromUser = False
+        self.parameters = parameters
+        self.fxbox = fxbox
+        self.name = parameters[0]
         self.sizer = wx.BoxSizer(wx.VERTICAL)
-        self.slider = QLiveControlKnob(self, parameter.min, parameter.max, 
-                                       parameter.getParameterValue(), label=parameter.name,
-                                       outFunction=parameter.setParameterValue)
+        self.slider = QLiveControlKnob(self, parameters[2], parameters[3], 
+                                       parameters[1], label=parameters[0],
+                                       log=parameters[5],
+                                       outFunction=self.outputValue)
         self.sizer.Add(self.slider, 0, wx.ALL, 5)
         
         self.interpKnob = QLiveControlKnob(self,INTERPTIME_MIN, INTERPTIME_MAX, 
-                                       parameter.getInterpTime(), label=parameter.name,
-                                       outFunction=self.interpolationTimeCallback, 
+                                       0.01, label=parameters[0], log=True,
+                                       outFunction=self.outputInterpValue, 
                                        backColour = CONTROLSLIDER_BACK_COLOUR_INTERP)
-        # INTERP add another knob for interpolation time, toggle between display of value knob and interp knob
         self.sizer.Add(self.interpKnob, 0, wx.ALL, 5)
 
         self.interpKnob.Hide()
         self.SetSizer(self.sizer)
         
-    def setValue(self, value):
-        print "got called"
-        self.slider.SetValue(value)
-        
-    def setParameterInterpolationTime(self, value):
-        self.interpKnob.SetValue(value)
+    def outputValue(self, value):
+        self.fxbox.setParamValue(self.name, value, self.fromUser)
+        self.fromUser = True
 
-        
-    def interpolationTimeCallback(self, value):
-        self.parameter.setInterpTime(value)
-        
+    def setValue(self, value, propagate=False):
+        self.fromUser = False
+        self.slider.SetValue(value, propagate)
+     
+    def getValue(self):
+        return self.slider.GetValue()
+
+    def outputInterpValue(self, value):
+        self.fxbox.setInterpValue(self.name, value)
+
+    def setInterpValue(self, value, propagate=False):
+        self.interpKnob.SetValue(value, propagate)
+
+    def getInterpValue(self):
+        return self.interpKnob.GetValue()
+
     def setShowMorph(self, bool):
         if bool:
             self.slider.Hide()
@@ -54,91 +57,20 @@ class SliderWidget(WidgetParent):
         else:
             self.slider.Show()
             self.interpKnob.Hide()
-            
         self.Layout()
-        
-        
-class PathWidget(WidgetParent):
-    def __init__(self, parameter, parent):
-        WidgetParent.__init__(self, parameter, parent)
-
-        self.callback = parameter.setValue
-                
-        self.sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.fbb = filebrowse.FileBrowseButton(self, -1, labelText="Path", 
-                                               size=(400,-1), fileMode=wx.OPEN, 
-                                               fileMask=AUDIO_FILE_WILDCARD,
-                                               initialValue=parameter.getValue(),
-                                               changeCallback=self.pathCallback)
-        self.fbb.SetBackgroundColour(BACKGROUND_COLOUR)
-        
-        self.sizer.Add(self.fbb, 0, wx.EXPAND|wx.ALL, 5)
-        self.SetSizer(self.sizer)
-
-    def pathCallback(self, evt):
-        path = evt.GetString()
-        if os.path.isfile(path):
-            self.callback(path)
-
-    def setValue(self, value):
-        self.fbb.SetValue(value, callBack=1)
-               
-class ButtonWidget(WidgetParent):
-    def __init__(self, parameter, parent):
-        WidgetParent.__init__(self, parameter, parent)
-
-        self.callback = parameter.setValue
-                
-        self.sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.openButton = wx.Button(self, label = parameter.name)
-        self.openButton.Bind(wx.EVT_BUTTON, self.buttonEvent)
-
-        self.sizer.Add(self.openButton, 0, wx.EXPAND | wx.ALL, 5)
-        self.SetSizer(self.sizer)
-         
-    def buttonEvent(self, event):
-        self.callback(1)
-        
-    def setValue(self, value):
-        pass        
-  
-class ToggleWidget(WidgetParent):
-    def __init__(self, parameter, parent):
-        WidgetParent.__init__(self, parameter, parent)
-
-        self.callback = parameter.setValue
-        
-        self.sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.button = wx.ToggleButton(self, label=parameter.name)
-        self.button.Bind(wx.EVT_TOGGLEBUTTON, self.buttonEvent)
-
-        self.setValue(parameter.getValue())
-
-        self.sizer.Add(self.button, 0, wx.EXPAND | wx.ALL, 5)
-        self.SetSizer(self.sizer)
-         
-    def buttonEvent(self, event):
-        self.callback(self.button.GetValue())
-        
-    def setValue(self, value):
-        self.button.SetValue(value)
-               
-def WidgetCreator(type):
-    dict = {}
-    dict["slider"] = SliderWidget
-    dict["path"] = PathWidget 
-    dict["button"] = ButtonWidget  
-    dict["toggle"] = ToggleWidget
-    return dict[type]  
 
 class FxSlidersView(wx.Frame):
     """
     take the audioprocess object (FxParent) and shows all that should be controlled 
     """
-    def __init__(self, parent, manager, audioProcess):
-        wx.Frame.__init__(self, parent, style=wx.DEFAULT_FRAME_STYLE|wx.FRAME_FLOAT_ON_PARENT)
+    def __init__(self, parent, fxbox, parameters):
+        style = wx.DEFAULT_FRAME_STYLE | wx.FRAME_FLOAT_ON_PARENT
+        wx.Frame.__init__(self, parent, style=style)
         self.parent = parent
-        self.manager = manager
+        self.fxbox = fxbox
+        self.parameters = parameters
+        self.last_enable = 1
+
         self.menuBar = wx.MenuBar()
 
         menu1 = wx.Menu()
@@ -157,15 +89,10 @@ class FxSlidersView(wx.Frame):
         
         self.Bind(wx.EVT_MENU, self.onTabulate, id=tabId)
         self.Bind(wx.EVT_MENU, self.onMoveCue, id=self.prevId, id2=self.nextId)
-
-        self.audio = audioProcess
-        self.parameters = audioProcess.parameters
         
         self.panel = wx.Panel(self)
         self.panel.SetBackgroundColour(BACKGROUND_COLOUR)
-        
-        # INTERP add button for setInterpTime mode, to show only interpKnobs
-        
+
         self.sizer = wx.BoxSizer(wx.VERTICAL)
         self.headSizer = wx.BoxSizer(wx.HORIZONTAL)
         self.knobSizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -190,27 +117,14 @@ class FxSlidersView(wx.Frame):
 
         ##init CTRLS
         self.widgets = []
-        for param in self.parameters:
-            if param.type == "slider":
-                slider = WidgetCreator(param.type)(param, self.panel)
-                self.widgets.append(slider)
-                self.knobSizer.Add(slider, 0, wx.EXPAND | wx.ALL, 2)
-            elif param.type == "path":
-                path = WidgetCreator(param.type)(param, self.panel)
-                self.widgets.append(path)
-                self.sizer.Add(path, 0, wx.EXPAND | wx.ALL, 2)
-            elif param.type == "button":
-                butt = WidgetCreator(param.type)(param, self.panel)
-                self.widgets.append(butt)
-                self.buttonSizer.Add(butt, 0, wx.EXPAND | wx.ALL, 2)
-            elif param.type == "toggle":
-                butt = WidgetCreator(param.type)(param, self.panel)
-                self.widgets.append(butt)
-                self.buttonSizer.Add(butt, 0, wx.EXPAND | wx.ALL, 2)
+        for param in self.parameters["ctrls"]:
+            slider = SliderWidget(self.panel, param, fxbox)
+            self.widgets.append(slider)
+            self.knobSizer.Add(slider, 0, wx.EXPAND | wx.ALL, 2)
 
         self.sizer.Add(self.buttonSizer, 0, wx.EXPAND)
         self.panel.SetSizer(self.sizer)
-        self.SetTitle(self.audio.name)
+        self.SetTitle(self.fxbox.name)
 
         frameSizer = wx.BoxSizer(wx.HORIZONTAL)
         frameSizer.Add(self.panel, 1, wx.EXPAND)
@@ -218,9 +132,7 @@ class FxSlidersView(wx.Frame):
         self.SetMinSize(self.GetSize())
     
         self.Bind(wx.EVT_CLOSE, self.onClose)
-        
-        self.Show()
-    
+
     def onTabulate(self, evt):
         QLiveLib.getVar("FxTracks").setSelectedTrack()
 
@@ -241,40 +153,17 @@ class FxSlidersView(wx.Frame):
                 widget.setShowMorph(self.interpButton.GetValue())
 
     def enableFx(self, evt):
-        self.audio.setEnable(evt.GetInt())
+        self.fxbox.setEnable(evt.GetInt(), fromUser=True)
         QLiveLib.getVar("FxTracks").drawAndRefresh()
-            
-    def refresh(self):
-        for i, param in enumerate(self.parameters):
-            if param.type == "slider":
-                self.widgets[i].setValue(param.getParameterValue())
-                self.widgets[i].setParameterInterpolationTime(param.getInterpTime())
 
-            else:
-                self.widgets[i].setValue(param.getValue())
+    def setEnableState(self, x):
+        self.enable.SetValue(x)
+        if x != self.last_enable:
+            self.last_enable = x
+            QLiveLib.getVar("FxTracks").drawAndRefresh()
+
+    def getWidgets(self):
+        return self.widgets
                 
     def onClose(self, evt):
-        index = self.manager.openViews.index(self)
-        self.manager.openViews.pop(index)
-        self.Destroy()
-
-class FxViewManager(object):
-    def __init__(self, parent):
-        self.parent = parent
-        self.openViews = []
-        
-    def openViewForAudioProcess(self, audioProcess):
-        for view in self.openViews:
-            if view.audio == audioProcess:
-                view.Raise()
-                return
-        view = FxSlidersView(self.parent, self, audioProcess)
-        self.openViews.append(view)
-        
-    def refresh(self):
-        for view in self.openViews:
-            view.refresh()
-
-    def closeAll(self):
-        for view in self.openViews:
-            view.Destroy()
+        self.Hide()

@@ -155,7 +155,6 @@ class MainWindow(wx.Frame):
                 self.loadFile(filepath)
         else:
             self.loadFile(NEW_FILE_PATH)
-
         dlg.Destroy()
         self.Show()
 
@@ -183,7 +182,7 @@ class MainWindow(wx.Frame):
         os.mkdir(os.path.join(dir, fld, "bounce"))
         flpath = os.path.join(dir, fld, fld+".qlp")
         shutil.copy(NEW_FILE_PATH, flpath)
-        self.loadFile(flpath)
+        #self.loadFile(flpath)
 
     def getCurrentState(self):
         dictSave = {}
@@ -209,7 +208,7 @@ class MainWindow(wx.Frame):
         if magicline != QLIVE_MAGIC_LINE:
             print "The file loaded is not a valid QLive file."
             return
-        self.tracks.fxsView.closeAll()
+        self.tracks.close()
         execfile(path, globals())
         # QLiveLib.PRINT("opening: ", dictSave)
         if path == NEW_FILE_PATH:
@@ -341,5 +340,5 @@ class MainWindow(wx.Frame):
         if self.audioServer.isBooted():
             self.audioServer.shutdown()
             time.sleep(0.25)
-        self.tracks.fxsView.closeAll()
+        self.tracks.close()
         self.Destroy()

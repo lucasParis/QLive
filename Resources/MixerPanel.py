@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 import wx
-from pyolib._wxwidgets import BACKGROUND_COLOUR, VuMeter
+from pyolib._wxwidgets import BACKGROUND_COLOUR
 from Widgets import MeterControlSlider
 from AudioMixer import *
 from constants import *
@@ -13,7 +13,7 @@ class QLiveControlSlider(MeterControlSlider):
                  powoftwo=False, backColour=None, orient=wx.HORIZONTAL, 
                  linkedObject=None):
         MeterControlSlider.__init__(self, parent, minvalue, maxvalue, init, pos, 
-                               size, self.localOutFunction, True, backColour)
+                               size, self.localOutFunction, False, backColour)
         self.channelobject = None
         self.midiscanning = False
         self.linkedObject = None
@@ -24,6 +24,7 @@ class QLiveControlSlider(MeterControlSlider):
     def localOutFunction(self, value):
         if self.linkedObject:
             self.linkedObject.SetValue(value)
+        value = pow(10.0, value * 0.05)
         self.externalOutFunction(value)
 
     def setLinkedObject(self, obj):

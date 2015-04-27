@@ -9,5 +9,6 @@ QLiveVariables["AudioMixer"] = None
 QLiveVariables["AudioServer"] = None
 QLiveVariables["MixerPanel"] = None
 QLiveVariables["Soundfiles"] = None
+QLiveVariables["FxViews"] = []
 
 QLiveVariables["CanProcessCueKeys"] = True

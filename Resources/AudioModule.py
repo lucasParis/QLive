@@ -10,15 +10,13 @@ import QLiveLib
 # possible types: slider, choice box, path selection
 class ParameterParent:
     def __init__(self, name="empty"):
-        # What is the difference between name and type?
         self.name = name
-        self.type = "slider"
 
 class SliderParameter(ParameterParent, PyoObject):
+    TYPE = "slider"
     def __init__(self, name="empty", value=0, min=0, max=1, unit="hz", exp=1):
         ParameterParent.__init__(self, name=name)
         PyoObject.__init__(self)
-        self.type = "slider"
         self.min = min
         self.max = max
         self.unit = unit
@@ -44,7 +42,7 @@ class SliderParameter(ParameterParent, PyoObject):
         return self.value
 
     def setParameterValue(self, value):
-        if not self.call == None:
+        if self.call is not None:
             self.call.stop()
         time = self.audioValue.time
         self.audioValue.time = 0.01
@@ -57,75 +55,17 @@ class SliderParameter(ParameterParent, PyoObject):
         print "after"
         self.audioValue.time = self.time
 
-        
     def getInterpTime(self):
         return self.audioValue.time
         
     def setInterpTime(self, value):
         self.audioValue.time = value
-        
-class ButtonParameter(ParameterParent):
-    def __init__(self, name="empty"):
-        ParameterParent.__init__(self, name=name)
-        self.type = "button"
-        self.callback = None
-        self.path = "" # Is there really a path in the button widget?
-
-    def setCallback(self, function):
-        self.callback = function
-        
-    def setValue(self, value):
-        self.path = value
-        if self.callback != None:
-            self.callback()
-
-    def getValue(self):
-        return self.path
-
-class ToggleParameter(ParameterParent):
-    def __init__(self, name="empty"):
-        ParameterParent.__init__(self, name=name)
-        self.type = "toggle"
-        self.value = 0
-        self.callback = None
-
-    def setCallback(self, function):
-        self.callback = function
-        
-    def setValue(self, value):
-        self.value = value
-        if self.callback != None:
-            self.callback(value)
-
-    def getValue(self):
-        return self.value
-        
-class PathParameter(ParameterParent):
-    def __init__(self, name="empty"):
-        ParameterParent.__init__(self, name=name)
-        self.type = "path"
-        self.path = ""
-        self.callback = None
-
-    def setCallback(self, function):
-        self.callback = function
-        
-    def setValue(self, value):
-        self.path = value
-        if self.callback != None:
-            self.callback(self.path)
-
-    def getValue(self):
-        return self.path
 
 ######## Parent class for fxs and input boxes ########
 class AudioModule(object):
     name = "empty"
     def __init__(self):
-        self.name = "empty"
         self.parameters = []
-        self.cues = []
-        self.currentCue = 0
         self.enable = True
 
         self.input = Sig([0] * NUM_CHNLS)
@@ -164,58 +104,6 @@ class AudioModule(object):
     def getOutput(self):
         return self.output
 
-    def getSaveDict(self):
-        if len(self.cues) <= self.currentCue:
-            self.appendCurrentState()
-        else:
-            self.saveCurrentState(self.currentCue)
-        dict = {'values': self.cues}
-        return dict
-        
-    def setSaveDict(self, saveDict):
-        self.cues = saveDict['values']
-        self.currentCue = 0
-        self.loadingCurrentCue()
-
-    def saveCurrentState(self, cue):
-        self.cues[cue] = [param.getValue() for param in self.parameters]
-
-    def appendCurrentState(self):
-        l = [param.getValue() for param in self.parameters]
-        self.cues.append(l)
-
-    def loadingCurrentCue(self):
-        for i, param in enumerate(self.parameters):
-            param.setValue(self.cues[self.currentCue][i])
-        
-    def cueEvent(self, eventDict):
-        if eventDict["type"] == 'newCue':
-            # save current state
-            if len(self.cues) == 0:
-                self.appendCurrentState()
-            else:
-                self.saveCurrentState(self.currentCue)
-            # append a copy of the current state
-            self.appendCurrentState()
-            self.currentCue = eventDict["totalCues"] - 1
-        elif eventDict["type"] == 'cueSelect':
-            # save current state
-            self.saveCurrentState(self.currentCue)
-            # load the selected cue
-            self.currentCue = eventDict["selectedCue"]
-            self.loadingCurrentCue()
-        elif eventDict["type"] == 'deleteCue':
-            # remove the current cue
-            self.cues.pop(eventDict["deletedCue"])
-            # load the new selected cue
-            self.currentCue = eventDict["currentCue"]
-            self.loadingCurrentCue()
-
-    def initCues(self, numberOfCues, currentCue):
-        for i in range(numberOfCues):
-            l = [param.getValue() for param in self.parameters]
-            self.cues.append(l)
-        self.currentCue = currentCue
 
 ######## Available effect modules ########
 class FxNone(AudioModule):
@@ -442,83 +330,4 @@ class InputIn(AudioModule):
         self.dbValue = DBToA(self.ctrlGain)
         self.amp = Sig(self.input, mul = self.dbValue)
         self.setOutput(self.amp)
-
-class Soundfile(AudioModule):
-    name = "Soundfile"
-    def __init__(self):
-        AudioModule.__init__(self)
-        self.removeDryWet()
-        self.setName("Soundfile")
-                
-        #ctrls
-        self.path = PathParameter(name = "path")
-        self.addParameter(self.path)
-        
-        self.speed = SliderParameter(name="speed", value=1, min=0.25, max=4, unit="")
-        self.addParameter(self.speed)
-        
-        self.ctrlGain = SliderParameter(name="gain", value=0, min=-90, max=24, 
-                                        unit="db", exp=1)
-        self.addParameter(self.ctrlGain)
-
-        self.playButton = ToggleParameter(name="play")
-        self.addParameter(self.playButton)
-
-        self.loopButton = ToggleParameter(name = "loop")
-        self.addParameter(self.loopButton)
-
-        #audio
-        filepath = os.path.join(SOUNDS_PATH, "silence.wav")
-        self.sfPlayer = SfPlayer(filepath, speed=self.speed, loop=False, 
-                                 offset=0, interp=2, mul=1, add=0).stop()
-        self.path.setCallback(self.loadPath)
-        self.playButton.setCallback(self.setPlay)
-        self.loopButton.setCallback(self.setLoop)
-
-        self.dbValue = DBToA(self.ctrlGain)
-        self.amp = Sig(self.sfPlayer, mul = self.dbValue)
-        self.setOutput(self.amp)
-
-    def loadPath(self, path):
-        if path:
-            self.sfPlayer.setPath(path)
-
-    def setPlay(self, state):
-        if state:
-            self.sfPlayer.play()
-        else:
-            self.sfPlayer.stop()
-
-    def setLoop(self, onOff):
-        self.sfPlayer.setLoop(onOff)
-
-######## Module Creators ########
-class Creator:
-    def buildNames(self):
-        self.names = [cls.name for cls in self.classes]
-
-    def getNames(self):
-        return self.names
-        
-    def createByName(self, name):
-        if name in self.names:
-            index = self.names.index(name)
-            return self.classes[index]()
-
-    def create(self, index):
-        if index < len(self.classes):
-            return self.classes[index]()
-    
-class FxCreator(Creator):
-    def __init__(self):
-        self.classes = [FxNone, FxLowpass, FxHighpass, FxFreeVerb, FxStereoVerb,
-                        FxDisto, FxDelay, FxCompressor, FxFreqShift, FxHarmonizer,
-                        FxMonoOut, FxStereoOut]
-        self.buildNames()
-        
-class InputCreator(Creator):
-    def __init__(self):
-        self.classes = [InputIn, Soundfile]
-        self.buildNames()
-                
         

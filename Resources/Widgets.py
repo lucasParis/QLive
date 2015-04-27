@@ -1,6 +1,6 @@
 import wx, math
 import wx.lib.stattext as stattext
-from pyolib._wxwidgets import ControlSlider, BACKGROUND_COLOUR
+from pyolib._wxwidgets import BACKGROUND_COLOUR
 from AudioMixer import *
 from constants import *
 
@@ -106,7 +106,7 @@ class QLiveControlKnob(wx.Panel):
     def getRange(self):
         return [self.minvalue, self.maxvalue]
 
-    def SetValue(self, value):
+    def SetValue(self, value, propagate=False):
         value = clamp(value, self.minvalue, self.maxvalue)
         if self.log:
             t = toLog(value, self.minvalue, self.maxvalue)
@@ -117,6 +117,9 @@ class QLiveControlKnob(wx.Panel):
         if self.integer:
             self.value = int(self.value)
         self.selected = False
+        if propagate:
+            if self.outFunction:
+                self.outFunction(self.GetValue())
         wx.CallAfter(self.Refresh)
 
     def GetValue(self):

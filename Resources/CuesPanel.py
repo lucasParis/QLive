@@ -6,6 +6,25 @@ from constants import *
 import QLiveLib
 from Widgets import TransportButtons, CueButton
 
+class CueEvent:
+    def __init__(self, type, current, old, total):
+        self.type = type
+        self.current = current
+        self.old = old
+        self.total = total
+
+    def getType(self):
+        return self.type
+
+    def getCurrent(self):
+        return self.current
+
+    def getOld(self):
+        return self.old
+
+    def getTotal(self):
+        return self.total
+
 class ControlPanel(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent, size=(95, -1), style=wx.SUNKEN_BORDER)
@@ -82,17 +101,18 @@ class CuesPanel(scrolled.ScrolledPanel):
         self.mainSizer.Add(but, 0, wx.EXPAND|wx.TOP|wx.LEFT|wx.RIGHT, 5)
         self.cueButtons.append(but)
         self.setSelectedCue(number)
-        
-    def onCueSelection(self, button):
-        if self.setSelectedCue(button.getNumber()):
-            self.sendCueEvent()
 
-    def sendCueEvent(self):
+    def sendCueEvent(self, evt):
         if QLiveLib.getVar("MainWindow") != None:
-            dictEvent = {"type": "cueSelect", 
-                         "selectedCue": self.currentCue}
-            QLiveLib.getVar("FxTracks").cueEvent(dictEvent)
-            QLiveLib.getVar("Soundfiles").cueEvent(dictEvent)
+            QLiveLib.getVar("FxTracks").cueEvent(evt)
+            QLiveLib.getVar("Soundfiles").cueEvent(evt)
+
+    def onCueSelection(self, button):
+        old = self.currentCue
+        if self.setSelectedCue(button.getNumber()):
+            evt = CueEvent(type=CUE_TYPE_SELECT, current=self.currentCue, 
+                           old=old, total=len(self.cueButtons))
+            self.sendCueEvent(evt)
 
     def onDelCue(self):
         button = self.cueButtons.pop(self.currentCue)
@@ -107,23 +127,17 @@ class CuesPanel(scrolled.ScrolledPanel):
             selection = self.currentCue - 1
         else:
             selection = 0
-        self.setSelectedCue(selection)
-        if QLiveLib.getVar("MainWindow") != None:
-            dictEvent = {"type": "deleteCue", 
-                         "currentCue": self.currentCue,
-                         "deletedCue" : deletedCue,
-                         "totalCues": len(self.cueButtons)}
-            QLiveLib.getVar("MainWindow").tracks.cueEvent(dictEvent)
-            QLiveLib.getVar("Soundfiles").cueEvent(dictEvent)
+        if self.setSelectedCue(selection):
+            evt = CueEvent(type=CUE_TYPE_DELETE, current=self.currentCue, 
+                           old=deletedCue, total=len(self.cueButtons))
+            self.sendCueEvent(evt)
 
     def onNewCue(self):
+        old = self.currentCue
         self.appendCueButton()
-        if QLiveLib.getVar("MainWindow") != None:
-            dictEvent = {"type": "newCue", 
-                         "currentCue": self.currentCue, 
-                         "totalCues": len(self.cueButtons)}
-            QLiveLib.getVar("MainWindow").tracks.cueEvent(dictEvent)
-            QLiveLib.getVar("Soundfiles").cueEvent(dictEvent)
+        evt = CueEvent(type=CUE_TYPE_NEW, current=self.currentCue, 
+                       old=old, total=len(self.cueButtons))
+        self.sendCueEvent(evt)
         
     def getNumberOfCues(self):
         return len(self.cueButtons)
@@ -141,14 +155,3 @@ class CuesPanel(scrolled.ScrolledPanel):
         dict = {}
         dict["numberOfCues"] = len(self.cueButtons)
         return dict
-        
-if __name__ == "__main__":
-    class TestWindow(wx.Frame):
-        def __init__(self):
-            wx.Frame.__init__(self, None)
-            self.cuesPanel = CuesPanel(self)
-            self.cuesPanel.parent = None
-    app = wx.App()
-    frame = TestWindow()
-    frame.Show()
-    app.MainLoop()
