@@ -613,6 +613,8 @@ class SoundFilePanel(wx.Panel):
             self.loadCue(evt.getCurrent())
         elif tp == CUE_TYPE_NEW:
             self.addCue(evt.getCurrent())
+        elif tp == CUE_TYPE_SAVE:
+            self.saveCue()
 
     def setSaveState(self, lst):
         for dict in lst:

@@ -59,15 +59,21 @@ class SoundFilePlayer:
         # handle ID_COL_DIRECTOUT and ID_COL_CHANNEL
 
 class BaseAudioObject:
-    def __init__(self, ctrls):
-        self.chnls = 2
-        for ctrl in ctrls:
+    def __init__(self, chnls, ctrls, values, interps):
+        self.chnls = chnls
+        for i, ctrl in enumerate(ctrls):
             name = ctrl[0]
-            if name == "gain":
-                val = pow(10, ctrl[1] * 0.05)
-            else:
+            if values is None:
                 val = ctrl[1]
-            setattr(self, name, SigTo(val, time=0.01, init=val))
+            else:
+                val = values[i]
+            if interps is None:
+                inter = 0.01
+            else:
+                inter = interps[i]
+            if name == "gain":
+                val = pow(10, val * 0.05)
+            setattr(self, name, SigTo(val, time=inter, init=val))
 
         self.input = Sig([0] * self.chnls)
 
@@ -81,88 +87,88 @@ class BaseAudioObject:
         self.output.value = [self.input, self.process][x]
 
 class AudioNone(BaseAudioObject):
-    def __init__(self, ctrls):
-        BaseAudioObject.__init__(self, ctrls)
+    def __init__(self, chnls, ctrls, values, interps):
+        BaseAudioObject.__init__(self, chnls, ctrls, values, interps)
         self.output = Sig(self.input)
 
     def setEnable(self, x):
         self.output.value = [[0.0] * self.chnls, self.input][x]
     
 class AudioIn(BaseAudioObject):
-    def __init__(self, ctrls):
-        BaseAudioObject.__init__(self, ctrls)
+    def __init__(self, chnls, ctrls, values, interps):
+        BaseAudioObject.__init__(self, chnls, ctrls, values, interps)
         self.output = Sig(self.input, mul=self.gain)
 
     def setEnable(self, x):
         self.output.value = [[0.0] * self.chnls, self.input][x]
 
 class FxLowpass(BaseAudioObject):
-    def __init__(self, ctrls):
-        BaseAudioObject.__init__(self, ctrls)
+    def __init__(self, chnls, ctrls, values, interps):
+        BaseAudioObject.__init__(self, chnls, ctrls, values, interps)
         self.filter = Biquad(self.input, freq=self.freq, q=self.Q, mul=self.gain)
         self.process = Interp(self.input, self.filter, self.dryWet)
         self.output = Sig(self.process)
 
 class FxHighpass(BaseAudioObject):
-    def __init__(self, ctrls):
-        BaseAudioObject.__init__(self, ctrls)        
+    def __init__(self, chnls, ctrls, values, interps):
+        BaseAudioObject.__init__(self, chnls, ctrls, values, interps)        
         self.filter = Biquad(self.input, freq=self.freq, q=self.Q, type=1, mul=self.gain)
         self.process = Interp(self.input, self.filter, self.dryWet)
         self.output = Sig(self.process)
 
 class FxFreeverb(BaseAudioObject):
-    def __init__(self, ctrls):
-        BaseAudioObject.__init__(self, ctrls)        
+    def __init__(self, chnls, ctrls, values, interps):
+        BaseAudioObject.__init__(self, chnls, ctrls, values, interps)        
         self.reverb = Freeverb(self.input, self.size, self.damp, 1, mul=self.gain)
         self.process = Interp(self.input, self.reverb, self.dryWet)
         self.output = Sig(self.process)
 
 class FxStereoVerb(BaseAudioObject):
-    def __init__(self, ctrls):
-        BaseAudioObject.__init__(self, ctrls)        
+    def __init__(self, chnls, ctrls, values, interps):
+        BaseAudioObject.__init__(self, chnls, ctrls, values, interps)        
         self.reverb = STRev(self.input, self.pan, self.revtime, self.cutoff, 1, mul=self.gain)
         self.process = Interp(self.input, self.reverb, self.dryWet)
         self.output = Sig(self.process)
 
 class FxDisto(BaseAudioObject):
-    def __init__(self, ctrls):
-        BaseAudioObject.__init__(self, ctrls)        
+    def __init__(self, chnls, ctrls, values, interps):
+        BaseAudioObject.__init__(self, chnls, ctrls, values, interps)        
         self.disto = Disto(self.input, self.drive, self.slope, mul=self.gain)
         self.process = Interp(self.input, self.disto, self.dryWet)
         self.output = Sig(self.process)
 
 class FxDelay(BaseAudioObject):
-    def __init__(self, ctrls):
-        BaseAudioObject.__init__(self, ctrls)        
+    def __init__(self, chnls, ctrls, values, interps):
+        BaseAudioObject.__init__(self, chnls, ctrls, values, interps)        
         self.delay = Delay(self.input, self.deltime, self.feed, 5, mul=self.gain)
         self.process = Interp(self.input, self.delay, self.dryWet)
         self.output = Sig(self.process)
 
 class FxCompressor(BaseAudioObject):
-    def __init__(self, ctrls):
-        BaseAudioObject.__init__(self, ctrls)        
+    def __init__(self, chnls, ctrls, values, interps):
+        BaseAudioObject.__init__(self, chnls, ctrls, values, interps)        
         self.comp = Compress(self.input, self.thresh, self.ratio, self.attack,
                              self.decay, 5, knee=0.5, mul=self.gain)
         self.process = Interp(self.input, self.comp, self.dryWet)
         self.output = Sig(self.process)
 
 class FxFreqShift(BaseAudioObject):
-    def __init__(self, ctrls):
-        BaseAudioObject.__init__(self, ctrls)        
+    def __init__(self, chnls, ctrls, values, interps):
+        BaseAudioObject.__init__(self, chnls, ctrls, values, interps)        
         self.shifter = FreqShift(self.input, self.shift, mul=self.gain)
         self.process = Interp(self.input, self.shifter, self.dryWet)
         self.output = Sig(self.process)
 
 class FxHarmonizer(BaseAudioObject):
-    def __init__(self, ctrls):
-        BaseAudioObject.__init__(self, ctrls)        
+    def __init__(self, chnls, ctrls, values, interps):
+        BaseAudioObject.__init__(self, chnls, ctrls, values, interps)        
         self.harmon = Harmonizer(self.input, self.transpo, self.feed, mul=self.gain)
         self.process = Interp(self.input, self.harmon, self.dryWet)
         self.output = Sig(self.process)
 
-class FxStereoOut(BaseAudioObject):
-    def __init__(self, ctrls):
-        BaseAudioObject.__init__(self, ctrls)
+class FxAudioOut(BaseAudioObject):
+    def __init__(self, chnls, ctrls, values, interps):
+        BaseAudioObject.__init__(self, chnls, ctrls, values, interps)
         self.process = self.input
         self.output = Sig(self.process, mul=self.gain)
 
@@ -170,7 +176,7 @@ AUDIO_OBJECTS = {"None": AudioNone, "AudioIn": AudioIn, "Lowpass": FxLowpass,
                 "Highpass": FxHighpass, "Freeverb": FxFreeverb, 
                 "StereoVerb": FxStereoVerb, "Disto": FxDisto, "Delay": FxDelay, 
                 "Compressor": FxCompressor, "FreqShift": FxFreqShift,
-                "Harmonizer": FxHarmonizer, "StereoOut": FxStereoOut}
+                "Harmonizer": FxHarmonizer, "AudioOut": FxAudioOut}
 
 class AudioServer:
     def __init__(self):
@@ -194,18 +200,29 @@ class AudioServer:
     def createBoxObjects(self):
         tracks = QLiveLib.getVar("FxTracks").getTracks()
         for track in tracks:
+            chnls = 1
             for but in track.getButtonInputs():
                 name = but.name
                 if not name: name = "None"
+                if name == "AudioIn":
+                    inchnls = but.getInChannels()
+                    numchnls = inchnls.count(1)
+                    ismulti = but.getIsMultiChannels()
+                    if ismulti:
+                        chnls = max(chnls, numchnls)
+                    else:
+                        chnls = 1
                 ctrls = INPUT_DICT[name]["ctrls"]
-                obj = AUDIO_OBJECTS[name](ctrls)
+                obj = AUDIO_OBJECTS[name](chnls, ctrls, but.getCurrentValues(),
+                                          but.getCurrentInterps())
                 but.setAudioRef(obj)
                 self.audioObjects.append(obj)
             for but in track.getButtonFxs():
                 name = but.name
                 if not name: name = "None"
                 ctrls = FX_DICT[name]["ctrls"]
-                obj = AUDIO_OBJECTS[name](ctrls)
+                obj = AUDIO_OBJECTS[name](chnls, ctrls, but.getCurrentValues(),
+                                          but.getCurrentInterps())
                 but.setAudioRef(obj)
                 self.audioObjects.append(obj)
             
@@ -229,6 +246,7 @@ class AudioServer:
             self.createBoxObjects()
             QLiveLib.getVar("FxTracks").start()
             self.server.start()
+            #QLiveLib.getVar("CuesPanel").loadCurrentCue()
         else:
             if self.recording:
                 self.recording = False
@@ -238,6 +256,7 @@ class AudioServer:
             self.resetObjectRefs()
             self.soundfiles = []
             self.audioObjects = []
+            QLiveLib.getVar("CuesPanel").onSaveCue()
 
     def record(self, state):
         if state:

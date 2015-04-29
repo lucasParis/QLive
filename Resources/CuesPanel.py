@@ -107,13 +107,18 @@ class CuesPanel(scrolled.ScrolledPanel):
             QLiveLib.getVar("FxTracks").cueEvent(evt)
             QLiveLib.getVar("Soundfiles").cueEvent(evt)
 
-    def onCueSelection(self, button):
+    def onCueSelection(self, x):
         old = self.currentCue
-        if self.setSelectedCue(button.getNumber()):
+        if self.setSelectedCue(x):
             evt = CueEvent(type=CUE_TYPE_SELECT, current=self.currentCue, 
                            old=old, total=len(self.cueButtons))
             self.sendCueEvent(evt)
 
+    def loadCurrentCue(self):
+            evt = CueEvent(type=CUE_TYPE_SELECT, current=self.currentCue, 
+                           old=None, total=len(self.cueButtons))
+            self.sendCueEvent(evt)
+        
     def onDelCue(self):
         button = self.cueButtons.pop(self.currentCue)
         button.Destroy()
@@ -132,6 +137,11 @@ class CuesPanel(scrolled.ScrolledPanel):
                            old=deletedCue, total=len(self.cueButtons))
             self.sendCueEvent(evt)
 
+    def onSaveCue(self):
+        evt = CueEvent(type=CUE_TYPE_SAVE, current=self.currentCue, 
+                       old=None, total=len(self.cueButtons))
+        self.sendCueEvent(evt)
+        
     def onNewCue(self):
         old = self.currentCue
         self.appendCueButton()

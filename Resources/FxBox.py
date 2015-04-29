@@ -22,7 +22,7 @@ class BaseFxBox(object):
             self.audioRef = None
         else:
             self.audioRef = weakref.ref(obj)
-
+        
     def getEnable(self):
         return self.enable
 
@@ -59,6 +59,18 @@ class BaseFxBox(object):
         if not fromUser and self.view is not None:
             self.view.setEnableState(x)
         
+    def checkInChannel(self, which, state):
+        self.inChannels[which] = state
+
+    def getInChannels(self):
+        return self.inChannels
+
+    def setIsMultiChannels(self, state):
+        self.isMultiChannels = state
+
+    def getIsMultiChannels(self):
+        return self.isMultiChannels
+
     def setId(self, id):
         self.id = id
         
@@ -107,18 +119,34 @@ class BaseFxBox(object):
             widgets = self.view.getWidgets()
             params = [widget.getValue() for widget in widgets]
             inters = [widget.getInterpValue() for widget in widgets]
-            return (params, inters, self.enable)
+            paraDict = {"values": params, 
+                        "interps": inters, 
+                        "enable": self.enable} 
+            return paraDict
         else:
             return None
 
     def setParams(self, params):
-        if self.view is not None:
+        if self.view is not None and params is not None:
             widgets = self.view.getWidgets()
+            values = params["values"]
+            inters = params["interps"]
             for i, widget in enumerate(widgets):
-                widget.setInterpValue(params[1][i], propagate=True)
-                widget.setValue(params[0][i], propagate=True)
-            if len(params) > 2:
-                self.setEnable(params[2])
+                widget.setInterpValue(inters[i], propagate=True)
+                widget.setValue(values[i], propagate=True)
+            self.setEnable(params["enable"])
+
+    def getCurrentValues(self):
+        if self.cues[self.currentCue] is not None:
+            return self.cues[self.currentCue]["values"]
+        else:
+            return None
+
+    def getCurrentInterps(self):
+        if self.cues[self.currentCue] is not None:
+            return self.cues[self.currentCue]["interps"]
+        else:
+            return None
 
     def saveCue(self):
         self.cues[self.currentCue] = self.getParams()
@@ -160,18 +188,29 @@ class BaseFxBox(object):
         elif tp == CUE_TYPE_NEW:
             self.saveCue()
             self.addCue(evt.getCurrent())
+        elif tp == CUE_TYPE_SAVE:
+            self.saveCue()
 
     def getSaveDict(self):
         self.saveCue()
-        return {'name': self.name,
+        dict = {'name': self.name,
                 'id': self.id,
                 'cues': self.cues}
-
+        if hasattr(self, "inChannels"):
+            dict["inChannels"] = self.inChannels
+            dict["isMultiChannels"] = self.isMultiChannels
+        return dict
+            
     def setSaveDict(self, saveDict):
         self.name = saveDict["name"]
         self.id = saveDict["id"]
         self.cues = saveDict["cues"]
         self.createView()
+        if self.view is not None and hasattr(self, "inChannels"):
+            self.inChannels = saveDict["inChannels"]
+            self.view.setInChannelChecks(self.inChannels)
+            self.isMultiChannels = saveDict["isMultiChannels"]
+            self.view.setIsMultiChannels(self.isMultiChannels)
         self.loadCue(0)
 
 class FxBox(BaseFxBox):
@@ -190,6 +229,8 @@ class InputBox(BaseFxBox):
         BaseFxBox.__init__(self, parent)
         self.module_dict = INPUT_DICT
         self.choices = INPUT_LIST
+        self.inChannels = [1] + [0] * (NUM_INPUTS - 1)
+        self.isMultiChannels = 0
 
     def getRect(self):
         x = 35

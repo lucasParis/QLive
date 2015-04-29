@@ -349,7 +349,7 @@ class CueButton(wx.Panel):
         wx.CallAfter(self.setNumber, number)
 
     def OnLeftDown(self, evt):
-        self.evtHandler(self)
+        self.evtHandler(self.getNumber())
 
     def OnSize(self, evt):
         self.labtext.Center()

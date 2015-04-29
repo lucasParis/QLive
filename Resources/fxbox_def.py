@@ -1,3 +1,5 @@
+from constants import *
+
 ####### BOX PROCESS DEFINITIONS ######
 
 # init parameters: name, init, min, max, unit, log (unit not used yet)
@@ -67,18 +69,19 @@ FX_DICT = { "None": {"ctrls": []},
                                         DRYWET_DEF
                                     ]
                         },
-            "StereoOut": {"ctrls":  [   GAIN_DEF
+            "AudioOut": {"ctrls":  [   GAIN_DEF
                                     ]
                         },
           }
 
 # Effects ordered names
 FX_LIST = ["None", "Lowpass", "Highpass", "Freeverb", "StereoVerb", "Disto",
-           "Delay", "Compressor", "FreqShift", "Harmonizer", "StereoOut"]
+           "Delay", "Compressor", "FreqShift", "Harmonizer", "AudioOut"]
 
 # Input defintions
 INPUT_DICT = {  "None":     {"ctrls":   []},
-                "AudioIn":  {"ctrls":   [GAIN_DEF]},
+                "AudioIn":  {"ctrls":   [GAIN_DEF],
+                             "inselect": [str(x+1) for x in range(NUM_INPUTS)]},
              }
 
 # Input ordered names

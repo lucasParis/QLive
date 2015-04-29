@@ -99,14 +99,19 @@ class FxTrack:
 
     def connectAudioMixer(self):
         audioMixer = QLiveLib.getVar("AudioMixer")
-        for but in self.buttonsInputs:
-            but.setInput([audioMixer.getInputChannel(i).getOutput() for i in range(NUM_CHNLS)])
+        for obj in self.buttonsInputs:
+            if obj.name == "AudioIn":
+                inchnls = obj.getInChannels()
+                ismulti = obj.getIsMultiChannels()
+                channels = [audioMixer.getInputChannel(i).getOutput() for i in range(NUM_INPUTS) if inchnls[i]]
+                if not ismulti:
+                    channels = sum(channels)
+                obj.setInput(channels)
         for i, obj in enumerate(self.buttonsFxs):
-            if obj.name == "MonoOut":
-                audioMixer.addToMixer(0, obj.getOutput())
-            if obj.name == "StereoOut":
-                audioMixer.addToMixer(0, obj.getOutput()[0])
-                audioMixer.addToMixer(1, obj.getOutput()[1])
+            if obj.name == "AudioOut":
+                chnls = len(obj.getOutput())
+                for j in range(chnls):
+                    audioMixer.addToMixer(j, obj.getOutput()[j])
 
     def onPaint(self, dc, buttonBitmap, disableButtonBitmap, selectedTrack):
         gc = wx.GraphicsContext_Create(dc)

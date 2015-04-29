@@ -50,6 +50,7 @@ SOUNDS_PATH = os.path.join(RESOURCES_PATH, "sounds")
 NEW_FILE_PATH = os.path.join(RESOURCES_PATH, "qlive_new_file.qlp")
 
 DEBUG = True
+LOAD_DEFAULT_FILE = False
 
 NUM_CHNLS = 2
 NUM_INPUTS = 8
@@ -64,6 +65,7 @@ LINK_STEREO_ID = 3000
 CUE_TYPE_SELECT = 0
 CUE_TYPE_NEW = 1
 CUE_TYPE_DELETE = 2
+CUE_TYPE_SAVE = 3
 
 # SoundFiles IDs and constants
 ID_COL_FILENAME = 0

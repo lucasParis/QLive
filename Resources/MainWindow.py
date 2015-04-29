@@ -154,7 +154,8 @@ class MainWindow(wx.Frame):
             else:
                 self.loadFile(filepath)
         else:
-            self.loadFile(NEW_FILE_PATH)
+            if LOAD_DEFAULT_FILE:
+                self.loadFile(NEW_FILE_PATH)
         dlg.Destroy()
         self.Show()
 
@@ -166,11 +167,9 @@ class MainWindow(wx.Frame):
             cues = QLiveLib.getVar("CuesPanel")
             current = cues.getCurrentCue()
             if evt.GetId() == self.prevId:
-                if cues.setSelectedCue(current - 1):
-                    cues.sendCueEvent()
+                cues.onCueSelection(current - 1)
             elif evt.GetId() == self.nextId:
-                if cues.setSelectedCue(current + 1):
-                    cues.sendCueEvent()
+                cues.onCueSelection(current + 1)
 
     def createProjectFolder(self, filepath):
         fil = os.path.basename(filepath)
@@ -182,7 +181,7 @@ class MainWindow(wx.Frame):
         os.mkdir(os.path.join(dir, fld, "bounce"))
         flpath = os.path.join(dir, fld, fld+".qlp")
         shutil.copy(NEW_FILE_PATH, flpath)
-        #self.loadFile(flpath)
+        self.loadFile(flpath)
 
     def getCurrentState(self):
         dictSave = {}
@@ -193,6 +192,7 @@ class MainWindow(wx.Frame):
         return dictSave
 
     def saveFile(self, path):
+        QLiveLib.getVar("CuesPanel").onSaveCue()
         dictSave = self.getCurrentState()
         self.saveState = copy.deepcopy(dictSave)
         QLiveLib.setVar("currentProject", path)
@@ -210,7 +210,6 @@ class MainWindow(wx.Frame):
             return
         self.tracks.close()
         execfile(path, globals())
-        # QLiveLib.PRINT("opening: ", dictSave)
         if path == NEW_FILE_PATH:
             QLiveLib.setVar("currentProject", "")
             QLiveLib.setVar("projectFolder", "")
@@ -219,7 +218,7 @@ class MainWindow(wx.Frame):
             QLiveLib.setVar("projectFolder", os.path.dirname(path))
             self.newRecent(path)
         self.saveState = copy.deepcopy(dictSave)
-        self.tracks.setSaveDict(self.saveState["tracks"])
+        self.tracks.setSaveState(self.saveState["tracks"])
         self.cues.setSaveDict(self.saveState["cues"])
         self.mixer.setSaveDict(self.saveState["mixer"])
         if "soundfiles" in self.saveState:

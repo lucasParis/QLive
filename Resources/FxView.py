@@ -60,9 +60,6 @@ class SliderWidget(wx.Panel):
         self.Layout()
 
 class FxSlidersView(wx.Frame):
-    """
-    take the audioprocess object (FxParent) and shows all that should be controlled 
-    """
     def __init__(self, parent, fxbox, parameters):
         style = wx.DEFAULT_FRAME_STYLE | wx.FRAME_FLOAT_ON_PARENT
         wx.Frame.__init__(self, parent, style=style)
@@ -71,58 +68,79 @@ class FxSlidersView(wx.Frame):
         self.parameters = parameters
         self.last_enable = 1
 
-        self.menuBar = wx.MenuBar()
-
-        menu1 = wx.Menu()
-        closeitem = menu1.Append(wx.ID_ANY, "Close\tCtrl+W")
-        self.Bind(wx.EVT_MENU, self.onClose, closeitem)
-        self.menuBar.Append(menu1, 'File')
-        self.SetMenuBar(self.menuBar)
-
         tabId = wx.NewId()
         self.prevId = wx.NewId()
         self.nextId = wx.NewId()
+        closeId = wx.NewId()
         accel_tbl = wx.AcceleratorTable([(wx.ACCEL_NORMAL,  wx.WXK_TAB, tabId),
                                         (wx.ACCEL_NORMAL,  wx.WXK_LEFT, self.prevId),
-                                        (wx.ACCEL_NORMAL,  wx.WXK_RIGHT, self.nextId)])
+                                        (wx.ACCEL_NORMAL,  wx.WXK_RIGHT, self.nextId),
+                                        (wx.ACCEL_CTRL, ord('W'), closeId)])
         self.SetAcceleratorTable(accel_tbl)
         
         self.Bind(wx.EVT_MENU, self.onTabulate, id=tabId)
         self.Bind(wx.EVT_MENU, self.onMoveCue, id=self.prevId, id2=self.nextId)
+        self.Bind(wx.EVT_MENU, self.onClose, id=closeId)
+        self.Bind(wx.EVT_CLOSE, self.onClose)
         
         self.panel = wx.Panel(self)
         self.panel.SetBackgroundColour(BACKGROUND_COLOUR)
 
         self.sizer = wx.BoxSizer(wx.VERTICAL)
-        self.headSizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.knobSizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.interpButton = wx.ToggleButton(self.panel, -1)
-        self.interpButton.SetLabel("Morph Time")
-        self.interpButton.Bind(wx.EVT_TOGGLEBUTTON, self.showMorphEvent)
-
-        self.headSizer.Add(self.interpButton, 0, wx.TOP|wx.LEFT, 7)
-        
-        self.headSizer.AddStretchSpacer(1)
-
+        # Head
+        headSizer = wx.BoxSizer(wx.HORIZONTAL)
+        headSizer.AddStretchSpacer(1)
         self.enable = wx.CheckBox(self.panel, -1, "Enable FX:", style=wx.ALIGN_RIGHT)
         self.enable.SetValue(1)
         self.enable.Bind(wx.EVT_CHECKBOX, self.enableFx)
-        self.headSizer.Add(self.enable, 0, wx.TOP|wx.RIGHT, 7)
+        headSizer.Add(self.enable, 0, wx.TOP|wx.RIGHT, 5)
+        self.sizer.Add(headSizer, 0, wx.EXPAND)
         
+        self.sizer.Add(wx.StaticLine(self.panel, -1), 0, wx.ALL|wx.EXPAND, 5)
+        
+        # Selection box
+        if self.parameters.has_key("inselect"):
+            self.inChannelChecks = []
+            statbox = wx.StaticBox(self.panel, -1, "Input Selections")
+            selectorSizer = wx.StaticBoxSizer(statbox, wx.HORIZONTAL)
+            labels = self.parameters["inselect"]
+            for i in range(len(labels)):
+                check = wx.CheckBox(self.panel, -1, labels[i])
+                check.Bind(wx.EVT_CHECKBOX, self.onCheckInSelect)
+                if i == 0:
+                    check.SetValue(1)
+                self.inChannelChecks.append(check)
+                selectorSizer.Add(check, 1, wx.EXPAND|wx.ALL, 5)
+            self.sizer.Add(selectorSizer, 0, wx.EXPAND|wx.LEFT|wx.RIGHT, 5)
+            
+            
+            sampleList = ["Mono Track", "Multi-Channel Track"]
+            self.chnlsButton = wx.RadioBox(self.panel, -1, "", wx.DefaultPosition,
+                                            wx.DefaultSize, sampleList, 2, 
+                                            wx.RA_SPECIFY_COLS | wx.NO_BORDER)
+            self.chnlsButton.Bind(wx.EVT_RADIOBOX, self.onChnlsRadioBox)
+            self.sizer.Add(self.chnlsButton, 0, wx.LEFT, 5)
 
-        self.sizer.Add(self.headSizer, 0, wx.EXPAND)
-        self.sizer.Add(self.knobSizer, 0, wx.EXPAND)
+            self.sizer.Add(wx.StaticLine(self.panel, -1), 0, wx.ALL|wx.EXPAND, 5)
 
-        ##init CTRLS
-        self.widgets = []
-        for param in self.parameters["ctrls"]:
-            slider = SliderWidget(self.panel, param, fxbox)
-            self.widgets.append(slider)
-            self.knobSizer.Add(slider, 0, wx.EXPAND | wx.ALL, 2)
+        # Controller box
+        if self.parameters.has_key("ctrls"):
+            knobSizer = wx.BoxSizer(wx.HORIZONTAL)
+            sampleList = ["Slider Values", "Interpolation Times"]
+            self.interpButton = wx.RadioBox(self.panel, -1, "", wx.DefaultPosition,
+                                            wx.DefaultSize, sampleList, 2, 
+                                            wx.RA_SPECIFY_COLS | wx.NO_BORDER)
+            self.interpButton.Bind(wx.EVT_RADIOBOX, self.showMorphEvent)
+            self.sizer.Add(self.interpButton, 0, wx.LEFT, 5)
 
-        self.sizer.Add(self.buttonSizer, 0, wx.EXPAND)
+            self.widgets = []
+            for param in self.parameters["ctrls"]:
+                slider = SliderWidget(self.panel, param, fxbox)
+                self.widgets.append(slider)
+                knobSizer.Add(slider, 0, wx.EXPAND|wx.LEFT|wx.RIGHT|wx.BOTTOM, 5)
+            self.sizer.Add(knobSizer, 0, wx.EXPAND)
+
         self.panel.SetSizer(self.sizer)
         self.SetTitle(self.fxbox.name)
 
@@ -130,8 +148,6 @@ class FxSlidersView(wx.Frame):
         frameSizer.Add(self.panel, 1, wx.EXPAND)
         self.SetSizerAndFit(frameSizer) 
         self.SetMinSize(self.GetSize())
-    
-        self.Bind(wx.EVT_CLOSE, self.onClose)
 
     def onTabulate(self, evt):
         QLiveLib.getVar("FxTracks").setSelectedTrack()
@@ -141,16 +157,24 @@ class FxSlidersView(wx.Frame):
             cues = QLiveLib.getVar("CuesPanel")
             current = cues.getCurrentCue()
             if evt.GetId() == self.prevId:
-                if cues.setSelectedCue(current - 1):
-                    cues.sendCueEvent()
+                cues.onCueSelection(current - 1)
             elif evt.GetId() == self.nextId:
-                if cues.setSelectedCue(current + 1):
-                    cues.sendCueEvent()
+                cues.onCueSelection(current + 1)
+
+    def setInChannelChecks(self, lst):
+        for i, check in enumerate(self.inChannelChecks):
+            check.SetValue(lst[i])
+
+    def setIsMultiChannels(self, state):
+        self.chnlsButton.SetSelection(state)
+
+    def onChnlsRadioBox(self, evt):
+        self.fxbox.setIsMultiChannels(evt.GetInt())
 
     def showMorphEvent(self, evt):
         for widget in self.widgets:
             if isinstance(widget, SliderWidget):
-                widget.setShowMorph(self.interpButton.GetValue())
+                widget.setShowMorph(evt.GetInt())
 
     def enableFx(self, evt):
         self.fxbox.setEnable(evt.GetInt(), fromUser=True)
@@ -161,6 +185,12 @@ class FxSlidersView(wx.Frame):
         if x != self.last_enable:
             self.last_enable = x
             QLiveLib.getVar("FxTracks").drawAndRefresh()
+
+    def onCheckInSelect(self, evt):
+        state = evt.GetInt()
+        obj = evt.GetEventObject()
+        which = int(obj.GetLabel()) - 1
+        self.fxbox.checkInChannel(which, state)
 
     def getWidgets(self):
         return self.widgets

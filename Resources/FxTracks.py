@@ -2,7 +2,6 @@ import wx
 from FxTrack import *
 
 # put FxBox at the clicked position
-# ScrollWindow should not scroll on arrow keys...
 
 class FxTracks(wx.ScrolledWindow):
     def __init__(self, parent):
@@ -28,10 +27,6 @@ class FxTracks(wx.ScrolledWindow):
         self.Bind(wx.EVT_LEFT_DOWN, self.leftClicked)
         self.Bind(wx.EVT_LEFT_DCLICK, self.leftDClicked)
         self.Bind(wx.EVT_RIGHT_DOWN, self.rightClicked)
-        self.Bind(wx.EVT_KEY_DOWN, self.OnKeyDown)
-
-    def OnKeyDown(self, evt):
-        evt.StopPropagation()
 
     def createTracks(self, num):
         self.tracks = []
@@ -200,13 +195,12 @@ class FxTracks(wx.ScrolledWindow):
     def getSaveDict(self):
         return [track.getSaveDict() for track in self.tracks]
 
-    def setSaveDict(self, saveDict):
-        # it's a list, not a dict
-        self.createTracks(len(saveDict))
+    def setSaveState(self, tracks):
+        self.removeAllTracks()
+        self.createTracks(len(tracks))
         for i in range(len(self.tracks)):
-            self.tracks[i].setSaveDict(saveDict[i])
+            self.tracks[i].setSaveDict(tracks[i])
         self.drawAndRefresh()
-            
         self.selectedTrack = 0
 
     def cueEvent(self, evt):
@@ -216,6 +210,11 @@ class FxTracks(wx.ScrolledWindow):
     def start(self):
         for track in self.tracks:
             track.start()
+
+    def removeAllTracks(self):
+        for track in self.tracks:
+            track.close()
+        self.tracks = []
 
     def removeTrack(self):
         self.tracks[self.selectedTrack].close()
