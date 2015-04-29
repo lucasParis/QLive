@@ -99,7 +99,7 @@ class FxSlidersView(wx.Frame):
         
         self.sizer.Add(wx.StaticLine(self.panel, -1), 0, wx.ALL|wx.EXPAND, 5)
         
-        # Selection box
+        # Selection boxes
         if self.parameters.has_key("inselect"):
             self.inChannelChecks = []
             statbox = wx.StaticBox(self.panel, -1, "Input Selections")
@@ -123,6 +123,20 @@ class FxSlidersView(wx.Frame):
             self.sizer.Add(self.chnlsButton, 0, wx.LEFT, 5)
 
             self.sizer.Add(wx.StaticLine(self.panel, -1), 0, wx.ALL|wx.EXPAND, 5)
+
+        if self.parameters.has_key("outselect"):
+            self.outChannelChecks = []
+            statbox = wx.StaticBox(self.panel, -1, "Output Selections")
+            selectorSizer = wx.StaticBoxSizer(statbox, wx.HORIZONTAL)
+            labels = self.parameters["outselect"]
+            for i in range(len(labels)):
+                check = wx.CheckBox(self.panel, -1, labels[i])
+                check.Bind(wx.EVT_CHECKBOX, self.onCheckOutSelect)
+                if i == 0:
+                    check.SetValue(1)
+                self.outChannelChecks.append(check)
+                selectorSizer.Add(check, 1, wx.EXPAND|wx.ALL, 5)
+            self.sizer.Add(selectorSizer, 0, wx.EXPAND|wx.LEFT|wx.RIGHT, 5)
 
         # Controller box
         if self.parameters.has_key("ctrls"):
@@ -171,6 +185,10 @@ class FxSlidersView(wx.Frame):
     def onChnlsRadioBox(self, evt):
         self.fxbox.setIsMultiChannels(evt.GetInt())
 
+    def setOutChannelChecks(self, lst):
+        for i, check in enumerate(self.outChannelChecks):
+            check.SetValue(lst[i])
+
     def showMorphEvent(self, evt):
         for widget in self.widgets:
             if isinstance(widget, SliderWidget):
@@ -191,6 +209,12 @@ class FxSlidersView(wx.Frame):
         obj = evt.GetEventObject()
         which = int(obj.GetLabel()) - 1
         self.fxbox.checkInChannel(which, state)
+
+    def onCheckOutSelect(self, evt):
+        state = evt.GetInt()
+        obj = evt.GetEventObject()
+        which = int(obj.GetLabel()) - 1
+        self.fxbox.checkOutChannel(which, state)
 
     def getWidgets(self):
         return self.widgets

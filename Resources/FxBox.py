@@ -71,6 +71,12 @@ class BaseFxBox(object):
     def getIsMultiChannels(self):
         return self.isMultiChannels
 
+    def checkOutChannel(self, which, state):
+        self.outChannels[which] = state
+
+    def getOutChannels(self):
+        return self.outChannels
+
     def setId(self, id):
         self.id = id
         
@@ -101,6 +107,8 @@ class BaseFxBox(object):
         
     def initModule(self, name):
         self.name = name
+        if self.name == "AudioOut":
+            self.outChannels = [1] + [0] * (NUM_OUTPUTS - 1)
         self.createView()
         currentCue = QLiveLib.getVar("CuesPanel").getCurrentCue()
         self.addCue(currentCue)
@@ -199,6 +207,8 @@ class BaseFxBox(object):
         if hasattr(self, "inChannels"):
             dict["inChannels"] = self.inChannels
             dict["isMultiChannels"] = self.isMultiChannels
+        if hasattr(self, "outChannels"):
+            dict["outChannels"] = self.outChannels
         return dict
             
     def setSaveDict(self, saveDict):
@@ -206,11 +216,16 @@ class BaseFxBox(object):
         self.id = saveDict["id"]
         self.cues = saveDict["cues"]
         self.createView()
-        if self.view is not None and hasattr(self, "inChannels"):
-            self.inChannels = saveDict["inChannels"]
-            self.view.setInChannelChecks(self.inChannels)
-            self.isMultiChannels = saveDict["isMultiChannels"]
-            self.view.setIsMultiChannels(self.isMultiChannels)
+        if self.view is not None:
+            if hasattr(self, "inChannels"):
+                self.inChannels = saveDict["inChannels"]
+                self.view.setInChannelChecks(self.inChannels)
+                self.isMultiChannels = saveDict["isMultiChannels"]
+                self.view.setIsMultiChannels(self.isMultiChannels)
+            if hasattr(self, "outChannels"):
+                self.outChannels = saveDict["outChannels"]
+                self.view.setOutChannelChecks(self.outChannels)
+            
         self.loadCue(0)
 
 class FxBox(BaseFxBox):

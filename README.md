@@ -9,7 +9,6 @@ TODO
 ** JIM **
 - interpolation pour arriver au cue, global per track, per FX _ Lucas
 - BPF
-- access to specific inputs in input module
 - midi triggering of cues
 
 

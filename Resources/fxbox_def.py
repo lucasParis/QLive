@@ -69,8 +69,9 @@ FX_DICT = { "None": {"ctrls": []},
                                         DRYWET_DEF
                                     ]
                         },
-            "AudioOut": {"ctrls":  [   GAIN_DEF
-                                    ]
+            "AudioOut": {   "ctrls":    [   GAIN_DEF
+                                        ],
+                            "outselect": [str(x+1) for x in range(NUM_OUTPUTS)],
                         },
           }
 

@@ -246,7 +246,6 @@ class AudioServer:
             self.createBoxObjects()
             QLiveLib.getVar("FxTracks").start()
             self.server.start()
-            #QLiveLib.getVar("CuesPanel").loadCurrentCue()
         else:
             if self.recording:
                 self.recording = False

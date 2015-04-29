@@ -110,8 +110,10 @@ class FxTrack:
         for i, obj in enumerate(self.buttonsFxs):
             if obj.name == "AudioOut":
                 chnls = len(obj.getOutput())
+                outchnls = obj.getOutChannels()
+                channels = [j for j in range(NUM_OUTPUTS) if outchnls[j]]
                 for j in range(chnls):
-                    audioMixer.addToMixer(j, obj.getOutput()[j])
+                    audioMixer.addToMixer(channels[j % len(channels)], obj.getOutput()[j])
 
     def onPaint(self, dc, buttonBitmap, disableButtonBitmap, selectedTrack):
         gc = wx.GraphicsContext_Create(dc)
