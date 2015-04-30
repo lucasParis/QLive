@@ -184,6 +184,7 @@ class FxSlidersView(wx.Frame):
         self.SetSizerAndFit(self.frameSizer)
 
         self.SetMinSize((500, -1))
+        self.SetSize((500, -1))
 
     def onTabulate(self, evt):
         QLiveLib.getVar("FxTracks").setSelectedTrack()
