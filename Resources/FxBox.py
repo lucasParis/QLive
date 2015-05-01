@@ -107,8 +107,6 @@ class BaseFxBox(object):
         
     def initModule(self, name):
         self.name = name
-        if self.name == "AudioOut":
-            self.outChannels = [1] + [0] * (NUM_OUTPUTS - 1)
         self.createView()
         currentCue = QLiveLib.getVar("CuesPanel").getCurrentCue()
         self.addCue(currentCue)
@@ -117,6 +115,8 @@ class BaseFxBox(object):
         if self.name:
             parameters = self.module_dict[self.name]
             self.view = FxSlidersView(QLiveLib.getVar("MainWindow"), self, parameters)
+            if self.name == "AudioOut":
+                self.outChannels = [1] + [0] * (NUM_OUTPUTS - 1)
 
     def delete(self):
         if self.view is not None:
