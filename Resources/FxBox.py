@@ -145,10 +145,13 @@ class BaseFxBox(object):
             self.setEnable(params["enable"])
 
     def getCurrentValues(self):
-        if self.cues[self.currentCue] is not None:
-            return self.cues[self.currentCue]["values"]
-        else:
+        if not self.cues:
             return None
+        else:
+            if self.cues[self.currentCue] is not None:
+                return self.cues[self.currentCue]["values"]
+            else:
+                return None
 
     def getCurrentInterps(self):
         if self.cues[self.currentCue] is not None:

@@ -213,18 +213,22 @@ class AudioServer:
                     else:
                         chnls = 1
                 ctrls = INPUT_DICT[name]["ctrls"]
-                obj = AUDIO_OBJECTS[name](chnls, ctrls, but.getCurrentValues(),
-                                          but.getCurrentInterps())
-                but.setAudioRef(obj)
-                self.audioObjects.append(obj)
+                values = but.getCurrentValues()
+                if values is not None:
+                    obj = AUDIO_OBJECTS[name](chnls, ctrls, values,
+                                              but.getCurrentInterps())
+                    but.setAudioRef(obj)
+                    self.audioObjects.append(obj)
             for but in track.getButtonFxs():
                 name = but.name
                 if not name: name = "None"
                 ctrls = FX_DICT[name]["ctrls"]
-                obj = AUDIO_OBJECTS[name](chnls, ctrls, but.getCurrentValues(),
-                                          but.getCurrentInterps())
-                but.setAudioRef(obj)
-                self.audioObjects.append(obj)
+                values = but.getCurrentValues()
+                if values is not None:
+                    obj = AUDIO_OBJECTS[name](chnls, ctrls, values,
+                                              but.getCurrentInterps())
+                    but.setAudioRef(obj)
+                    self.audioObjects.append(obj)
             
     def resetPlayerRefs(self):
         objs = QLiveLib.getVar("Soundfiles").getSoundFileObjects()
