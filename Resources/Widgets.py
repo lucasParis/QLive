@@ -33,8 +33,8 @@ def powOfTwoToInt(x):
 
 class QLiveControlKnob(wx.Panel):
     def __init__(self, parent, minvalue, maxvalue, init=None, pos=(0,0), 
-                 size=(50,70), log=False, outFunction=None, integer=False, 
-                 backColour=None, label=''):
+                 size=(50,85), log=False, outFunction=None, integer=False, 
+                 backColour=None, label='', playFunction=None, editFunction=None):
         wx.Panel.__init__(self, parent=parent, id=wx.ID_ANY, pos=pos, 
                           size=size, style=wx.NO_BORDER|wx.WANTS_CHARS)
         self.parent = parent
@@ -42,6 +42,8 @@ class QLiveControlKnob(wx.Panel):
         self.SetBackgroundColour(BACKGROUND_COLOUR)
         self.SetMinSize(self.GetSize())
         self.outFunction = outFunction
+        self.playFunction = playFunction
+        self.editFunction = editFunction
         self.integer = integer
         self.log = log
         self.label = label
@@ -54,6 +56,8 @@ class QLiveControlKnob(wx.Panel):
         self.mode = 0
         self.midiLearn = False
         self.midictlLabel = ""
+        self.autoPlay = False
+        self.autoEdit = False
         self.colours = {0: "#000000", 1: "#FF0000", 2: "#00FF00"}
         if backColour: self.backColour = backColour
         else: self.backColour = CONTROLSLIDER_BACK_COLOUR
@@ -122,6 +126,14 @@ class QLiveControlKnob(wx.Panel):
                 self.outFunction(self.GetValue())
         wx.CallAfter(self.Refresh)
 
+    def setAutoPlay(self, state):
+        self.autoPlay = state
+        wx.CallAfter(self.Refresh)
+
+    def setAutoEdit(self, state):
+        self.autoEdit = state
+        wx.CallAfter(self.Refresh)
+
     def GetValue(self):
         if self.log:
             t = tFromValue(self.value, self.minvalue, self.maxvalue)
@@ -178,6 +190,14 @@ class QLiveControlKnob(wx.Panel):
                 self.oldValue = self.value
                 self.CaptureMouse()
                 self.selected = False
+            rec = wx.Rect(7, 69, 12, 12)
+            if rec.Contains(pos):
+                self.autoPlay = not self.autoPlay
+            rec = wx.Rect(31, 69, 12, 12)
+            if rec.Contains(pos):
+                self.autoEdit = not self.autoEdit
+                if self.editFunction is not None:
+                    self.editFunction(self.autoEdit)
             wx.CallAfter(self.Refresh)
         evt.Skip()
 
@@ -218,6 +238,7 @@ class QLiveControlKnob(wx.Panel):
         wx.CallAfter(self.Refresh)
 
     def OnPaint(self, evt):
+        # TODO: Drawing of the controlKnob must really be optimized
         w,h = self.GetSize()
         dc = self.dcref(self)
         gc = wx.GraphicsContext_Create(dc)
@@ -284,7 +305,23 @@ class QLiveControlKnob(wx.Panel):
         dc.SetTextForeground(CONTROLSLIDER_TEXT_COLOUR)
         dc.DrawLabel(val, recval, wx.ALIGN_CENTER)
 
+        if self.autoPlay:
+            gc.SetBrush(wx.Brush("#55DD55"))
+        else:
+            gc.SetBrush(wx.Brush("#333333", wx.TRANSPARENT))
+        gc.SetPen(wx.Pen("#333333", 1.5))
+        tri = [(8,70), (8,80), (16,75), (8, 70)]
+        gc.DrawLines(tri)
 
+        gc.SetFont(wx.Font(CONTROLSLIDER_FONT, wx.ROMAN, wx.NORMAL, wx.NORMAL, face=FONT_FACE))
+        if self.autoEdit:
+            gc.SetPen(wx.Pen("#333333", 1.5))
+            gc.SetBrush(wx.Brush("#DD5555"))
+        else:
+            gc.SetPen(wx.Pen("#333333", 1.5))
+            gc.SetBrush(wx.Brush("#333333", wx.TRANSPARENT))
+        gc.DrawRoundedRectangle(32, 70, 10, 10, 2)
+        gc.DrawText("e", 35, 69)
 
         evt.Skip()
        
@@ -526,7 +563,7 @@ class MeterControlSlider(wx.Panel):
         return interpFloat(inter, self.minvalue, self.maxvalue)
 
     def SetValue(self, value, propagate=True):
-        # setting value (from midi controller) is often ovveride by
+        # TODO: setting value is often ovveride by
         # setRms calls and the label is not always updated
         self.propagate = propagate
         if self.HasCapture():
@@ -730,17 +767,13 @@ if __name__ == "__main__":
 #            self.am = Sig(1, mul=Randi(0.3, 1.4, 8))
 #            self.si = Noise(self.am)
 #            self.pe = PeakAmp(self.si, m.setRms)
-
-
-            #tr = TransportButtons(panel)
-            knob = QLiveControlKnob(panel, 20, 20000, pos=(20,20), label="Freq", outFunction = self.callback)
-            knob.setEnable(True)
-            
-            knob.SetValue(1000)
+#            tr = TransportButtons(panel)
+            knob = QLiveControlKnob(panel, 20, 20000, 1000, pos=(20,20), 
+                                    label="Freq", outFunction = self.callback)
             self.Show()
+
         def callback(self, value):
-            print "callback"
-            pass#self.am.value = value
+            pass
 
     app = wx.App()
     f = TestFrame()

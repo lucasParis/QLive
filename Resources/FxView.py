@@ -2,7 +2,7 @@
 # encoding: utf-8
 import wx, os
 from constants import *
-from pyolib._wxwidgets import BACKGROUND_COLOUR
+from pyolib._wxwidgets import BACKGROUND_COLOUR, Grapher
 from Widgets import *
 import QLiveLib
 
@@ -18,7 +18,8 @@ class SliderWidget(wx.Panel):
         self.slider = QLiveControlKnob(self, parameters[2], parameters[3], 
                                        parameters[1], label=parameters[0],
                                        log=parameters[5],
-                                       outFunction=self.outputValue)
+                                       outFunction=self.outputValue,
+                                       editFunction=self.onEditFunction)
         self.sizer.Add(self.slider, 0, wx.ALL, 5)
         
         self.interpKnob = QLiveControlKnob(self,INTERPTIME_MIN, INTERPTIME_MAX, 
@@ -29,6 +30,17 @@ class SliderWidget(wx.Panel):
 
         self.interpKnob.Hide()
         self.SetSizer(self.sizer)
+        
+    def onEditFunction(self, state):
+        self.GetParent().GetParent().onEditButton(self, state)
+
+    def setAutoPlay(self, state):
+        self.slider.setAutoPlay(state)
+        self.interpKnob.setAutoPlay(state)
+
+    def setAutoEdit(self, state):
+        self.slider.setAutoEdit(state)
+        self.interpKnob.setAutoEdit(state)
         
     def outputValue(self, value):
         self.fxbox.setParamValue(self.name, value, self.fromUser)
@@ -67,6 +79,7 @@ class FxSlidersView(wx.Frame):
         self.fxbox = fxbox
         self.parameters = parameters
         self.last_enable = 1
+        self.graph_object = None
 
         tabId = wx.NewId()
         self.prevId = wx.NewId()
@@ -82,6 +95,8 @@ class FxSlidersView(wx.Frame):
         self.Bind(wx.EVT_MENU, self.onMoveCue, id=self.prevId, id2=self.nextId)
         self.Bind(wx.EVT_MENU, self.onClose, id=closeId)
         self.Bind(wx.EVT_CLOSE, self.onClose)
+
+        self.SetTitle("%s Parameter Controls" % self.fxbox.name)
         
         self.panel = wx.Panel(self)
         self.panel.SetBackgroundColour(BACKGROUND_COLOUR)
@@ -155,13 +170,20 @@ class FxSlidersView(wx.Frame):
                 knobSizer.Add(slider, 0, wx.EXPAND|wx.LEFT|wx.RIGHT|wx.BOTTOM, 5)
             self.sizer.Add(knobSizer, 0, wx.EXPAND)
 
-        self.panel.SetSizer(self.sizer)
-        self.SetTitle(self.fxbox.name)
+        self.graph = Grapher(self.panel, xlen=256, yrange=(0, 1), 
+                             init=[(0,0), (0.5,0.5), (1,0)], 
+                             mode=0, outFunction=None)
+        self.graph.SetSize((500, 200))
+        self.graph.Hide()
+        self.sizer.Add(self.graph, 1, wx.EXPAND|wx.ALL, 5)
 
-        frameSizer = wx.BoxSizer(wx.HORIZONTAL)
-        frameSizer.Add(self.panel, 1, wx.EXPAND)
-        self.SetSizerAndFit(frameSizer) 
-        self.SetMinSize(self.GetSize())
+        self.panel.SetSizer(self.sizer)
+
+        self.frameSizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.frameSizer.Add(self.panel, 1, wx.EXPAND)
+        self.SetSizerAndFit(self.frameSizer)
+
+        self.SetMinSize((500, -1))
 
     def onTabulate(self, evt):
         QLiveLib.getVar("FxTracks").setSelectedTrack()
@@ -174,6 +196,22 @@ class FxSlidersView(wx.Frame):
                 cues.onCueSelection(current - 1)
             elif evt.GetId() == self.nextId:
                 cues.onCueSelection(current + 1)
+
+    def onEditButton(self, obj, state):
+        gsz = self.graph.GetSize()
+        sz = self.GetSize()
+        if self.graph_object is not None:
+            if self.graph_object is not obj:
+                self.graph_object.setAutoEdit(False) 
+        if state:
+            self.graph_object = obj
+            if not self.graph.IsShown():
+                self.graph.Show()
+                self.SetSize((sz[0], sz[1] + gsz[1]))
+        else:
+            self.graph_object = None
+            self.graph.Hide()
+            self.SetSize((sz[0], sz[1] - gsz[1]))
 
     def setInChannelChecks(self, lst):
         for i, check in enumerate(self.inChannelChecks):

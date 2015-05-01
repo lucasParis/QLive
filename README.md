@@ -6,21 +6,18 @@ QLive is a cues-based software to help the creation of mixed music
   
 TODO
 ----
+
 ** JIM **
+
 - interpolation pour arriver au cue, global per track, per FX _ Lucas
 - BPF
 - midi triggering of cues
-
-
-** bugs **
-
+- Handling SoundFilePlayer number of channels and routing to the tracks 
 
 
 **Short term**
 
-
 - Documentation/archive prototype
-
 - Finalizing cue selection (Lucas)
 
 
