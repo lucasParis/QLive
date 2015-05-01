@@ -148,7 +148,7 @@ class BaseFxBox(object):
         if not self.cues:
             return None
         else:
-            if self.cues[self.currentCue] is not None:
+            if self.cues[self.currentCue] is not None and self.currentCue in self.cues:
                 return self.cues[self.currentCue]["values"]
             else:
                 return None

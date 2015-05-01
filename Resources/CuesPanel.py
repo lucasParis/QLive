@@ -6,6 +6,10 @@ from constants import *
 import QLiveLib
 from Widgets import TransportButtons, CueButton
 
+class SetInterpTimeDialog(wx.Dialog):
+    def __init__(self):
+        pass
+
 class CueEvent:
     def __init__(self, type, current, old, total):
         self.type = type
