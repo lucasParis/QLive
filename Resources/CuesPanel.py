@@ -4,11 +4,24 @@ import wx
 import wx.lib.scrolledpanel as scrolled
 from constants import *
 import QLiveLib
-from Widgets import TransportButtons, CueButton
+from Widgets import TransportButtons, CueButton, QLiveControlKnob
 
 class SetInterpTimeDialog(wx.Dialog):
     def __init__(self):
-        pass
+        wx.Dialog.__init__(self, None, size = (200, 120))
+        panel = wx.Panel(self)
+
+        knob = QLiveControlKnob(self, 0.01, 300, pos = (5,5))
+
+        
+        button = wx.Button(self,label="set All" , pos = (60, 5))
+        button.Bind(wx.EVT_BUTTON, self.onSetAll)
+        
+
+
+    def onSetAll(self, e):
+        self.Close()
+        
 
 class CueEvent:
     def __init__(self, type, current, old, total):
@@ -46,6 +59,11 @@ class ControlPanel(wx.Panel):
         title = wx.StaticText(self, label="-- CUES --")
         self.mainSizer.Add(title, 0, wx.ALIGN_CENTER, 5)
 
+        button = wx.Button(self,wx.ID_OK, label="Interp Time" )
+        self.mainSizer.Add(button, 0, wx.ALIGN_CENTER, 5)
+        button.Bind(wx.EVT_BUTTON, self.onSetInterpTime)
+
+
         bmp = wx.Bitmap(ICON_ADD, wx.BITMAP_TYPE_PNG)
         self.newButton = wx.BitmapButton(self, wx.ID_ANY, bmp)
         self.newButton.Bind(wx.EVT_BUTTON, self.onNewCue)
@@ -64,6 +82,10 @@ class ControlPanel(wx.Panel):
 
     def onNewCue(self, evt):
         QLiveLib.getVar("CuesPanel").onNewCue()
+        
+    def onSetInterpTime(self, e):
+        panel = SetInterpTimeDialog()
+        panel.ShowModal()
 
 class CuesPanel(scrolled.ScrolledPanel):
     def __init__(self, parent=None, size=(95, 500)):
@@ -158,6 +180,7 @@ class CuesPanel(scrolled.ScrolledPanel):
         
     def getCurrentCue(self):
         return self.currentCue
+        
 
     def setSaveDict(self, dict):
         self.clearButtons()
