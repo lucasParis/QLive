@@ -19,7 +19,7 @@ class QLiveApp(wx.App):
         else:
             sizey = 670
         self.filenames = []
-        self.frame = MainWindow(pos=(20, 20), size=(sizex, sizey))
+        self.frame = MainWindow(pos=(20, 20), size=(s   izex, sizey))
         QLiveLib.setVar("MainWindow", self.frame)
         if self.filenames:
             self.frame.loadFile(QLiveLib.ensureNFD(self.filenames[0]))

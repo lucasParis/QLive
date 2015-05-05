@@ -14,12 +14,16 @@ class SetInterpTimeDialog(wx.Dialog):
         knob = QLiveControlKnob(self, 0.01, 300, pos = (5,5))
 
         
-        button = wx.Button(self,label="set All" , pos = (60, 5))
+        button = wx.Button(self,label="set All" , pos = (60, 65))
         button.Bind(wx.EVT_BUTTON, self.onSetAll)
         
 
 
     def onSetAll(self, e):
+        value = knob.GetValue()
+        if QLiveLib.getVar("MainWindow") != None:
+            pass
+#            QLiveLib.getVar("FxTracks").cueEvent(value)
         self.Close()
         
 
