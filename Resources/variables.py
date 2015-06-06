@@ -3,6 +3,7 @@ QLiveVariables = dict()
 QLiveVariables["currentProject"] = ""
 QLiveVariables["projectFolder"] = ""
 QLiveVariables["MainWindow"] = None
+QLiveVariables["ControlPanel"] = None
 QLiveVariables["CuesPanel"] = None
 QLiveVariables["FxTracks"] = None
 QLiveVariables["AudioMixer"] = None

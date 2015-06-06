@@ -186,6 +186,22 @@ class AudioServer:
         self.soundfiles = []
         self.audioObjects = []
         self.recording = False
+        self.cueMidiLearn = CueMidiLearn(self.cueMidiLearnCallback)
+        self.cueMidiLearnState = None
+        self.cueMidiNotes = {}
+        self.cueMidiNotein = Notein(poly=1)
+        self.cueMidiCall = TrigFunc(self.cueMidiNotein["trigon"], self.cueMidiNoteCallback)
+
+    def getSaveState(self):
+        return {"cueMidiNotes": self.cueMidiNotes}
+
+    def setSaveState(self, state):
+        if state:
+            self.cueMidiNotes = state["cueMidiNotes"]
+            for val, state in self.cueMidiNotes.items():
+                if state in ["up", "down"]:
+                    QLiveLib.getVar("ControlPanel").setButtonTooltip(state, 
+                                                        "Midi key: %d" % val)
 
     def createSoundFilePlayers(self):
         objs = QLiveLib.getVar("Soundfiles").getSoundFileObjects()
@@ -300,6 +316,33 @@ class AudioServer:
     def recStop(self):
         self.server.recstop()
 
+    def cueMidiNoteCallback(self):
+        if not self.cueMidiLearn.isStarted():
+            if self.cueMidiNotes:
+                pit = self.cueMidiNotein.get("pitch")
+                if pit in self.cueMidiNotes:
+                    QLiveLib.getVar("ControlPanel").moveCueFromMidi(self.cueMidiNotes[pit])
+
+    def setCueMidiLearnState(self, which):
+        self.cueMidiLearnState = which
+
+    def startCueMidiLearn(self):
+        self.cueMidiLearn.scan()
+
+    def stopCueMidiLearn(self):
+        self.cueMidiLearn.stop()
+        
+    def cueMidiLearnCallback(self, val, ctl=False):
+        if ctl:
+            self.cueMidiCtls[val] = self.cueMidiLearnState
+        else:
+            self.cueMidiNotes[val] = self.cueMidiLearnState
+        QLiveLib.getVar("ControlPanel").setButtonTooltip(self.cueMidiLearnState, 
+                                                        "Midi key: %d" % val)
+        self.cueMidiLearnState = None
+        print self.cueMidiCtls
+        QLiveLib.getVar("ControlPanel").resetCueButtonBackgroundColour()
+
 class MidiLearn:
     def __init__(self, callback):
         self.callback = callback
@@ -315,3 +358,47 @@ class MidiLearn:
     def scanned(self, ctlnum, midichnl):
         self.callback(ctlnum, midichnl)
         self.scanner.stop()
+
+class CueMidiLearn:
+    def __init__(self, callback):
+        self.callback = callback
+        self.started = False
+        self.current_pitch = -1
+        self.scanner = CtlScan(self.scanned, True).stop()
+        self.notes = Notein(poly=1).stop()
+        self.notecall = TrigFunc(self.notes["trigon"], self.noteon).stop()
+        self.notecall2 = TrigFunc(self.notes["trigoff"], self.noteoff).stop()
+    
+    def scan(self):
+        self.scanner.reset()
+        self.scanner.play()
+        self.notes.play()
+        self.notecall.play()
+        self.notecall2.play()
+        self.started = True
+
+    def stop(self):
+        self.scanner.stop()
+        self.notes.stop()
+        self.notecall.stop()
+        self.notecall2.stop()
+        self.started = False
+
+    def scanned(self, ctlnum):
+        if 0:
+            self.callback(ctlnum, ctl=True)
+            self.stop()
+
+    def noteon(self):
+        pit = int(self.notes.get("pitch"))
+        self.current_pitch = pit
+        self.callback(pit)
+    
+    def noteoff(self):
+        pit = int(self.notes.get("pitch"))
+        if pit == self.current_pitch:
+            self.stop()
+            self.current_pitch = -1
+
+    def isStarted(self):
+        return self.started

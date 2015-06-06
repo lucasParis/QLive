@@ -105,6 +105,7 @@ class MainWindow(wx.Frame):
         QLiveLib.setVar("AudioMixer", self.audioMixer)
 
         self.controlPanel = ControlPanel(self.mainPanel)
+        QLiveLib.setVar("ControlPanel", self.controlPanel)
         csize = self.controlPanel.GetSize()
         
         self.cues = CuesPanel(self.mainPanel, size=(csize[0], 1000))
@@ -189,6 +190,7 @@ class MainWindow(wx.Frame):
         dictSave["cues"] = self.cues.getSaveDict()
         dictSave["mixer"] = self.mixer.getSaveDict()
         dictSave["soundfiles"] = self.soundfiles.getSaveState()
+        dictSave["server"] = self.audioServer.getSaveState()
         return dictSave
 
     def saveFile(self, path):
@@ -221,6 +223,7 @@ class MainWindow(wx.Frame):
         self.tracks.setSaveState(self.saveState["tracks"])
         self.cues.setSaveDict(self.saveState["cues"])
         self.mixer.setSaveDict(self.saveState["mixer"])
+        self.audioServer.setSaveState(self.saveState.get("server", {}))
         if "soundfiles" in self.saveState:
             self.soundfiles.setSaveState(self.saveState["soundfiles"])
         linkMenuItem = self.GetMenuBar().FindItemById(LINK_STEREO_ID)

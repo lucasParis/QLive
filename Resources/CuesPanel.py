@@ -16,8 +16,6 @@ class SetInterpTimeDialog(wx.Dialog):
         
         button = wx.Button(self,label="set All" , pos = (60, 65))
         button.Bind(wx.EVT_BUTTON, self.onSetAll)
-        
-
 
     def onSetAll(self, e):
         value = knob.GetValue()
@@ -50,8 +48,11 @@ class ControlPanel(wx.Panel):
     def __init__(self, parent):
         wx.Panel.__init__(self, parent, size=(95, -1), style=wx.SUNKEN_BORDER)
         self.mainSizer = wx.BoxSizer(wx.VERTICAL)
-        self.buttonSizer = wx.BoxSizer(wx.HORIZONTAL)
-
+        self.newAddSizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.upDownSizer = wx.BoxSizer(wx.HORIZONTAL)
+        
+        self.learnButton = None
+        
         self.buttons = TransportButtons(self, 
                                         playCallback=QLiveLib.getVar("AudioServer").start,
                                         recordCallback=QLiveLib.getVar("AudioServer").record)
@@ -63,21 +64,41 @@ class ControlPanel(wx.Panel):
         title = wx.StaticText(self, label="-- CUES --")
         self.mainSizer.Add(title, 0, wx.ALIGN_CENTER, 5)
 
-        button = wx.Button(self,wx.ID_OK, label="Interp Time" )
-        self.mainSizer.Add(button, 0, wx.ALIGN_CENTER, 5)
-        button.Bind(wx.EVT_BUTTON, self.onSetInterpTime)
+        #button = wx.Button(self,wx.ID_OK, label="Interp Time" )
+        #self.mainSizer.Add(button, 0, wx.ALIGN_CENTER, 5)
+        #button.Bind(wx.EVT_BUTTON, self.onSetInterpTime)
 
 
         bmp = wx.Bitmap(ICON_ADD, wx.BITMAP_TYPE_PNG)
         self.newButton = wx.BitmapButton(self, wx.ID_ANY, bmp)
         self.newButton.Bind(wx.EVT_BUTTON, self.onNewCue)
-        self.buttonSizer.Add(self.newButton, 1)
+        self.newAddSizer.Add(self.newButton, 1)
 
         bmp = wx.Bitmap(ICON_DELETE, wx.BITMAP_TYPE_PNG)
         self.delButton = wx.BitmapButton(self, wx.ID_ANY, bmp)
         self.delButton.Bind(wx.EVT_BUTTON, self.onDelCue)
-        self.buttonSizer.Add(self.delButton, 1)
-        self.mainSizer.Add(self.buttonSizer, 0, wx.EXPAND|wx.ALL, 5)
+        self.newAddSizer.Add(self.delButton, 1)
+
+        self.mainSizer.Add(self.newAddSizer, 0, wx.EXPAND|wx.ALL, 5)
+
+        bmp = wx.Bitmap(ICON_ARROW_UP, wx.BITMAP_TYPE_PNG)
+        self.upButton = wx.BitmapButton(self, wx.ID_ANY, bmp)
+        self.upButton.Bind(wx.EVT_BUTTON, self.onMoveCueUp)
+        self.upButton.Bind(wx.EVT_RIGHT_DOWN, self.midiLearn)
+        self.upTooltip = wx.ToolTip("")
+        self.upButton.SetToolTip(self.upTooltip)
+        self.upDownSizer.Add(self.upButton, 1)
+
+        bmp = wx.Bitmap(ICON_ARROW_DOWN, wx.BITMAP_TYPE_PNG)
+        self.downButton = wx.BitmapButton(self, wx.ID_ANY, bmp)
+        self.downButton.Bind(wx.EVT_BUTTON, self.onMoveCueDown)
+        self.downButton.Bind(wx.EVT_RIGHT_DOWN, self.midiLearn)
+        self.downTooltip = wx.ToolTip("")
+        self.downButton.SetToolTip(self.downTooltip)
+        self.upDownSizer.Add(self.downButton, 1)
+
+        self.mainSizer.Add(self.upDownSizer, 0, 
+                           wx.EXPAND|wx.LEFT|wx.RIGHT|wx.BOTTOM, 5)
 
         self.SetSizerAndFit(self.mainSizer)
 
@@ -86,6 +107,48 @@ class ControlPanel(wx.Panel):
 
     def onNewCue(self, evt):
         QLiveLib.getVar("CuesPanel").onNewCue()
+
+    def onMoveCueUp(self, evt):
+        QLiveLib.getVar("CuesPanel").onMoveCueUp()
+
+    def onMoveCueDown(self, evt):
+        QLiveLib.getVar("CuesPanel").onMoveCueDown()
+
+    def moveCueFromMidi(self, which):
+        if which == "up":
+            wx.CallAfter(QLiveLib.getVar("CuesPanel").onMoveCueUp)
+        elif which == "down":
+            wx.CallAfter(QLiveLib.getVar("CuesPanel").onMoveCueDown)
+
+    def midiLearn(self, evt):
+        obj = evt.GetEventObject()
+        if self.learnButton is not None and self.learnButton != obj:
+            self.learnButton.SetBackgroundColour(None)
+        server = QLiveLib.getVar("AudioServer")
+        if self.learnButton == obj:
+            obj.SetBackgroundColour(None)
+            self.learnButton = None
+            server.stopCueMidiLearn()
+        else:
+            obj.SetBackgroundColour(MIDILEARN_COLOUR)
+            self.learnButton = obj
+            if obj == self.upButton:
+                which = "up"
+            elif obj == self.downButton:
+                which = "down"
+            server.setCueMidiLearnState(which)
+            server.startCueMidiLearn()
+
+    def setButtonTooltip(self, which, tip):
+        if which == "up":
+            self.upTooltip.SetTip(tip)
+        elif which == "down":
+            self.downTooltip.SetTip(tip)
+        
+    def resetCueButtonBackgroundColour(self):
+        if self.learnButton is not None:
+            wx.CallAfter(self.learnButton.SetBackgroundColour, None)
+            self.learnButton = None
         
     def onSetInterpTime(self, e):
         panel = SetInterpTimeDialog()
@@ -185,6 +248,11 @@ class CuesPanel(scrolled.ScrolledPanel):
     def getCurrentCue(self):
         return self.currentCue
         
+    def onMoveCueUp(self):
+        self.onCueSelection(self.currentCue - 1)
+
+    def onMoveCueDown(self):
+        self.onCueSelection(self.currentCue + 1)
 
     def setSaveDict(self, dict):
         self.clearButtons()

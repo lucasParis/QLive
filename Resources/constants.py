@@ -136,6 +136,8 @@ ICON_RECORD = os.path.join(IMAGES_PATH, "record-icon.png")
 ICON_RECORD_PRESSED = os.path.join(IMAGES_PATH, "record-pressed-icon.png")
 ICON_ADD = os.path.join(IMAGES_PATH, "add-icon.png")
 ICON_DELETE = os.path.join(IMAGES_PATH, "delete-icon.png")
+ICON_ARROW_UP = os.path.join(IMAGES_PATH, "arrow-up-icon.png")
+ICON_ARROW_DOWN = os.path.join(IMAGES_PATH, "arrow-down-icon.png")
 
 # Colours
 BACKGROUND_COLOUR = BACKGROUND_COLOUR
