@@ -81,16 +81,18 @@ class ControlPanel(wx.Panel):
 
         self.mainSizer.Add(self.newAddSizer, 0, wx.EXPAND|wx.ALL, 5)
 
-        bmp = wx.Bitmap(ICON_ARROW_UP, wx.BITMAP_TYPE_PNG)
-        self.upButton = wx.BitmapButton(self, wx.ID_ANY, bmp)
+        self.upbmp = wx.Bitmap(ICON_ARROW_UP, wx.BITMAP_TYPE_PNG)
+        self.upmidbmp = wx.Bitmap(ICON_ARROW_UP_MIDI, wx.BITMAP_TYPE_PNG)
+        self.upButton = wx.BitmapButton(self, wx.ID_ANY, self.upbmp)
         self.upButton.Bind(wx.EVT_BUTTON, self.onMoveCueUp)
         self.upButton.Bind(wx.EVT_RIGHT_DOWN, self.midiLearn)
         self.upTooltip = wx.ToolTip("")
         self.upButton.SetToolTip(self.upTooltip)
         self.upDownSizer.Add(self.upButton, 1)
 
-        bmp = wx.Bitmap(ICON_ARROW_DOWN, wx.BITMAP_TYPE_PNG)
-        self.downButton = wx.BitmapButton(self, wx.ID_ANY, bmp)
+        self.downbmp = wx.Bitmap(ICON_ARROW_DOWN, wx.BITMAP_TYPE_PNG)
+        self.downmidbmp = wx.Bitmap(ICON_ARROW_DOWN_MIDI, wx.BITMAP_TYPE_PNG)
+        self.downButton = wx.BitmapButton(self, wx.ID_ANY, self.downbmp)
         self.downButton.Bind(wx.EVT_BUTTON, self.onMoveCueDown)
         self.downButton.Bind(wx.EVT_RIGHT_DOWN, self.midiLearn)
         self.downTooltip = wx.ToolTip("")
@@ -123,14 +125,23 @@ class ControlPanel(wx.Panel):
     def midiLearn(self, evt):
         obj = evt.GetEventObject()
         if self.learnButton is not None and self.learnButton != obj:
-            self.learnButton.SetBackgroundColour(None)
+            if self.learnButton == self.upButton:
+                wx.CallAfter(self.learnButton.SetBitmapLabel, self.upbmp)
+            elif self.learnButton == self.downButton:
+                wx.CallAfter(self.learnButton.SetBitmapLabel, self.downbmp)
         server = QLiveLib.getVar("AudioServer")
         if self.learnButton == obj:
-            obj.SetBackgroundColour(None)
+            if obj == self.upButton:
+                obj.SetBitmapLabel(self.upbmp)
+            elif obj == self.downButton:
+                obj.SetBitmapLabel(self.downbmp)
             self.learnButton = None
             server.stopCueMidiLearn()
         else:
-            obj.SetBackgroundColour(MIDILEARN_COLOUR)
+            if obj == self.upButton:
+                obj.SetBitmapLabel(self.upmidbmp)
+            elif obj == self.downButton:
+                obj.SetBitmapLabel(self.downmidbmp)
             self.learnButton = obj
             if obj == self.upButton:
                 which = "up"
@@ -147,7 +158,10 @@ class ControlPanel(wx.Panel):
         
     def resetCueButtonBackgroundColour(self):
         if self.learnButton is not None:
-            wx.CallAfter(self.learnButton.SetBackgroundColour, None)
+            if self.learnButton == self.upButton:
+                wx.CallAfter(self.learnButton.SetBitmapLabel, self.upbmp)
+            elif self.learnButton == self.downButton:
+                wx.CallAfter(self.learnButton.SetBitmapLabel, self.downbmp)
             self.learnButton = None
         
     def onSetInterpTime(self, e):

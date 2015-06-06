@@ -138,6 +138,8 @@ ICON_ADD = os.path.join(IMAGES_PATH, "add-icon.png")
 ICON_DELETE = os.path.join(IMAGES_PATH, "delete-icon.png")
 ICON_ARROW_UP = os.path.join(IMAGES_PATH, "arrow-up-icon.png")
 ICON_ARROW_DOWN = os.path.join(IMAGES_PATH, "arrow-down-icon.png")
+ICON_ARROW_UP_MIDI = os.path.join(IMAGES_PATH, "arrow-up-midi-icon.png")
+ICON_ARROW_DOWN_MIDI = os.path.join(IMAGES_PATH, "arrow-down-midi-icon.png")
 
 # Colours
 BACKGROUND_COLOUR = BACKGROUND_COLOUR
