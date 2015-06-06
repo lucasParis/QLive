@@ -340,7 +340,6 @@ class AudioServer:
         QLiveLib.getVar("ControlPanel").setButtonTooltip(self.cueMidiLearnState, 
                                                         "Midi key: %d" % val)
         self.cueMidiLearnState = None
-        print self.cueMidiCtls
         QLiveLib.getVar("ControlPanel").resetCueButtonBackgroundColour()
 
 class MidiLearn:
